@@ -78,3 +78,6 @@ fabric.properties
 
 # From Corentin's original repository
 **/.DS_Store
+
+# Ignore all things in the .idea folder
+.idea/*
