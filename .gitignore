@@ -81,3 +81,4 @@ fabric.properties
 
 # Ignore all things in the .idea folder
 .idea/*
+/.python-version
