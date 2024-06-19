@@ -352,3 +352,8 @@ class JetAirfoil(Jet):
         X = "({}-({}))".format(self.y2, self.y1)
         Y = "({}-({}))".format(self.x1, self.x2)
         return atan2_str(X, Y)
+
+
+class JetChannel(Jet):
+    # TODO: implement this class @canordq
+    pass
