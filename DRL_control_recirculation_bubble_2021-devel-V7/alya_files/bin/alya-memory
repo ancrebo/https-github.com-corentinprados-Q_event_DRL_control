@@ -1,0 +1,64 @@
+#
+# This script plots memory evolution
+#
+echo "Press Ctrl-C to quit"
+echo "reset"                                        >  ./gnuplot.tmp
+
+echo "set multiplot "                               >> ./gnuplot.tmp
+echo "set size noratio 1.0,2.0 "                    >> ./gnuplot.tmp
+
+#----------------------------------------------------------------
+# Top-Left
+#----------------------------------------------------------------
+
+echo 'set format y "10^{%2T}"'                      >> ./gnuplot.tmp
+echo "set size   0.5,0.5 "                          >> ./gnuplot.tmp
+echo "set origin 0.0,0.5 "                          >> ./gnuplot.tmp   
+echo "set xlabel 'Time step'"                       >> ./gnuplot.tmp
+echo "set ylabel 'Current master memory (Mbytes)'"  >> ./gnuplot.tmp
+echo "set log y"                                    >> ./gnuplot.tmp
+echo "plot '$1-memory.res' u 1:3 not w l"           >> ./gnuplot.tmp
+
+#----------------------------------------------------------------
+# Top-Right
+#----------------------------------------------------------------
+
+echo 'set format y "10^{%2T}"'                      >> ./gnuplot.tmp
+echo "set size   0.5,0.5 "                          >> ./gnuplot.tmp
+echo "set origin 0.5,0.5"                           >> ./gnuplot.tmp    
+echo "set xlabel 'Time step'"                       >> ./gnuplot.tmp
+echo "set ylabel 'Maximum master memory (Mbytes)'"  >> ./gnuplot.tmp
+echo "plot '$1-memory.res' u 1:2 not w l"           >> ./gnuplot.tmp       
+
+#----------------------------------------------------------------
+# Bot-Left
+#----------------------------------------------------------------
+
+echo 'set format y "10^{%2T}"'                      >> ./gnuplot.tmp
+echo "set size   0.5,0.5 "                          >> ./gnuplot.tmp
+echo "set origin 0.0,0.0"                           >> ./gnuplot.tmp
+echo "set xlabel 'Time step'"                       >> ./gnuplot.tmp
+echo "set ylabel 'Slave memory (Mbytes)'"           >> ./gnuplot.tmp
+echo "set log y "                                   >> ./gnuplot.tmp
+echo "plot '$1-memory.res' u 1:4 t 'Average' w l, '$1-memory.res' u 1:7 t 'Current' w l" >> ./gnuplot.tmp
+
+#----------------------------------------------------------------
+# Bot-Right
+#----------------------------------------------------------------
+
+echo "set size   0.5,0.5 "                          >> ./gnuplot.tmp
+echo "set origin 0.5,0.0"                           >> ./gnuplot.tmp    
+echo "set xlabel 'Time step'"                       >> ./gnuplot.tmp
+echo "set ylabel 'Maximum slave memory (Mbytes)'"   >> ./gnuplot.tmp
+echo "set log y "                                   >> ./gnuplot.tmp   
+echo "plot '$1-memory.res' u 1:5 not w l"           >> ./gnuplot.tmp   
+
+#----------------------------------------------------------------
+# Replot
+#----------------------------------------------------------------
+
+echo "unset multiplot "                             >> ./gnuplot.tmp
+echo "load './gnuplot.tmp'"                         >  ./gnuplot2.tmp
+echo "pause 2"                                      >> ./gnuplot2.tmp
+echo "load './gnuplot2.tmp'"                        >> ./gnuplot2.tmp
+gnuplot ./gnuplot2.tmp 
