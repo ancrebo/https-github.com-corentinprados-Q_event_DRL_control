@@ -9,36 +9,39 @@ from __future__ import print_function, division
 import os, subprocess
 
 from configuration import ALYA_GMSH, ALYA_INCON
-from env_utils     import run_subprocess
+from env_utils import run_subprocess
 
 
-def run_mesh(runpath,casename,ndim,ini_vel=['0','0','0']):
-	'''
-	Use pyAlya tools to generate the mesh from gmsh
-	'''
-	# Build arguments string
-	# Convert from GMSH to ALYA
-	args  = '-2 ' if ndim == 2 else '' 
-	args += '-c %s %s' % (casename,casename)
-	run_subprocess(os.path.join(runpath,'mesh'),ALYA_GMSH,args)
-	# TODO: generate periodicity if applicable
-	# Generate initial condition
-	args = '--vx %s --vy %s ' % (ini_vel[0],ini_vel[1])
-	if len(ini_vel) > 2: args += '--vz %s ' % ini_vel[2]
-	args += '%s' % casename
-	run_subprocess(os.path.join(runpath,'mesh'),ALYA_INCON,args)
-	# Symbolic link the mesh to the case main folder
-	run_subprocess(runpath,'ln','-s mesh/*.mpio.bin .')
+def run_mesh(runpath, casename, ndim, ini_vel=["0", "0", "0"]):
+    """
+    Use pyAlya tools to generate the mesh from gmsh
+    """
+    # Build arguments string
+    # Convert from GMSH to ALYA
+    args = "-2 " if ndim == 2 else ""
+    args += "-c %s %s" % (casename, casename)
+    run_subprocess(os.path.join(runpath, "mesh"), ALYA_GMSH, args)
+    # TODO: generate periodicity if applicable
+    # Generate initial condition
+    args = "--vx %s --vy %s " % (ini_vel[0], ini_vel[1])
+    if len(ini_vel) > 2:
+        args += "--vz %s " % ini_vel[2]
+    args += "%s" % casename
+    run_subprocess(os.path.join(runpath, "mesh"), ALYA_INCON, args)
+    # Symbolic link the mesh to the case main folder
+    run_subprocess(runpath, "ln", "-s mesh/*.mpio.bin .")
 
 
 ### Functions to write ALYA configuration files ###
 
-def write_case_file(filepath,casename,simu_name):
-	'''
-	Writes the casename.dat file
-	'''
-	file = open(os.path.join(filepath,'%s.dat'%casename),'w')
-	file.write('''$-------------------------------------------------------------------
+
+def write_case_file(filepath, casename, simu_name):
+    """
+    Writes the casename.dat file
+    """
+    file = open(os.path.join(filepath, "%s.dat" % casename), "w")
+    file.write(
+        """$-------------------------------------------------------------------
 RUN_DATA
   ALYA:                   %s
   INCLUDE                 run_type.dat
@@ -70,44 +73,49 @@ MPI_IO:        ON
   RESTART:     ON
   POSTPROCESS: ON
 END_MPI_IO
-$-------------------------------------------------------------------'''%simu_name)
-	file.close()
+$-------------------------------------------------------------------"""
+        % simu_name
+    )
+    file.close()
 
-def write_run_type(filepath,type,freq=1):
-	'''
-	Writes the run type file that is included in the .dat
-	'''
-	file = open(os.path.join(filepath,'run_type.dat'),'w')
-	# Write file
-	file.write('RUN_TYPE: %s, PRELIMINARY, FREQUENCY=%d\n'%(type,freq))
-	file.close()
 
-def write_time_interval(filepath,start_time,end_time):
-	'''
-	Writes the time interval file that is included in the .dat
-	'''
-	file = open(os.path.join(filepath,'time_interval.dat'),'w')
-	# Write file
-	file.write('TIME_INTERVAL: %f, %f\n'%(start_time,end_time))
-	file.close()
+def write_run_type(filepath, type, freq=1):
+    """
+    Writes the run type file that is included in the .dat
+    """
+    file = open(os.path.join(filepath, "run_type.dat"), "w")
+    # Write file
+    file.write("RUN_TYPE: %s, PRELIMINARY, FREQUENCY=%d\n" % (type, freq))
+    file.close()
+
+
+def write_time_interval(filepath, start_time, end_time):
+    """
+    Writes the time interval file that is included in the .dat
+    """
+    file = open(os.path.join(filepath, "time_interval.dat"), "w")
+    # Write file
+    file.write("TIME_INTERVAL: %f, %f\n" % (start_time, end_time))
+    file.close()
+
 
 def detect_last_timeinterval(filename):
     # Open the file in read mode
-    with open(filename, 'r') as file:
+    with open(filename, "r") as file:
         # Read all lines from the file
         lines = file.readlines()
 
         # Loop through each line
         for line in lines:
             # Check if the line contains 'TIME_INTERVAL'
-            if 'TIME_INTERVAL:' in line:
+            if "TIME_INTERVAL:" in line:
                 # Find the position of 'TIME_INTERVAL:'
-                time_interval_pos = line.find('TIME_INTERVAL:')
+                time_interval_pos = line.find("TIME_INTERVAL:")
                 # Extract the substring after 'TIME_INTERVAL:'
-                substring = line[time_interval_pos + len('TIME_INTERVAL:'):]
+                substring = line[time_interval_pos + len("TIME_INTERVAL:") :]
 
                 # Split the substring by comma to get individual values
-                values = substring.split(',')
+                values = substring.split(",")
 
                 # If there are values after 'TIME_INTERVAL:', return the first one
                 if len(values) > 1:
@@ -116,12 +124,14 @@ def detect_last_timeinterval(filename):
     # If no values are found after 'TIME_INTERVAL:', return None
     return None
 
-def write_dom_file(filepath,casename,ncpus):
-	'''
-	Write the case_name.dom.dat
-	'''
-	file = open(os.path.join(filepath,'%s.dom.dat'%casename),'w')
-	file.write('''$------------------------------------------------------------
+
+def write_dom_file(filepath, casename, ncpus):
+    """
+    Write the case_name.dom.dat
+    """
+    file = open(os.path.join(filepath, "%s.dom.dat" % casename), "w")
+    file.write(
+        """$------------------------------------------------------------
 DIMENSIONS
   INCLUDE	                  mesh/%s.dims.dat
   INCLUDE                   fields.dat
@@ -147,24 +157,30 @@ END_BOUNDARY_CONDITIONS
 $-------------------------------------------------------------
 FIELDS
 END_FIELDS
-$-------------------------------------------------------------'''%(casename,ncpus))
-	file.close()
+$-------------------------------------------------------------"""
+        % (casename, ncpus)
+    )
+    file.close()
 
-def write_ker_file(filepath,casename,jetlist,steps,postprocess=[]):
-	'''
-	Write the casename.ker.dat
 
-	postprocess can include CODNO, MASSM, COMMU, EXNOR
-	'''
-	# Create jet includes
-	jet_includes = ''
-	for jet in jetlist: jet_includes += '    INCLUDE %s.dat\n' % jet
-	# Create variable postprocess
-	var_includes = ''
-	for var in postprocess: var_includes += '  POSTPROCESS %s\n' % var
-	# Write file
-	file = open(os.path.join(filepath,'%s.ker.dat'%casename),'w')
-	file.write('''$------------------------------------------------------------
+def write_ker_file(filepath, casename, jetlist, steps, postprocess=[]):
+    """
+    Write the casename.ker.dat
+
+    postprocess can include CODNO, MASSM, COMMU, EXNOR
+    """
+    # Create jet includes
+    jet_includes = ""
+    for jet in jetlist:
+        jet_includes += "    INCLUDE %s.dat\n" % jet
+    # Create variable postprocess
+    var_includes = ""
+    for var in postprocess:
+        var_includes += "  POSTPROCESS %s\n" % var
+    # Write file
+    file = open(os.path.join(filepath, "%s.ker.dat" % casename), "w")
+    file.write(
+        """$------------------------------------------------------------
 PHYSICAL_PROBLEM
   PROPERTIES
     INCLUDE       physical_properties.dat
@@ -197,81 +213,96 @@ OUTPUT_&_POST_PROCESS
   $ Witness points
   INCLUDE witness.dat
 END_OUTPUT_&_POST_PROCESS  
-$------------------------------------------------------------'''%(jet_includes,steps,var_includes))
-	file.close()
+$------------------------------------------------------------"""
+        % (jet_includes, steps, var_includes)
+    )
+    file.close()
 
-def write_physical_properties(filepath,rho,mu):
-	'''
-	Writes the physical properties file that is included in the .ker.dat
-	'''
-	file = open(os.path.join(filepath,'physical_properties.dat'),'w')
-	# Write file
-	file.write('MATERIAL: 1\n')
-	file.write('  DENSITY:   CONSTANT, VALUE=%f\n'%rho)
-	file.write('  VISCOSITY: CONSTANT: VALUE=%f\n'%mu)
-	file.write('END_MATERIAL\n')
-	file.close()
 
-def write_inflow_file(filepath,functions):
-	'''
-	Writes the inflow file that is included in the .ker.dat
-	'''
-	file = open(os.path.join(filepath,'inflow.dat'),'w')
-	# Write file
-	file.write('FUNCTION=INFLOW, DIMENSION=%d\n'%len(functions))
-	for f in functions:
-		file.write('  %s\n'%f)
-	file.write('END_FUNCTION\n')
-	file.close()	
+def write_physical_properties(filepath, rho, mu):
+    """
+    Writes the physical properties file that is included in the .ker.dat
+    """
+    file = open(os.path.join(filepath, "physical_properties.dat"), "w")
+    # Write file
+    file.write("MATERIAL: 1\n")
+    file.write("  DENSITY:   CONSTANT, VALUE=%f\n" % rho)
+    file.write("  VISCOSITY: CONSTANT: VALUE=%f\n" % mu)
+    file.write("END_MATERIAL\n")
+    file.close()
 
-def write_jet_file(filepath,name,functions):
-	'''
-	Writes the inflow file that is included in the .ker.dat
-	'''
-	file = open(os.path.join(filepath,'%s.dat'%name),'w')
-	# Write file
-	file.write('FUNCTION=%s, DIMENSION=%d\n'%(name.upper(),len(functions)))
-	for f in functions:
-		file.write('  %s\n'%f)
-	file.write('END_FUNCTION\n')
-	file.close()
 
-def write_witness_file(filepath,probes_positions):
-	'''
-	Writes the witness file that is included in the .ker.dat
-	'''
-	nprobes = len(probes_positions)
-	ndim    = len(probes_positions[0])
-	# Open file for writing
-	file    = open(os.path.join(filepath,'witness.dat'),'w')
-	# Write header
-	file.write('WITNESS_POINTS, NUMBER=%d\n'%nprobes)
-	# Write probes
-	if ndim == 2:
-		for pos in probes_positions:
-			file.write('%f,%f\n'%(pos[0],pos[1]))
-	else:
-		for pos in probes_positions:
-			file.write('%f,%f,%f\n'%(pos[0],pos[1],pos[2]))
-	# Write end
-	file.write('END_WITNESS_POINTS\n')
-	file.close()
+def write_inflow_file(filepath, functions):
+    """
+    Writes the inflow file that is included in the .ker.dat
+    """
+    file = open(os.path.join(filepath, "inflow.dat"), "w")
+    # Write file
+    file.write("FUNCTION=INFLOW, DIMENSION=%d\n" % len(functions))
+    for f in functions:
+        file.write("  %s\n" % f)
+    file.write("END_FUNCTION\n")
+    file.close()
 
-def write_nsi_file(filepath,casename,varlist=['VELOC','PRESS'],witlist=['VELOX','VELOY','VELOZ','PRESS']):
-	'''
-	Write the casename.nsi.dat
 
-	postprocess can include VELOC, PRESS, etc.
-	'''
-	# Create variable postprocess
-	var_includes = ''
-	for var in varlist: var_includes += '  POSTPROCESS %s\n' % var
-	# Create jet includes
-	wit_includes = ''
-	for var in witlist: wit_includes += '    %s\n' % var
-	# Write file
-	file = open(os.path.join(filepath,'%s.nsi.dat'%casename),'w')
-	file.write('''$------------------------------------------------------------
+def write_jet_file(filepath, name, functions):
+    """
+    Writes the inflow file that is included in the .ker.dat
+    """
+    file = open(os.path.join(filepath, "%s.dat" % name), "w")
+    # Write file
+    file.write("FUNCTION=%s, DIMENSION=%d\n" % (name.upper(), len(functions)))
+    for f in functions:
+        file.write("  %s\n" % f)
+    file.write("END_FUNCTION\n")
+    file.close()
+
+
+def write_witness_file(filepath, probes_positions):
+    """
+    Writes the witness file that is included in the .ker.dat
+    """
+    nprobes = len(probes_positions)
+    ndim = len(probes_positions[0])
+    # Open file for writing
+    file = open(os.path.join(filepath, "witness.dat"), "w")
+    # Write header
+    file.write("WITNESS_POINTS, NUMBER=%d\n" % nprobes)
+    # Write probes
+    if ndim == 2:
+        for pos in probes_positions:
+            file.write("%f,%f\n" % (pos[0], pos[1]))
+    else:
+        for pos in probes_positions:
+            file.write("%f,%f,%f\n" % (pos[0], pos[1], pos[2]))
+    # Write end
+    file.write("END_WITNESS_POINTS\n")
+    file.close()
+
+
+def write_nsi_file(
+    filepath,
+    casename,
+    varlist=["VELOC", "PRESS"],
+    witlist=["VELOX", "VELOY", "VELOZ", "PRESS"],
+):
+    """
+    Write the casename.nsi.dat
+
+    postprocess can include VELOC, PRESS, etc.
+    """
+    # Create variable postprocess
+    var_includes = ""
+    for var in varlist:
+        var_includes += "  POSTPROCESS %s\n" % var
+    # Create jet includes
+    wit_includes = ""
+    for var in witlist:
+        wit_includes += "    %s\n" % var
+    # Write file
+    file = open(os.path.join(filepath, "%s.nsi.dat" % casename), "w")
+    file.write(
+        """$------------------------------------------------------------
 PHYSICAL_PROBLEM
   PROBLEM_DEFINITION       
     TEMPORAL_DERIVATIVES:	On  
@@ -348,5 +379,7 @@ BOUNDARY_CONDITIONS, NON_CONSTANT
   $ Boundary codes
   INCLUDE boundary_codes.dat
 END_BOUNDARY_CONDITIONS  
-$------------------------------------------------------------'''%(var_includes,wit_includes))
-	file.close()
+$------------------------------------------------------------"""
+        % (var_includes, wit_includes)
+    )
+    file.close()
