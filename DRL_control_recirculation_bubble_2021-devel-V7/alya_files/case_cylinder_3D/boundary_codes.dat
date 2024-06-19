@@ -1,0 +1,17 @@
+CODES, NODES
+		$1	     000  0.0,	0.0,  0.0	 $ FRONT
+		6	     111  1.0,	1.0,  1.0,	 SPACE_TIME_FUNCTION = INFLOW $ INLET
+		3	     010  0.0,	0.0,  0.0	 $ TOP
+		4            000  0.0,  0.0,  0.0       $ out
+		$2           000  0.0,  0.0,  0.0       $ back
+		5            010  0.0,  0.0,  0.0       $ BOT
+		7            111  0.0,  0.0,  0.0       $ CYLINDER
+               	8	     111  1.0,	1.0,  1.0,	 SPACE_TIME_FUNCTION = JET_TOP $ INLET
+	        9	     111  1.0,	1.0,  1.0,	 SPACE_TIME_FUNCTION = JET_BOT $ INLET
+		6 & 3        111  1.0,  1.0,  1.0,       SPACE_TIME_FUNCTION = INFLOW  $ in + top
+		6 & 5        111  1.0,  1.0,  1.0,       SPACE_TIME_FUNCTION = INFLOW  $ in + bot
+                8 & 7        111  0.0,  0.0,  0.0       $ jet_top + cyl
+		9 & 7        111  0.0,  0.0,  0.0       $ jet_bot + cyl
+		4 & 3        010  0.0,  0.0,  0.0       $ out + top
+		4 & 5        010  0.0,  0.0,  0.0       $ out + bot
+END_CODES

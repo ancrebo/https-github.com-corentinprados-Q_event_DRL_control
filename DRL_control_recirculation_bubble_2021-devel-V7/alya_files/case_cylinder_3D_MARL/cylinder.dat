@@ -1,0 +1,33 @@
+$-------------------------------------------------------------------
+RUN_DATA
+  ALYA: 	         cylinder
+  RUN_TYPE:              CONTI, PRELIMINARY, FREQUENCY=50
+  LATEX_INFO_FILE:       YES
+  LIVE_INFORMATION:      Screen
+  TIMING:                ON
+END_RUN_DATA
+$-------------------------------------------------------------------
+PROBLEM_DATA
+  TIME_COUPLING      global, fromCritical $
+	INCLUDE time_interval.dat
+	$ TIME_STEP_SIZE=  0.001
+	NUMBER_OF_STEPS    999999
+
+  NASTIN_MODULE:          On
+  END_NASTIN_MODULE
+
+  PARALL_SERVICE:         ON
+    POSTPROCESS           MASTER
+    PARTITION_TYPE:       FACES
+    PARTITIONING
+    METHOD:               METIS
+    END_PARTITIONING
+  END_PARALL_SERVICE 
+END_PROBLEM_DATA
+$-------------------------------------------------------------------
+MPI_IO: ON
+  GEOMETRY: ON $ Export
+  RESTART: ON
+  POSTPROCESS: ON
+END_MPI_IO
+$-------------------------------------------------------------------
