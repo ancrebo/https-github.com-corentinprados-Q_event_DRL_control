@@ -1,0 +1,15 @@
+CODES, NODES
+	1		11	1.0, 1.0, SPACE_TIME_FUNCTION = INFLOW     $ inlet
+	2		00	0.0, 0.0                                   $ outlet
+	3		11	0.0, 0.0                                   $ cylinder_wall
+	4		11	0.0, 0.0                                   $ top		
+	5		11	0.0, 0.0                                   $ bottom
+	6		11	1.0, 1.0, SPACE_TIME_FUNCTION = JET_BOTTOM $ jet_bottom
+	7		11	1.0, 1.0, SPACE_TIME_FUNCTION = JET_TOP    $ jet_top
+	1 & 4	11	1.0, 0.0, SPACE_TIME_FUNCTION = INFLOW	   $ inlet & top 
+	1 & 5	11	1.0, 0.0, SPACE_TIME_FUNCTION = INFLOW	   $ inlet & bot
+	3 & 6	11	1.0, 1.0, SPACE_TIME_FUNCTION = JET_BOTTOM $ cylinder & jet_bot
+	3 & 7	11	1.0, 1.0, SPACE_TIME_FUNCTION = JET_TOP	   $ cylinder & jet_top
+	2 & 4	11	0.0, 0.0                                   $ outlet & top
+	2 & 5	11	0.0, 0.0                                   $ outlet & bot
+END_CODES 
