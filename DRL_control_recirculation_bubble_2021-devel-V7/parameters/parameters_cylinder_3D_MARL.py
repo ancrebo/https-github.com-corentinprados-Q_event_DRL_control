@@ -60,13 +60,16 @@ Parabolic_max_velocity = 1.5
 ### **********************************************************
 ### MULTI-ENVIRONMENT SETUP **********************************
 
-nb_proc       = 360 #Number of calculation processors
-num_servers   = 3 # number of environment in parallel
+# nb_proc       = 360 #Number of calculation processors ## 6 for local
+nb_proc	      	= 6 # for local?
+# num_servers   = 3 # number of environment in parallel ## 1 for local
+num_servers 	= 1 # for local?
 
-proc_per_node = 128
+# proc_per_node = 128 ## 32 for local??
+proc_per_node = 32 # for local??
 #proc_per_node = int(os.getenv('SLURM_NTASKS_PER_NODE'))*int(os.getenv('SLURM_CPUS_PER_TASK'))
 
-mem_per_node  = 200000 # MB RAM in each node
+mem_per_node  = 200000 # MB RAM in each node # not used for local?
 #mem_per_node   = int(os.getenv('SLURM_MEM_PER_NODE'))
 
 mem_per_cpu    = mem_per_node//proc_per_node

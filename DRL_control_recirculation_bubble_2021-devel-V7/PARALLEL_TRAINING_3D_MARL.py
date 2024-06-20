@@ -68,7 +68,6 @@ generate_node_list(
 
 # Read the list of nodes
 nodelist = read_node_list()
-
 # IMPORTANT: this environment base is needed to do the baseline, the main one
 environment_base = Environment(simu_name=simu_name, node=nodelist[0])  # Baseline
 
