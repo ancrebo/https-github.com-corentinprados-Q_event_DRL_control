@@ -66,7 +66,8 @@ initial_time = time.time()
 # TODO --- ADD NUM_CFD (MARL)
 generate_node_list(
     num_servers=num_servers, num_cores_server=nb_proc
-)  # TODO: check if this works in MN!
+)
+# TODO: check if this works in MN!
 # TODO: Update to local nodelists with num_servers
 
 # Read the list of nodes
@@ -99,7 +100,7 @@ agent = Agent.create(
     predict_terminal_values=True,
     # TODO: gae_lambda=0.97 doesn't currently exist
     # Critic
-    ## TODO -- memory ?
+    # TODO -- memory ?
     baseline=network,
     baseline_optimizer=dict(
         type="multi_step", num_steps=5, optimizer=dict(type="adam", learning_rate=1e-3)
