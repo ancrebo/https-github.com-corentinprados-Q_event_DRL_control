@@ -22,7 +22,7 @@ from configuration import ALYA_ULTCL
 run_subprocess("./", ALYA_ULTCL, "", preprocess=True)
 
 # Set up which case to run
-training_case = "re3900_cylinder_3D_MARL"  # cylinder_2D, airfoil_2D, cylinder_3D
+training_case = "channel_3D_MARL"  # cylinder_2D, airfoil_2D, cylinder_3D, channel_3D_MARL
 run_subprocess(
     "./", "rm -f", "parameters.py", preprocess=True
 )  # Ensure deleting old parameters
@@ -127,7 +127,10 @@ def split(environment, np):  # called 1 time in PARALLEL_TRAINING.py
     list_inv_envs = []
     for j in range(nz_Qs):
         env = cp.copy(environment)
-        env.ENV_ID = [np, (j + 1)] # Adjust for two dimensions? or translate two to one dimension (n, m) -> (j)
+        env.ENV_ID = [
+            np,
+            (j + 1),
+        ]  # Adjust for two dimensions? or translate two to one dimension (n, m) -> (j)
         env.host = "environment{}".format(np)
         list_inv_envs.append(env)
     return list_inv_envs

@@ -107,7 +107,7 @@ class Environment(Environment):
         self.nz_Qs = nz_Qs
         self.actions_per_inv = actions_per_inv
         self.nb_inv_per_CFD = nb_inv_per_CFD
-        self.bound_inv = 6 + self.ENV_ID[1]     # 6 is from ALYA boundary code ??
+        self.bound_inv = 6 + self.ENV_ID[1]  # 6 is from ALYA boundary code ??
         self.neighbor_state = neighbor_state
 
         self.probes_values_global = []
