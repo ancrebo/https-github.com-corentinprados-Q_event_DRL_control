@@ -29,7 +29,7 @@ reward_function = (
     "q-event-ratio"  # TODO: add q-event-ratio reward function @pietero
 )
 
-Re_case = 5
+Re_case = 6
 slices_probes_per_jet = 1
 neighbor_state = False
 
@@ -40,6 +40,7 @@ neighbor_state = False
 #### 3 --> Re = 400
 #### 4 --> Re = 1000
 #### 5 --> Re = 3900 (high Re case--FTaC)
+#### 6 --> Re = 180
 
 ### *****************************************************
 ### RUN BASELINE ****************************************
@@ -63,6 +64,11 @@ run_baseline = True
 # xkarman = 3 * int(2 * cylinder_coordinates[0])
 #
 # Parabolic_max_velocity = 1.5
+
+h = 2.0
+Lx = 2.67*h
+Ly = h
+Lz = 0.8*h
 
 
 
@@ -571,7 +577,7 @@ simulation_params = {
 
 # Variational input
 variational_input = {
-    "filename": "cylinder",  # basename
+    "filename": "channel",  # basename
     "bound": [
         5,
         6,
@@ -596,13 +602,13 @@ variational_input = {
         0,
         0,
     ],  # Vector rotation in case rotation between axis is needed
-    "phi": 90,  # Rotation angle
-    "D_exp": 1.42,  # SCHAFER Experimental Drag
-    "S_exp": 0,  # Experimental Side
-    "L_exp": 1.01,  # SCHAFER Experimental Lift
-    "R_exp": 0,  # Experimental Roll
-    "P_exp": 0,  # Experimental Pitch
-    "Y_exp": 0,  # Experimental yaw
+    # "phi": 90,  # Rotation angle
+    # "D_exp": 1.42,  # SCHAFER Experimental Drag
+    # "S_exp": 0,  # Experimental Side
+    # "L_exp": 1.01,  # SCHAFER Experimental Lift
+    # "R_exp": 0,  # Experimental Roll
+    # "P_exp": 0,  # Experimental Pitch
+    # "Y_exp": 0,  # Experimental yaw
 }
 
 # Optimization

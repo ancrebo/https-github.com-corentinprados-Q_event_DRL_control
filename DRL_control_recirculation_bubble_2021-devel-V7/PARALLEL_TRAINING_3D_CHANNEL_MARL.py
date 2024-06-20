@@ -6,6 +6,9 @@
 #
 # Pol Suarez, Francisco Alcantara
 # 21/02/2022
+
+# TODO: ANY CHANNEL-SPECIFIC EDITS
+
 from __future__ import print_function, division
 
 import os, sys
@@ -63,11 +66,13 @@ initial_time = time.time()
 # TODO --- ADD NUM_CFD (MARL)
 generate_node_list(
     num_servers=num_servers, num_cores_server=nb_proc
-)  # TODO: check if this works in MN!
+)
+# TODO: check if this works in MN!
 # TODO: Update to local nodelists with num_servers
 
 # Read the list of nodes
 nodelist = read_node_list()
+
 # IMPORTANT: this environment base is needed to do the baseline, the main one
 environment_base = Environment(simu_name=simu_name, node=nodelist[0])  # Baseline
 
@@ -95,7 +100,7 @@ agent = Agent.create(
     predict_terminal_values=True,
     # TODO: gae_lambda=0.97 doesn't currently exist
     # Critic
-    ## TODO -- memory ?
+    # TODO -- memory ?
     baseline=network,
     baseline_optimizer=dict(
         type="multi_step", num_steps=5, optimizer=dict(type="adam", learning_rate=1e-3)
