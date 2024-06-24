@@ -1,0 +1,605 @@
+Unloading the cpe module is insufficient to restore the system defaults.
+Please run 'source
+/opt/cray/pe/cpe/22.06/restore_lmod_system_defaults.[csh|sh]'. 
+The following modules were not unloaded:
+  (Use "module --force purge" to unload all):
+
+  1) systemdefault/1.0.0
+
+Lmod is automatically replacing "cpeCray/22.06" with "PrgEnv-cray/8.3.3".
+
+Unloading the cpe module is insufficient to restore the system defaults.
+Please run 'source
+/opt/cray/pe/cpe/22.06/restore_lmod_system_defaults.[csh|sh]'. 
+The following modules were not unloaded:
+  (Use "module --force purge" to unload all):
+
+  1) systemdefault/1.0.0
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+Warning: Import - Problems loading VTK IO!
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/bin/pyalya_gmsh2alya:277: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+  id_interior  = int(zones['code'][np.logical_not(zones['isbc'])])
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+/cfs/klemming/projects/snic/kthmech/polsm/env-pyalya-MPI/lib/python3.9/site-packages/h5py/__init__.py:36: UserWarning: h5py is running against HDF5 1.12.2 when it was built against 1.12.1, this may cause problems
+  _warn(("h5py is running against HDF5 {0} when it was built against {1}, "
+Warning: Import - Problems loading VTK IO!
+Warning: 123 - Inconsistent number of subdomains 1!
+Warning: 77 - Inconsistent number of subdomains 1!
+Warning: 122 - Inconsistent number of subdomains 1!
+Warning: 35 - Inconsistent number of subdomains 1!
+Warning: 76 - Inconsistent number of subdomains 1!
+Warning: 79 - Inconsistent number of subdomains 1!
+Warning: 33 - Inconsistent number of subdomains 1!
+Warning: 56 - Inconsistent number of subdomains 1!
+Warning: 34 - Inconsistent number of subdomains 1!
+Warning: 110 - Inconsistent number of subdomains 1!
+Warning: 119 - Inconsistent number of subdomains 1!
+Warning: 9 - Inconsistent number of subdomains 1!
+Warning: 7 - Inconsistent number of subdomains 1!
+Warning: 95 - Inconsistent number of subdomains 1!
+Warning: 75 - Inconsistent number of subdomains 1!
+Warning: 29 - Inconsistent number of subdomains 1!
+Warning: 63 - Inconsistent number of subdomains 1!
+Warning: 84 - Inconsistent number of subdomains 1!
+Warning: 93 - Inconsistent number of subdomains 1!
+Warning: 111 - Inconsistent number of subdomains 1!
+Warning: 65 - Inconsistent number of subdomains 1!
+Warning: 96 - Inconsistent number of subdomains 1!
+Warning: 103 - Inconsistent number of subdomains 1!
+Warning: 91 - Inconsistent number of subdomains 1!
+Warning: 125 - Inconsistent number of subdomains 1!
+Warning: 32 - Inconsistent number of subdomains 1!
+Warning: 71 - Inconsistent number of subdomains 1!
+Warning: 31 - Inconsistent number of subdomains 1!
+Warning: 81 - Inconsistent number of subdomains 1!
+Warning: 127 - Inconsistent number of subdomains 1!
+Warning: 101 - Inconsistent number of subdomains 1!
+Warning: 21 - Inconsistent number of subdomains 1!
+Warning: 5 - Inconsistent number of subdomains 1!
+Warning: 113 - Inconsistent number of subdomains 1!
+Warning: 19 - Inconsistent number of subdomains 1!
+Warning: 69 - Inconsistent number of subdomains 1!
+Warning: 94 - Inconsistent number of subdomains 1!
+Warning: 85 - Inconsistent number of subdomains 1!
+Warning: 124 - Inconsistent number of subdomains 1!
+Warning: 115 - Inconsistent number of subdomains 1!
+Warning: 117 - Inconsistent number of subdomains 1!
+Warning: 45 - Inconsistent number of subdomains 1!
+Warning: 64 - Inconsistent number of subdomains 1!
+Warning: 74 - Inconsistent number of subdomains 1!
+Warning: 37 - Inconsistent number of subdomains 1!
+Warning: 89 - Inconsistent number of subdomains 1!
+Warning: 57 - Inconsistent number of subdomains 1!
+Warning: 55 - Inconsistent number of subdomains 1!
+Warning: 39 - Inconsistent number of subdomains 1!
+Warning: 1 - Inconsistent number of subdomains 1!
+Warning: 14 - Inconsistent number of subdomains 1!
+Warning: 43 - Inconsistent number of subdomains 1!
+Warning: 10 - Inconsistent number of subdomains 1!
+Warning: 121 - Inconsistent number of subdomains 1!
+Warning: 48 - Inconsistent number of subdomains 1!
+Warning: 11 - Inconsistent number of subdomains 1!
+Warning: 18 - Inconsistent number of subdomains 1!
+Warning: 66 - Inconsistent number of subdomains 1!
+Warning: 40 - Inconsistent number of subdomains 1!
+Warning: 104 - Inconsistent number of subdomains 1!
+Warning: 15 - Inconsistent number of subdomains 1!
+Warning: 49 - Inconsistent number of subdomains 1!
+Warning: 3 - Inconsistent number of subdomains 1!
+Warning: 88 - Inconsistent number of subdomains 1!
+Warning: 112 - Inconsistent number of subdomains 1!
+Warning: 38 - Inconsistent number of subdomains 1!
+Warning: 72 - Inconsistent number of subdomains 1!
+Warning: 61 - Inconsistent number of subdomains 1!
+Warning: 87 - Inconsistent number of subdomains 1!
+Warning: 58 - Inconsistent number of subdomains 1!
+Warning: 13 - Inconsistent number of subdomains 1!
+Warning: 42 - Inconsistent number of subdomains 1!
+Warning: 90 - Inconsistent number of subdomains 1!
+Warning: 82 - Inconsistent number of subdomains 1!
+Warning: 22 - Inconsistent number of subdomains 1!
+Warning: 59 - Inconsistent number of subdomains 1!
+Warning: 118 - Inconsistent number of subdomains 1!
+Warning: 106 - Inconsistent number of subdomains 1!
+Warning: 83 - Inconsistent number of subdomains 1!
+Warning: 67 - Inconsistent number of subdomains 1!
+Warning: 23 - Inconsistent number of subdomains 1!
+Warning: 30 - Inconsistent number of subdomains 1!
+Warning: 6 - Inconsistent number of subdomains 1!
+Warning: 51 - Inconsistent number of subdomains 1!
+Warning: 99 - Inconsistent number of subdomains 1!
+Warning: 17 - Inconsistent number of subdomains 1!
+Warning: 50 - Inconsistent number of subdomains 1!
+Warning: 100 - Inconsistent number of subdomains 1!
+Warning: 46 - Inconsistent number of subdomains 1!
+Warning: 108 - Inconsistent number of subdomains 1!
+Warning: 25 - Inconsistent number of subdomains 1!
+Warning: 36 - Inconsistent number of subdomains 1!
+Warning: 68 - Inconsistent number of subdomains 1!
+Warning: 105 - Inconsistent number of subdomains 1!
+Warning: 73 - Inconsistent number of subdomains 1!
+Warning: 44 - Inconsistent number of subdomains 1!
+Warning: 97 - Inconsistent number of subdomains 1!
+Warning: 27 - Inconsistent number of subdomains 1!
+Warning: 47 - Inconsistent number of subdomains 1!
+Warning: 41 - Inconsistent number of subdomains 1!
+Warning: 60 - Inconsistent number of subdomains 1!
+Warning: 53 - Inconsistent number of subdomains 1!
+Warning: 2 - Inconsistent number of subdomains 1!
+Warning: 126 - Inconsistent number of subdomains 1!
+Warning: 80 - Inconsistent number of subdomains 1!
+Warning: 98 - Inconsistent number of subdomains 1!
+Warning: 70 - Inconsistent number of subdomains 1!
+Warning: 20 - Inconsistent number of subdomains 1!
+Warning: 0 - Inconsistent number of subdomains 1!
+Warning: 120 - Inconsistent number of subdomains 1!
+Warning: 4 - Inconsistent number of subdomains 1!
+Warning: 109 - Inconsistent number of subdomains 1!
+Warning: 107 - Inconsistent number of subdomains 1!
+Warning: 114 - Inconsistent number of subdomains 1!
+Warning: 78 - Inconsistent number of subdomains 1!
+Warning: 24 - Inconsistent number of subdomains 1!
+Warning: 62 - Inconsistent number of subdomains 1!
+Warning: 86 - Inconsistent number of subdomains 1!
+Warning: 92 - Inconsistent number of subdomains 1!
+Warning: 116 - Inconsistent number of subdomains 1!
+Warning: 102 - Inconsistent number of subdomains 1!
+Warning: 12 - Inconsistent number of subdomains 1!
+Warning: 28 - Inconsistent number of subdomains 1!
+Warning: 54 - Inconsistent number of subdomains 1!
+Warning: 8 - Inconsistent number of subdomains 1!
+Warning: 26 - Inconsistent number of subdomains 1!
+Warning: 52 - Inconsistent number of subdomains 1!
+Warning: 16 - Inconsistent number of subdomains 1!

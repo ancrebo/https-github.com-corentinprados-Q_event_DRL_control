@@ -1,0 +1,33 @@
+{
+    "authors": [
+        "lucas.gasparino@bsc.es"
+    ],
+    "comparisons": [
+        {
+            "file": "cavtet20-VELOC-00000010.post.mpio.txt",
+            "method": "absolute",
+            "tolerance": 1e-7
+        },
+        {
+            "file": "cavtet20-PRESS-00000010.post.mpio.txt",
+            "method": "absolute",
+            "tolerance": 1e-7
+        }
+    ],
+    "description": "Test for TET20 element type.",
+    "exclude": [
+        "special"
+    ],
+    "executions": [
+        {
+            "mpi": 5,
+            "openmp": 0
+        }
+    ],
+    "modules": [
+        "nastin"
+    ],
+    "name": "cavtet20",
+    "postprocess": "mpio2txt",
+    "timeout": "00:02:00"
+}
