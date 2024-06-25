@@ -22,7 +22,7 @@ from configuration import ALYA_ULTCL
 run_subprocess("./", ALYA_ULTCL, "", preprocess=True)
 
 # Set up which case to run
-training_case = "cylinder_3D_MARL_test"  # cylinder_2D, airfoil_2D, cylinder_3D, channel_3D_MARL, cylinder_3D_MARL_test
+training_case = "cylinder_3D_WS_test"  # cylinder_2D, airfoil_2D, cylinder_3D, channel_3D_MARL, cylinder_3D_MARL_test
 run_subprocess(
     "./", "rm -f", "parameters.py", preprocess=True
 )  # Ensure deleting old parameters
