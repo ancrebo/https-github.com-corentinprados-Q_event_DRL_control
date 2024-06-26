@@ -65,7 +65,7 @@ Parabolic_max_velocity = 1.5
 
 num_nodes_srun = 24
 # nb_proc = 100 * num_nodes_srun  # Number of calculation processors
-nb_proc = 12 # Local??
+nb_proc = 18 # Local??
 # num_servers = 6  # number of environment in parallel
 num_servers = 1 # Local??
 
