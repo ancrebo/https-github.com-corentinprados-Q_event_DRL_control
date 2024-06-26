@@ -25,7 +25,7 @@ reward_function = (
     "drag_plain_lift"  # at this moment, the only one used and parametrized
 )
 
-Re_case = 1
+Re_case = 0
 slices_probes_per_jet = 3
 neighbor_state = False
 
@@ -65,7 +65,7 @@ Parabolic_max_velocity = 1.5
 
 num_nodes_srun = 24
 # nb_proc = 100 * num_nodes_srun  # Number of calculation processors
-nb_proc = 6 # Local??
+nb_proc = 12 # Local??
 # num_servers = 6  # number of environment in parallel
 num_servers = 1 # Local??
 
