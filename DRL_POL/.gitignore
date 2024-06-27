@@ -26,6 +26,9 @@ alya_files/case_cylinder_3D_WS_test/mesh/cylinder.msh
 alya_files/case_cylinder_3D_WS_test/core
 alya_files/case_cylinder_3D_WS_test/mesh/*.mpio.bin
 
+alya_files/*.mpio.bin
+alya_files/**/*.mpio.bin
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
