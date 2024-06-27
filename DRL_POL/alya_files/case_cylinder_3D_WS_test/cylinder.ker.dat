@@ -24,5 +24,6 @@ END_SPACE_&_TIME_FUNCTIONS
 END_NUMERICAL_TREATMENT  
 $------------------------------------------------------------
 OUTPUT_&_POST_PROCESS
+INCLUDE witness.dat
 END_OUTPUT_&_POST_PROCESS  
 $------------------------------------------------------------
