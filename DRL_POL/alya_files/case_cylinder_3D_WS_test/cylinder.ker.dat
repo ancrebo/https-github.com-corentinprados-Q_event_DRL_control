@@ -24,7 +24,8 @@ END_SPACE_&_TIME_FUNCTIONS
 END_NUMERICAL_TREATMENT  
 $------------------------------------------------------------
 OUTPUT_&_POST_PROCESS  
-    STEPS=1000
+    STEPS=10
+    PERIOD=0.25
       POSTPROCESS VELOC
       POSTPROCESS PRESS
     INCLUDE	witness.dat
