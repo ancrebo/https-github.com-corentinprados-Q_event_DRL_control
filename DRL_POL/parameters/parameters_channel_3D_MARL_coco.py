@@ -215,19 +215,31 @@ offset_reward = offset_reward_list[Re_case]
 norm_Q = 0.176  # (0.088/2)/5 asa said in papers, limited Q for no momentum or discontinuities in the CFD solver
 
 # location jet over the cylinder 0 is top centre
-jet_angle = 0
+# jet_angle = 0
 
-nz_Qs = nb_inv_per_CFD  ## DEBUG param --> define how many Qs to control in the span (needs to define Q profile)
+# nz_Qs = nb_inv_per_CFD  ## DEBUG param --> define how many Qs to control in the span (needs to define Q profile)
+nz_Qs = 3   # number of agents in the spanwise direction
+nx_Qs = 3   # number of agents in the streamwise direction
 
-## it will place many slices of witness as Qs locations we have
+
+# it will place many slices of witness as Qs locations we have
+
+"""
+@pietero:
+Replace with `calc_wit_points` functions???
 
 Qs_position_z = []
 for nq in range(nz_Qs):
     Qs_position_z.append((Lz / (nz_Qs)) * (0.5 + nq))
-print("Jets are placed in Z coordinates: ", Qs_position_z)
+print("Jets are placed in X,Z coordinates: ", Qs_position_z)
+"""
 
-delta_Q_z = Lz / (nz_Qs)
+delta_Q_z = Lz / nz_Qs
+delta_Q_x = Lx / nx_Qs  # QUESTION from @pietero: are these even necessary for channel?
 
+"""
+@pietero/canordq:
+Replace with totally different code for channel parameters???
 
 jets_definition = {
     "JET_TOP": {
@@ -249,9 +261,11 @@ jets_definition = {
         "remesh": False,
     },
 }
+"""
+
 
 # Build the jets
-jets = build_jets(JetCylinder, jets_definition, delta_t_smooth)
+jets = build_jets(JetCylinder, jets_definition, delta_t_smooth) # TODO: update jets class @pietero
 n_jets = len(jets)
 
 geometry_params = (
