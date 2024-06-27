@@ -1,4 +1,4 @@
-# DRL specific files
+alya_files/WS_test-backup/# DRL specific files
 saved_models/
 best_model/
 episodes/
@@ -28,6 +28,12 @@ alya_files/case_cylinder_3D_WS_test/mesh/*.mpio.bin
 
 alya_files/*.mpio.bin
 alya_files/**/*.mpio.bin
+
+alya_files/**/*.swp
+
+alya_files/WS_test-backup/
+
+data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
