@@ -45,7 +45,7 @@ USE_SLURM = False
 # Oversubscribe over MPI, must be set to False always
 # unless debugging on the local machine and needed by
 # the system
-OVERSUBSCRIBE = True
+OVERSUBSCRIBE = False
 
 
 # Activate the debug mode, which means you get prints of every action
