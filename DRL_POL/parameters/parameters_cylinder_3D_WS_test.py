@@ -117,7 +117,7 @@ else:
 ### *****************************************************
 ### TIMESCALES ******************************************
 
-baseline_duration = 4.533536E+00  # to converge with velocity max = 1 (CHANGE THIS TO SAME AS TEST BASELINE DURATION)
+baseline_duration = 5.003E+00  # to converge with velocity max = 1 (CHANGE THIS TO SAME AS TEST BASELINE DURATION)
 baseline_time_start = 0.0
 
 delta_t_smooth = 0.25  # ACTION DURATION smooth law duration

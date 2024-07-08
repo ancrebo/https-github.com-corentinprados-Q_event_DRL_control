@@ -28,7 +28,7 @@ NODELIST = "nodelist"
 
 
 ## BINARIES
-ALYA_BIN = os.path.join(BIN_PATH, "alya_3D_hv3.x")
+ALYA_BIN = os.path.join(BIN_PATH, "alya_3D_qevents.x")
 ALYA_SETS = os.path.join(BIN_PATH, "alya-sets")
 ALYA_CLEAN = os.path.join(BIN_PATH, "alya-clean")
 ALYA_ULTCL = os.path.join(BIN_PATH, "ultra_cleaner.sh")
