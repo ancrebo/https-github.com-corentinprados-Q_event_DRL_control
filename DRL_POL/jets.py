@@ -154,7 +154,7 @@ class Jet(object):
             self.Qs_position_z,
             self.delta_Q_z,
         )
-        # Create the velocities using the smoothing functions,
+        # Create the velocities (function?) using the smoothing functions,
         if self.dimension == 2:
             # For 2D jets set Vx and Vy
             self.Vx = "{0}*cos({1})".format(smooth_fun, self.theta)
@@ -356,4 +356,88 @@ class JetAirfoil(Jet):
 
 class JetChannel(Jet):
     # TODO: implement this class @canordq
+
+    """
+    Specialized jet class to deal with jets specificed in cylindrical coordinates.
+    """
+
+    def set_geometry(self, params):
+        """
+        Specialized method that sets up the geometry of the jet
+        """
+        from parameters import cylinder_coordinates, Qs_position_z, delta_Q_z
+
+        # Sanity check
+        # TODO: asserts are dangerous... we need a function that stops everything!!
+        if params["width"] <= 0.0:
+            raise ValueError("Invalid jet width=%f" % params["width"])
+        if params["radius"] <= 0.0:
+            raise ValueError("Invalid jet radius=%f" % params["radius"])
+        if params["positions_angle"] <= 0.0:
+            raise ValueError("Invalid jet angle=%f" % params["positions_angle"])
+        # Recover parameters from dictionary
+        self.radius = params["radius"]
+        self.width = params["width"]
+        self.theta0 = self.normalize_angle(np.deg2rad(params["positions_angle"]))
+        self.theta = self.get_theta(cylinder_coordinates)
+
+    # TODO: adjust this function for 2D channel
+    def create_smooth_funcs_2D(
+        self,
+        Q_new,
+        Q_pre,
+        time_start,
+        T_smoo,
+        smooth_func,
+        Qs_position_z,
+        delta_Q_z,
+        Qs_position_x,
+        delta_Q_x,
+    ):
+        """
+        Specialized method that creates the smooth functions in 2D
+        """
+        w = self.width * (np.pi / 180)  # deg2rad
+        scale = np.pi / (2.0 * w * self.radius)  #### FIX: NOT R**2 --> D
+
+        string_all_Q_pre = "0"
+        string_all_Q_new = "0"
+        string_heav = ""
+
+        if smooth_func == "EXPONENTIAL":
+
+            ## Q_pre and Q_new --> list! with nz_Qs dimensions
+            string_h = Q_smooth_exp(time_start, T_smoo)
+
+            # create the new Q string
+            string_heav = heav_func(Qs_position_z[0], delta_Q_z)
+            string_all_Q_pre = "%s*(%.4f)" % (string_heav, Q_pre[0])
+            string_all_Q_new = "%s*(%.4f)" % (string_heav, Q_new[0])
+
+            for i in range(1, self.nb_inv_per_CFD):
+                string_heav = heav_func(Qs_position_z[i], delta_Q_z)
+                string_all_Q_pre += "+ %s*(%.4f)" % (string_heav, Q_pre[i])
+                string_all_Q_new += "+ %s*(%.4f)" % (string_heav, Q_new[i])
+            string_Q = "((%s) + (%s)*((%s)-(%s)))" % (
+                string_all_Q_pre,
+                string_h,
+                string_all_Q_new,
+                string_all_Q_pre,
+            )
+
+        else:
+            string_Q = Q_smooth_linear(Q_new, Q_pre, time_start, T_smoo)
+
+        if self.short_spacetime_func == True:
+            # just with Qnorm*Qi -- no projection or smoothing in time/space
+            return "(%.1f)*(%s)" % (scale, string_all_Q_new)
+        else:
+            string_C = "cos(%.3f/%.3f*(%s-(%.3f)))" % (
+                np.pi,
+                w,
+                self.theta,
+                self.theta0,
+            )
+            return "(%.1f)*(%s)*(%s)" % (scale, string_Q, string_C)
+
     pass
