@@ -13,6 +13,7 @@ AUTHORS ->  POL
 import os, csv, numpy as np
 import shutil
 import time
+from typing import List, Tuple
 
 # IMPORT TENSORFLOW
 from tensorforce.environments import Environment
@@ -1056,7 +1057,7 @@ class Environment(Environment):
         return probes_values_2
 
     # -----------------------------------------------------------------------------------------------------
-    def execute(self, actions):
+    def execute(self, actions: List[float]) -> Tuple[list[float], bool, float]:
 
         action = []
         for i in range(self.actions_per_inv):
@@ -1209,25 +1210,30 @@ class Environment(Environment):
         self.run(which="execute")
         print("Done. time elapsed : ", time.time() - t0)
 
-        # Get the new avg drag and lift --> LOCAL
-        average_drag, average_lift = compute_avg_lift_drag(
-            self.episode_number, cpuid=self.host, nb_inv=self.ENV_ID[1]
-        )
-        self.history_parameters["drag"].extend([average_drag])
-        self.history_parameters["lift"].extend([average_lift])
-        self.history_parameters["time"].extend([self.last_time])
-        self.history_parameters["episode_number"].extend([self.episode_number])
-        self.save_history_parameters(nb_actuations)
+        if self.case == "cylinder":
+            # Get the new avg drag and lift --> LOCAL
+            average_drag, average_lift = compute_avg_lift_drag(
+                self.episode_number, cpuid=self.host, nb_inv=self.ENV_ID[1]
+            )
+            self.history_parameters["drag"].extend([average_drag])
+            self.history_parameters["lift"].extend([average_lift])
+            self.history_parameters["time"].extend([self.last_time])
+            self.history_parameters["episode_number"].extend([self.episode_number])
+            self.save_history_parameters(nb_actuations)
 
-        # Get the new avg drag and lift --> GLOBAL
-        average_drag_GLOBAL, average_lift_GLOBAL = compute_avg_lift_drag(
-            self.episode_number,
-            cpuid=self.host,
-            nb_inv=self.nb_inv_per_CFD,
-            global_rew=True,
-        )
-        self.history_parameters["drag_GLOBAL"].extend([average_drag_GLOBAL])
-        self.history_parameters["lift_GLOBAL"].extend([average_lift_GLOBAL])
+            # Get the new avg drag and lift --> GLOBAL
+            average_drag_GLOBAL, average_lift_GLOBAL = compute_avg_lift_drag(
+                self.episode_number,
+                cpuid=self.host,
+                nb_inv=self.nb_inv_per_CFD,
+                global_rew=True,
+            )
+            self.history_parameters["drag_GLOBAL"].extend([average_drag_GLOBAL])
+            self.history_parameters["lift_GLOBAL"].extend([average_lift_GLOBAL])
+
+        elif self.case == "channel":
+            # TODO: implement history parameters for channel if needed
+            pass
 
         # Compute the reward
         reward = self.compute_reward()
@@ -1272,13 +1278,14 @@ class Environment(Environment):
             "%s.nsi.wit" % self.case,
         )
 
-        # read witness file and extract the entire array list
-        self.probes_values_global = read_last_wit(
-            filename,
-            output_params["probe_type"],
-            self.optimization_params["norm_press"],
-            NWIT_TO_READ,
-        )
+        if self.case == "cylinder":     # TODO: check if only cylinder or can be channel too
+            # read witness file and extract the entire array list
+            self.probes_values_global = read_last_wit(
+                filename,
+                output_params["probe_type"],
+                self.optimization_params["norm_press"],
+                NWIT_TO_READ,
+            )
 
         # filter probes per jet (corresponding to the ENV.ID[])
         probes_values_2 = self.list_observation()
@@ -1366,3 +1373,9 @@ class Environment(Environment):
             return self.optimization_params["norm_reward"] * (
                 avg_lift / avg_drag + self.optimization_params["offset_reward"]
             )
+
+        elif (
+            self.reward_function == "q_event_volume"
+        ):
+            # TODO: implement q-event volume reward function @pietero
+            pass

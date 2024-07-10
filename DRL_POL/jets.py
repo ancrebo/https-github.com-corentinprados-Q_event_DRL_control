@@ -355,7 +355,7 @@ class JetAirfoil(Jet):
 
 
 class JetChannel(Jet):
-    # TODO: implement this class @canordq
+    # TODO: implement this class for channel
 
     """
     Specialized jet class to deal with jets specificed in cylindrical coordinates.
@@ -384,19 +384,21 @@ class JetChannel(Jet):
     # TODO: adjust this function for 2D channel
     def create_smooth_funcs_2D(
         self,
-        Q_new,
-        Q_pre,
-        time_start,
-        T_smoo,
-        smooth_func,
-        Qs_position_z,
-        delta_Q_z,
-        Qs_position_x,
-        delta_Q_x,
-    ):
+        Q_new: list,
+        Q_pre: list,
+        time_start: float,
+        T_smoo: float,
+        smooth_func: str,
+        Qs_position_z: list,
+        delta_Q_z: float,
+        Qs_position_x: list,
+        delta_Q_x: float,
+    ) -> str:
         """
         Specialized method that creates the smooth functions in 2D
         """
+
+        # scale = ? for channel
         w = self.width * (np.pi / 180)  # deg2rad
         scale = np.pi / (2.0 * w * self.radius)  #### FIX: NOT R**2 --> D
 
