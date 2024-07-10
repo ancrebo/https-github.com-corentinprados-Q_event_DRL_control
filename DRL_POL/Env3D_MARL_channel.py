@@ -13,7 +13,7 @@ AUTHORS ->  POL
 import os, csv, numpy as np
 import shutil
 import time
-from typing import List, Tuple
+from typing import List, Tuple, Union, Any, Dict
 
 # IMPORT TENSORFLOW
 from tensorforce.environments import Environment
@@ -77,62 +77,70 @@ class Environment(Environment):
     ## only one time in multienvironment
     def __init__(
         self,
-        simu_name,
-        number_steps_execution=1,
-        continue_training=False,
-        deterministic=False,
-        ENV_ID=[-1, -1],
-        host="",
-        node=None,
-        check_id=False,
+        simu_name: str,
+        number_steps_execution: int = 1,
+        continue_training: bool = False,
+        deterministic: bool = False,
+        ENV_ID: List[int] = [-1, -1],
+        host: str = "",
+        node: Union[str, None] = None,
+        check_id: bool = False,
     ):
 
         cr_start("ENV.init", 0)
 
-        self.simu_name = simu_name
-        self.case = case
-        self.ENV_ID = ENV_ID
-        self.host = "enviroment%d" % self.ENV_ID[0]
-        self.nodelist = node
+        self.simu_name: str = simu_name
+        self.case: str = case
+        self.ENV_ID: List[int] = ENV_ID
+        self.host: str = "enviroment%d" % self.ENV_ID[0]
+        self.nodelist: Union[str, None] = node
         # self.nodelist     = [n for n in node.split(',')]
-        self.do_baseline = True  # This parameter was being overwritten so it is no point to have it optional
-        self.action_count = 0
-        self.check_id = check_id
-        self.dimension = dimension
+        self.do_baseline: bool = (
+            True  # This parameter was being overwritten so it is no point to have it optional
+        )
+        self.action_count: int = 0
+        self.check_id: bool = check_id
+        self.dimension: int = dimension
 
-        self.number_steps_execution = number_steps_execution
-        self.reward_function = reward_function
-        self.output_params = output_params
-        self.optimization_params = optimization_params
-        self.Jets = jets
-        self.n_jets = len(jets)
-        self.nz_Qs = nz_Qs
-        self.actions_per_inv = actions_per_inv
-        self.nb_inv_per_CFD = nb_inv_per_CFD
-        self.bound_inv = 6 + self.ENV_ID[1]  # 6 is from ALYA boundary code ??
-        self.neighbor_state = neighbor_state
+        self.number_steps_execution: int = number_steps_execution
+        self.reward_function: str = reward_function
+        self.output_params: Dict[str, Any] = output_params
+        self.optimization_params: Dict[str, Union[int, float]] = optimization_params
+        self.Jets: Dict[str, Any] = jets
+        self.n_jets: int = len(jets)
+        self.nz_Qs: int = nz_Qs
+        self.actions_per_inv: int = actions_per_inv
+        self.nb_inv_per_CFD: int = nb_inv_per_CFD
+        self.bound_inv: int = 6 + self.ENV_ID[1]  # 6 is from ALYA boundary code ??
+        self.neighbor_state: bool = neighbor_state
 
-        self.probes_values_global = []
+        self.probes_values_global: np.ndarray = np.ndarray([])
 
-        self.simulation_timeframe = simulation_params["simulation_timeframe"]
-        self.last_time = round(self.simulation_timeframe[1], 3)
-        self.delta_t_smooth = simulation_params["delta_t_smooth"]
-        self.smooth_func = simulation_params["smooth_func"]
+        self.simulation_timeframe: List[float] = simulation_params[
+            "simulation_timeframe"
+        ]
+        self.last_time: float = round(self.simulation_timeframe[1], 3)
+        self.delta_t_smooth: float = simulation_params["delta_t_smooth"]
+        self.smooth_func: str = simulation_params["smooth_func"]
 
-        self.previous_action_global = np.zeros(self.nb_inv_per_CFD)
-        self.action_global = np.zeros(self.nb_inv_per_CFD)
+        self.previous_action_global: np.ndarray = np.zeros(self.nb_inv_per_CFD)
+        self.action_global: np.ndarray = np.zeros(self.nb_inv_per_CFD)
+
+        self.action: np.ndarray = np.zeros(self.actions_per_inv * 2)
 
         # postprocess values
-        self.history_parameters = {}
-        self.history_parameters["drag"] = []
-        self.history_parameters["lift"] = []
-        self.history_parameters["drag_GLOBAL"] = []
-        self.history_parameters["lift_GLOBAL"] = []
-        self.history_parameters["time"] = []
-        self.history_parameters["episode_number"] = []
-        name = "output.csv"
+        self.history_parameters: Dict[str, List[Union[float, int]]] = {
+            "drag": [],
+            "lift": [],
+            "drag_GLOBAL": [],
+            "lift_GLOBAL": [],
+            "time": [],
+            "episode_number": [],
+        }
+
+        name: str = "output.csv"
         # if we start from other episode already done
-        last_row = None
+        last_row: Union[List[str], None] = None
         if os.path.exists("saved_models/" + name):
             with open("saved_models/" + name, "r") as f:
                 for row in reversed(
@@ -141,25 +149,25 @@ class Environment(Environment):
                     last_row = row
                     break
         if not last_row is None:
-            self.episode_number = int(last_row[0])
-            self.last_episode_number = int(last_row[0])
+            self.episode_number: int = int(last_row[0])
+            self.last_episode_number: int = int(last_row[0])
         else:
-            self.last_episode_number = 0
-            self.episode_number = 0
+            self.last_episode_number: int = 0
+            self.episode_number: int = 0
 
         # these are for cylinder case
-        self.episode_drags = np.array([])
-        self.episode_lifts = np.array([])
-        self.episode_drags_GLOBAL = np.array([])
-        self.episode_lifts_GLOBAL = np.array([])
+        self.episode_drags: np.ndarray = np.array([])
+        self.episode_lifts: np.ndarray = np.array([])
+        self.episode_drags_GLOBAL: np.ndarray = np.array([])
+        self.episode_lifts_GLOBAL: np.ndarray = np.array([])
 
         # need to get some for two boundary case
 
-        self.continue_training = continue_training
-        self.deterministic = deterministic
+        self.continue_training: bool = continue_training
+        self.deterministic: bool = deterministic
 
         if self.deterministic:
-            self.host = "deterministic"
+            self.host: str = "deterministic"
 
         # check if the actual environment has to run cfd or not
         # quick way --> if the 2nd component of the ENVID[] is 1...
@@ -172,45 +180,52 @@ class Environment(Environment):
     # -----------------------------------------------------------------------------------------------------
     # -----------------------------------------------------------------------------------------------------
 
-    def start(self):
+    def start(self) -> None:
         cr_start("ENV.start", 0)
         # Get the new avg drag and lift and SAVE
-        temp_id = (
+        temp_id: str = (
             "{}".format(self.host)
             if self.continue_training == True or self.deterministic == True
             else ""
         )
 
-        if self.continue_training:
-            average_drag, average_lift = 0.0, 0.0
-            average_drag_GLOBAL, average_lift_GLOBAL = 0.0, 0.0
-        else:
-            # average_drag, average_lift = compute_avg_lift_drag(self.episode_number, cpuid=temp_id)
-            average_drag, average_lift = compute_avg_lift_drag(
-                self.episode_number, cpuid=temp_id, nb_inv=self.ENV_ID[1]
-            )  # NOTE: add invariant code! not the same BC
-            average_drag_GLOBAL, average_lift_GLOBAL = compute_avg_lift_drag(
-                self.episode_number,
-                cpuid=temp_id,
-                nb_inv=self.nb_inv_per_CFD,
-                global_rew=True,
-            )  # NOTE: add invariant code! not the same BC
+        if self.case == "cylinder":
+            if self.continue_training:
+                average_drag: float = 0.0
+                average_lift: float = 0.0
+                average_drag_GLOBAL: float = 0.0
+                average_lift_GLOBAL: float = 0.0
+            else:
+                # Compute average drag and lift
+                # average_drag, average_lift = compute_avg_lift_drag(self.episode_number, cpuid=temp_id)
+                average_drag, average_lift = compute_avg_lift_drag(
+                    self.episode_number, cpuid=temp_id, nb_inv=self.ENV_ID[1]
+                )  # NOTE: add invariant code! not the same BC
+                average_drag_GLOBAL, average_lift_GLOBAL = compute_avg_lift_drag(
+                    self.episode_number,
+                    cpuid=temp_id,
+                    nb_inv=self.nb_inv_per_CFD,
+                    global_rew=True,
+                )  # NOTE: add invariant code! not the same BC
 
-        # Update history parameters
-        self.history_parameters["drag"].extend([average_drag])
-        self.history_parameters["lift"].extend([average_lift])
-        self.history_parameters["drag_GLOBAL"].extend([average_drag_GLOBAL])
-        self.history_parameters["lift_GLOBAL"].extend([average_lift_GLOBAL])
-        self.history_parameters["time"].extend([self.last_time])
-        self.history_parameters["episode_number"].extend([self.episode_number])
-        self.save_history_parameters(nb_actuations)
-        print(
-            "Results : \n\tAverage drag : {}\n\tAverage lift : {}".format(
-                average_drag, average_lift
+            # Update history parameters
+            self.history_parameters["drag"].extend([average_drag])
+            self.history_parameters["lift"].extend([average_lift])
+            self.history_parameters["drag_GLOBAL"].extend([average_drag_GLOBAL])
+            self.history_parameters["lift_GLOBAL"].extend([average_lift_GLOBAL])
+            self.history_parameters["time"].extend([self.last_time])
+            self.history_parameters["episode_number"].extend([self.episode_number])
+            # Save history parameters
+            self.save_history_parameters(nb_actuations)
+            # Print results
+            print(
+                "Results : \n\tAverage drag : {}\n\tAverage lift : {}".format(
+                    average_drag, average_lift
+                )
             )
-        )
 
-        self.action = np.zeros(self.actions_per_inv * 2)
+        # Initialize action
+        self.action = np.zeros(self.actions_per_inv * 2)  #
 
         self.check_id = True  # check if the folder with cpuid number is created
         cr_stop("ENV.start", 0)
@@ -218,7 +233,7 @@ class Environment(Environment):
     # -----------------------------------------------------------------------------------------------------
     # -----------------------------------------------------------------------------------------------------
 
-    def clean(self, full=False):
+    def clean(self, full: bool = False) -> None:
         cr_start("ENV.clean", 0)
         if full:
             # saved_models contains the .csv of all cd and cl agt the end of each episode
@@ -234,7 +249,9 @@ class Environment(Environment):
     # -------------------------------------------------------------------------------------------------------
     # -------------------------------------------------------------------------------------------------------
 
-    def create_mesh(self):  # TODO: Flag para que no tenga que volver a hacer la malla
+    def create_mesh(
+        self,
+    ) -> None:  # TODO: Flag para que no tenga que volver a hacer la malla
         cr_start("ENV.mesh", 0)
         if self.do_baseline == True:
             if self.dimension == 2:
@@ -251,7 +268,7 @@ class Environment(Environment):
     # -------------------------------------------------------------------------------------------------------
     # -------------------------------------------------------------------------------------------------------
 
-    def run_baseline(self, clean=True):
+    def run_baseline(self, clean: bool = True) -> None:
         cr_start("ENV.run_baseline", 0)
         # Do a full clean
         if clean:
@@ -276,7 +293,7 @@ class Environment(Environment):
     # -------------------------------------------------------------------------------------------------------
     # -------------------------------------------------------------------------------------------------------
 
-    def run(self, which):
+    def run(self, which: str) -> None:
         print("Simulation on : ", self.simulation_timeframe)
         logssets = os.path.join("logs", "log_sets.log")
         if which == "reset":
@@ -347,16 +364,16 @@ class Environment(Environment):
             cr_start("ENV.run_actions", 0)
             filepath = os.path.join(
                 "alya_files",
-                "%s" % self.host,
-                "%s" % self.ENV_ID[1],
-                "EP_%d" % self.episode_number,
+                f"{self.host}",
+                f"{self.ENV_ID[1]}",
+                f"EP_{self.episode_number}",
             )
 
             filepath_flag_sync = os.path.join(
                 "alya_files",
-                "%s" % self.host,
+                f"{self.host}",
                 "1",
-                "EP_%s" % self.episode_number,
+                f"EP_{self.episode_number}",
                 "flags_MARL",
             )
             action_end_flag_path = os.path.join(
@@ -372,16 +389,16 @@ class Environment(Environment):
                 )
                 casepath = os.path.join(
                     "alya_files",
-                    "%s" % self.host,
-                    "%s" % self.ENV_ID[1],
-                    "EP_%d" % self.episode_number,
+                    f"{self.host}",
+                    f"{self.ENV_ID[1]}",
+                    f"EP_{self.episode_number}",
                 )
                 logsrun = os.path.join(
                     "logs",
                     (
                         "log_last_execute_run.log"
                         if not DEBUG
-                        else "log_execute_run_%d.log" % self.action_count
+                        else f"log_execute_run_{self.action_count}.log"
                     ),
                 )
                 # Run subprocess
@@ -390,7 +407,7 @@ class Environment(Environment):
                     run_subprocess(
                         casepath,
                         ALYA_BIN,
-                        "%s" % self.case,
+                        f"{self.case}",
                         nprocs=nb_proc,
                         oversubscribe=OVERSUBSCRIBE,
                         nodelist=self.nodelist,
@@ -399,7 +416,7 @@ class Environment(Environment):
                     run_subprocess(
                         casepath,
                         ALYA_SETS,
-                        "%s-boundary.nsi.set 3" % self.case,
+                        f"{self.case}-boundary.nsi.set 3",
                         log=logssets,
                     )  # TODO: Boundary hardcoded!!
                 if self.dimension == 3:
@@ -409,7 +426,7 @@ class Environment(Environment):
                     run_subprocess(
                         casepath,
                         ALYA_BIN,
-                        "%s" % self.case,
+                        f"{self.case}",
                         nprocs=nb_proc,
                         mem_per_srun=mem_per_srun,
                         num_nodes_srun=num_nodes_srun,
@@ -419,7 +436,7 @@ class Environment(Environment):
                     run_subprocess(
                         casepath,
                         ALYA_SETS,
-                        "%s-boundary.nsi.set 3" % self.case,
+                        f"{self.case}-boundary.nsi.set 3",
                         log=logssets,
                         preprocess=True,
                     )
@@ -428,7 +445,7 @@ class Environment(Environment):
                 run_subprocess(
                     filepath_flag_sync,
                     "mkdir ",
-                    "action_end_flag_%d" % self.action_count,
+                    f"action_end_flag_{self.action_count}",
                 )  # Create dir? not so elegant I think
 
             else:
@@ -439,25 +456,26 @@ class Environment(Environment):
                     ):
                         if count_wait % 1000 == 0:
                             print(
-                                "Inv: %s is waiting for the action #%s"
-                                % (self.ENV_ID, self.action_count)
+                                f"Inv: {self.ENV_ID} is waiting for the action #{self.action_count}"
                             )
                         time.sleep(0.05)
                         count_wait += 1
 
                 time.sleep(1)
-                print("Actions in %s are sync" % self.ENV_ID)
+                print(f"Actions in {self.ENV_ID} are sync")
 
             cr_stop("ENV.run_actions", 0)
 
     # -----------------------------------------------------------------------------------------------------
     # -----------------------------------------------------------------------------------------------------
 
-    def save_history_parameters(self, nb_actuations, name="output.csv"):
+    def save_history_parameters(
+        self, nb_actuations: int, name: str = "output.csv"
+    ) -> None:
 
         cr_start("ENV.save_cd_cl", 0)
 
-        # Save at the end of every episodes
+        # Save at the end of every episode
         self.episode_drags = np.append(
             self.episode_drags, self.history_parameters["drag"]
         )
@@ -554,7 +572,7 @@ class Environment(Environment):
     # -----------------------------------------------------------------------------------------------------
     # -----------------------------------------------------------------------------------------------------
 
-    def save_this_action(self):
+    def save_this_action(self) -> None:
 
         cr_start("ENV.save_action", 0)
 
@@ -564,39 +582,30 @@ class Environment(Environment):
         if not os.path.exists("actions"):
             os.mkdir("actions")
 
-        if not os.path.exists("actions/{}".format(self.host)):
-            os.mkdir("actions/{}".format(self.host))
+        if not os.path.exists(f"actions/{self.host}"):
+            os.mkdir(f"actions/{self.host}")
+
+        if not os.path.exists(f"actions/{self.host}/{self.ENV_ID[0]}_{self.ENV_ID[1]}"):
+            os.mkdir(f"actions/{self.host}/{self.ENV_ID[0]}_{self.ENV_ID[1]}")
 
         if not os.path.exists(
-            "actions/{}/{}_{}".format(self.host, self.ENV_ID[0], self.ENV_ID[1])
+            f"actions/{self.host}/{self.ENV_ID[0]}_{self.ENV_ID[1]}/ep_{self.episode_number}"
         ):
             os.mkdir(
-                "actions/{}/{}_{}".format(self.host, self.ENV_ID[0], self.ENV_ID[1])
+                f"actions/{self.host}/{self.ENV_ID[0]}_{self.ENV_ID[1]}/ep_{self.episode_number}"
             )
 
-        if not os.path.exists(
-            "actions/{}/{}_{}/ep_{}/".format(
-                self.host, self.ENV_ID[0], self.ENV_ID[1], self.episode_number
-            )
-        ):
-            os.mkdir(
-                "actions/{}/{}_{}/ep_{}/".format(
-                    self.host, self.ENV_ID[0], self.ENV_ID[1], self.episode_number
-                )
-            )
+        path_a = f"actions/{self.host}/{self.ENV_ID[0]}_{self.ENV_ID[1]}/ep_{self.episode_number}/"
 
-        path_a = "actions/{}/{}_{}/ep_{}/".format(
-            self.host, self.ENV_ID[0], self.ENV_ID[1], self.episode_number
-        )
+        action_line = f"{self.action_count}"
 
-        action_line = "{}".format(self.action_count)
         for i in range(self.actions_per_inv):
-            action_line = action_line + "; {}".format(self.action[i])
+            action_line += f"; {self.action[i]}"
 
         if not os.path.exists(path_a + name_a):
             header_line = "Action"
             for i in range(self.actions_per_inv):
-                header_line = header_line + "; Jet_{}".format(i + 1)
+                header_line += f"; Jet_{i + 1}"
 
             with open(path_a + name_a, "w") as csv_file:
                 spam_writer = csv.writer(csv_file, lineterminator="\n")
@@ -614,7 +623,7 @@ class Environment(Environment):
     # -----------------------------------------------------------------------------------------------------
     # -----------------------------------------------------------------------------------------------------
 
-    def save_reward(self, reward):
+    def save_reward(self, reward: float) -> None:
 
         cr_start("ENV.save_reward", 0)
 
@@ -625,30 +634,17 @@ class Environment(Environment):
         if not os.path.exists("rewards"):
             os.mkdir("rewards")
 
-        if not os.path.exists("rewards/{}".format(self.host)):
-            os.mkdir("rewards/{}".format(self.host))
+        if not os.path.exists(f"rewards/{self.host}"):
+            os.mkdir(f"rewards/{self.host}")
 
-        if not os.path.exists(
-            "rewards/{}/{}_{}".format(self.host, self.ENV_ID[0], self.ENV_ID[1])
-        ):
-            os.mkdir(
-                "rewards/{}/{}_{}".format(self.host, self.ENV_ID[0], self.ENV_ID[1])
-            )
+        if not os.path.exists(f"rewards/{self.host}/{self.ENV_ID[0]}_{self.ENV_ID[1]}"):
+            os.mkdir(f"rewards/{self.host}/{self.ENV_ID[0]}_{self.ENV_ID[1]}")
 
-        if not os.path.exists(
-            "rewards/{}/{}_{}/ep_{}/".format(
-                self.host, self.ENV_ID[0], self.ENV_ID[1], self.episode_number
-            )
-        ):
-            os.mkdir(
-                "rewards/{}/{}_{}/ep_{}/".format(
-                    self.host, self.ENV_ID[0], self.ENV_ID[1], self.episode_number
-                )
-            )
+        if not os.path.exists(f"rewards/{self.host}/{self.ENV_ID[0]}_{self.ENV_ID[1]}/ep_{self.episode_number}"):
+            os.mkdir(f"rewards/{self.host}/{self.ENV_ID[0]}_{self.ENV_ID[1]}/ep_{self.episode_number}")
 
-        path_a = "rewards/{}/{}_{}/ep_{}/".format(
-            self.host, self.ENV_ID[0], self.ENV_ID[1], self.episode_number
-        )
+        path_a = f"rewards/{self.host}/{self.ENV_ID[0]}_{self.ENV_ID[1]}/ep_{self.episode_number}/"
+
 
         if not os.path.exists(path_a + name_a):
             with open(path_a + name_a, "w") as csv_file:
@@ -660,6 +656,7 @@ class Environment(Environment):
                 spam_writer = csv.writer(csv_file, delimiter=";", lineterminator="\n")
                 spam_writer.writerow([self.action_count, reward])
 
+
         print("Done.")
 
         cr_stop("ENV.save_reward", 0)
@@ -667,33 +664,22 @@ class Environment(Environment):
     # -----------------------------------------------------------------------------------------------------
     # -----------------------------------------------------------------------------------------------------
 
-    def save_final_reward(self, reward):
+    def save_final_reward(self, reward: float) -> None:
 
-        print(
-            "Saving the last reward from episode {}: ".format(self.episode_number),
-            reward,
-        )
+        print(f"Saving the last reward from episode {self.episode_number}: {reward}")
 
         name_a = "output_final_rewards.csv"
 
         if not os.path.exists("final_rewards"):
             os.mkdir("final_rewards")
 
-        if not os.path.exists("final_rewards/{}".format(self.host)):
-            os.mkdir("final_rewards/{}".format(self.host))
+        if not os.path.exists(f"final_rewards/{self.host}"):
+            os.mkdir(f"final_rewards/{self.host}")
 
-        if not os.path.exists(
-            "final_rewards/{}/{}_{}".format(self.host, self.ENV_ID[0], self.ENV_ID[1])
-        ):
-            os.mkdir(
-                "final_rewards/{}/{}_{}".format(
-                    self.host, self.ENV_ID[0], self.ENV_ID[1]
-                )
-            )
+        if not os.path.exists(f"final_rewards/{self.host}/{self.ENV_ID[0]}_{self.ENV_ID[1]}"):
+            os.mkdir(f"final_rewards/{self.host}/{self.ENV_ID[0]}_{self.ENV_ID[1]}")
 
-        path_a = "final_rewards/{}/{}_{}/".format(
-            self.host, self.ENV_ID[0], self.ENV_ID[1]
-        )
+        path_a = f"final_rewards/{self.host}/{self.ENV_ID[0]}_{self.ENV_ID[1]}/"
 
         if not os.path.exists(path_a + name_a):
             with open(path_a + name_a, "w") as csv_file:
@@ -710,25 +696,25 @@ class Environment(Environment):
     # -----------------------------------------------------------------------------------------------------
     # -----------------------------------------------------------------------------------------------------
 
-    def save_comms_probes(self):  # TODO: This function is not used. May be eliminated
+    def save_comms_probes(self) -> None:  # TODO: This function is not used. May be eliminated
 
-        print("Saving probes inputs: N°", self.action_count)
+        print(f"Saving probes inputs: N° {self.action_count}")
 
         name_a = "output_probes_comms.csv"
 
         if not os.path.exists("probes_comms"):
             os.mkdir("probes_comms")
 
-        if not os.path.exists("probes_comms/ep_{}/".format(self.episode_number)):
-            os.mkdir("probes_comms/ep_{}/".format(self.episode_number))
+        if not os.path.exists(f"probes_comms/ep_{self.episode_number}/"):
+            os.mkdir(f"probes_comms/ep_{self.episode_number}/")
 
-        path_a = "probes_comms/ep_{}/".format(self.episode_number)
+        path_a = f"probes_comms/ep_{self.episode_number}/"
 
         if not os.path.exists(path_a + name_a):
             with open(path_a + name_a, "w") as csv_file:
                 spam_writer = csv.writer(csv_file, delimiter=";", lineterminator="\n")
                 array_acts = np.linspace(1, 24, dtype=int)
-                spam_writer.writerow(["Action", array_acts])  # , "AvgRecircArea"])
+                spam_writer.writerow(["Action", *array_acts])  # Unpack array_acts to write each value separately
                 spam_writer.writerow([self.action_count, self.probes_values])
         else:
             with open(path_a + name_a, "a") as csv_file:
@@ -741,7 +727,7 @@ class Environment(Environment):
     # -----------------------------------------------------------------------------------------------------
 
     ### AQUI DEBEMOS ANULAR EL RECUPERAR EL BASELINE SI YA EXISTE EL QUE TOCA
-    def recover_start(self):
+    def recover_start(self) -> None:
 
         cr_start("ENV.recover_start", 0)
 
@@ -750,7 +736,7 @@ class Environment(Environment):
         # flag to sync the cp times... then the other pseudo can read properly witness
         # path example: /alya_files/environment1/1/EP_1/.
         filepath_flag_sync_cp = os.path.join(
-            runpath, "%s" % self.host, "1", "EP_%d" % self.episode_number
+            runpath, f"{self.host}", "1", f"EP_{self.episode_number}"
         )
 
         # lowcost mode --> CLEAN everytime olderfiles
@@ -761,9 +747,9 @@ class Environment(Environment):
         if not DEBUG and self.episode_number > 0:
             if not self.bool_restart_prevEP:
                 runbin = "rm -rf"
-                runargs = os.path.join("%s" % self.host, "%s" % self.ENV_ID[1], "EP_*")
+                runargs = os.path.join(f"{self.host}", f"{self.ENV_ID[1]}", "EP_*")
                 # avoid checks in deterministic
-                if self.deterministic == False:
+                if not self.deterministic:
                     run_subprocess(runpath, runbin, runargs)
 
         if self.bool_restart_prevEP and self.episode_number > 1:
@@ -771,13 +757,13 @@ class Environment(Environment):
             # runargs = '%s %s' %(os.path.join('%s'%self.host,'%s'%self.ENV_ID[1],'EP_*'),os.path.join('%s'%self.host,'%s'%self.ENV_ID[1],'EP_%d'%self.episode_number))
         else:
             runbin = "cp -r"
-            runargs = "baseline %s" % os.path.join(
-                "%s" % self.host, "%s" % self.ENV_ID[1], "EP_%d" % self.episode_number
+            runargs = "baseline " + os.path.join(
+                f"{self.host}", f"{self.ENV_ID[1]}", f"EP_{self.episode_number}"
             )
             logs = os.path.join(
                 "baseline",
                 "logs",
-                "log_restore_last_episode_%d.log" % self.episode_number,
+                f"log_restore_last_episode_{self.episode_number}.log"
             )
             run_subprocess(runpath, runbin, runargs, log=logs)
 
@@ -796,33 +782,30 @@ class Environment(Environment):
     # --------------------------------------------------------------------------
 
     # create folder for each cpu id in parallel and folder per invariants inside
-    def create_cpuID(self):
+    def create_cpuID(self) -> None:
         runpath = "alya_files"
         runbin = "mkdir -p"
         # if self.deterministic == False:
-        runargs = "%s" % self.host
-        runpath2 = "alya_files/%s" % self.host
+        runargs = f"{self.host}"
+        runpath2 = f"alya_files/{self.host}"
         run_subprocess(runpath, runbin, runargs)
 
         for inv_i in range(1, self.nz_Qs + 1):
-            runargs2 = "%s" % inv_i
+            runargs2 = f"{inv_i}"
             run_subprocess(runpath2, runbin, runargs2)
 
         # Write the nodes running this environmment
         name = "nodes"
-        if not os.path.exists(
-            "alya_files/{}/{}/".format(self.host, self.ENV_ID[1]) + name
-        ):
-            with open(
-                "alya_files/{}/{}/".format(self.host, self.ENV_ID[1]) + name, "w"
-            ) as csv_file:
+        node_path = f"alya_files/{self.host}/{self.ENV_ID[1]}/{name}"
+
+        if not os.path.exists(node_path):
+            with open(node_path, "w") as csv_file:
                 spam_writer = csv.writer(csv_file, delimiter=";", lineterminator="\n")
                 spam_writer.writerow(["Nodes in this learning"])
                 spam_writer.writerow(self.nodelist)
+
         else:
-            with open(
-                "alya_files/{}/{}/".format(self.host, self.ENV_ID[1]) + name, "a"
-            ) as csv_file:
+            with open(node_path, "a") as csv_file:
                 spam_writer = csv.writer(csv_file, delimiter=";", lineterminator="\n")
                 spam_writer.writerow(["Nodes in this learning"])
                 spam_writer.writerow(self.nodelist)
@@ -830,17 +813,17 @@ class Environment(Environment):
         #    runargs = 'deterministic'
         #    run_subprocess(runpath,runbin,runargs,check_return=False)
 
-        print("Folder created for CPU ID: %s/%s" % (self.host, self.ENV_ID[1]))
+        print(f"Folder created for CPU ID: {self.host}/{self.ENV_ID[1]}")
 
     # Optional
-    def close(self):
+    def close(self) -> None:
         super().close()
 
     # -----------------------------------------------------------------------------------------------------
     # -----------------------------------------------------------------------------------------------------
     ## Default function required for the DRL
 
-    def list_observation(self):
+    def list_observation(self) -> np.ndarray:
 
         if not self.neighbor_state:
             # TODO: filter this observation state to each invariant and its neighbours:
@@ -899,7 +882,7 @@ class Environment(Environment):
 
         return probes_values_2
 
-    def states(self):
+    def states(self) -> Dict[str, Any]:
 
         if not self.neighbor_state:
             state_size = int(len(self.output_params["locations"]) / self.nb_inv_per_CFD)
@@ -915,7 +898,7 @@ class Environment(Environment):
     # -----------------------------------------------------------------------------------------------------
     # -----------------------------------------------------------------------------------------------------
 
-    def actions(self):
+    def actions(self) -> Dict[str, Any]:
         """Action is a list of n_jets-1 capped values of Q"""
         """UPDATE --> now with multiple Q per jet slot --> use nz_Qs"""
         """UPDATE 2 --> NOW WITH MARL --> ACTIONS_PER_INV = 1"""
@@ -930,7 +913,7 @@ class Environment(Environment):
     # -----------------------------------------------------------------------------------------------------
     # -----------------------------------------------------------------------------------------------------
 
-    def reset(self):
+    def reset(self) -> np.ndarray:
 
         if self.ENV_ID[1] != 1:
             time.sleep(4)
@@ -949,7 +932,7 @@ class Environment(Environment):
         # Clean
         print("\n\nLocation: Reset")
         print(
-            "Action: start to set up the case, set the initial conditions and clean the action counter"
+            "Action: start to set up the case, set the initial conditions and clean the action counter\n"
         )
         self.clean(False)
 
@@ -966,23 +949,23 @@ class Environment(Environment):
         if self.bool_restart_prevEP and self.episode_number > 1:
             t2 = detect_last_timeinterval(
                 os.path.join(
-                    "alya_files", "%s" % self.host, "1", "EP_*", "time_interval.dat"
+                    "alya_files", f"{self.host}", "1", "EP_*", "time_interval.dat"
                 )
             )
             print(
                 "POOOOOOOL PATH:",
                 os.path.join(
                     "alya_files",
-                    "%s" % self.host,
+                    f"{self.host}",
                     "1",
-                    "EP_%d" % (self.episode_number),
+                    f"EP_{self.episode_number}",
                     "time_interval.dat",
                 ),
             )
         else:
             t2 = self.simulation_timeframe[1]
         self.simulation_timeframe = [t1, t2]
-        print("The actual timeframe is between {} and {}: ".format(t1, t2))
+        print(f"The actual timeframe is between {t1} and {t2}: ")
 
         # Copy the baseline in the environment directory
 
@@ -993,15 +976,15 @@ class Environment(Environment):
             write_time_interval(
                 os.path.join(
                     "alya_files",
-                    "%s" % self.host,
-                    "%s" % self.ENV_ID[1],
-                    "EP_%d" % self.episode_number,
+                    f"{self.host}",
+                    f"{self.ENV_ID[1]}",
+                    f"EP_{self.episode_number}",
                 ),
                 t1,
                 t2,
             )
 
-        print("Actual episode: {}".format(self.episode_number))
+        print(f"Actual episode: {self.episode_number}")
         print("\n\Action: extract the probes")
         NWIT_TO_READ = 1  # Read n timesteps from witness file from behind, last instant
 
@@ -1010,16 +993,16 @@ class Environment(Environment):
         # filename     = os.path.join('alya_files','%s'%self.host,'%s'%self.ENV_ID[1],'EP_%d'%self.episode_number,'%s.nsi.wit'%self.case)
         filename = os.path.join(
             "alya_files",
-            "%s" % self.host,
+            f"{self.host}",
             "1",
-            "EP_%d" % self.episode_number,
-            "%s.nsi.wit" % self.case,
+            f"EP_{self.episode_number}",
+            f"{self.case}.nsi.wit",
         )
         filepath_flag_sync_cp = os.path.join(
             "alya_files",
-            "%s" % self.host,
+            f"{self.host}",
             "1",
-            "EP_%d" % self.episode_number,
+            f"EP_{self.episode_number}",
             "flags_MARL",
         )
 
@@ -1037,10 +1020,10 @@ class Environment(Environment):
         NWIT_TO_READ = 1
         filename = os.path.join(
             "alya_files",
-            "%s" % self.host,
+            f"{self.host}",
             "1",
-            "EP_%d" % self.episode_number,
-            "%s.nsi.wit" % self.case,
+            f"EP_{self.episode_number}",
+            f"{self.case}.nsi.wit",
         )
 
         # read witness file and extract the entire array list
@@ -1057,7 +1040,8 @@ class Environment(Environment):
         return probes_values_2
 
     # -----------------------------------------------------------------------------------------------------
-    def execute(self, actions: List[float]) -> Tuple[list[float], bool, float]:
+    # TODO: figure our where the actions in `execute` argument are coming from @pietero
+    def execute(self, actions: Dict[float]) -> Tuple[np.ndarray, bool, float]:
 
         action = []
         for i in range(self.actions_per_inv):
@@ -1076,20 +1060,20 @@ class Environment(Environment):
         self.save_this_action()
 
         print(
-            "New flux computed for INV: %s  :\n\tQs : %s" % (self.ENV_ID, self.action)
+            f"New flux computed for INV: {self.ENV_ID}  :\n\tQs : {self.action}"
         )
 
         dir_name = os.path.join(
             "alya_files",
-            "%s" % self.host,
+            f"{self.host}",
             "1",
-            "EP_%s" % self.episode_number,
+            f"EP_{self.episode_number}",
             "flags_MARL",
         )
         run_subprocess(
             dir_name,
             "mkdir",
-            "%d_inv_action_%d_ready" % (self.ENV_ID[1], self.action_count),
+            f"{self.ENV_ID[1]}_inv_action_{self.action_count}_ready",
         )
 
         self.last_time = self.simulation_timeframe[1]
@@ -1152,9 +1136,9 @@ class Environment(Environment):
             write_time_interval(
                 os.path.join(
                     "alya_files",
-                    "%s" % self.host,
-                    "%s" % self.ENV_ID[1],
-                    "EP_%d" % self.episode_number,
+                    f"{self.host}",
+                    f"{self.ENV_ID[1]}",
+                    f"EP_{self.episode_number}",
                 ),
                 t1,
                 t2,
@@ -1162,9 +1146,9 @@ class Environment(Environment):
 
             simu_path = os.path.join(
                 "alya_files",
-                "%s" % self.host,
-                "%s" % self.ENV_ID[1],
-                "EP_%d" % self.episode_number,
+                f"{self.host}",
+                f"{self.ENV_ID[1]}",
+                f"EP_{self.episode_number}",
             )
 
             if self.case == "cylinder":
@@ -1202,6 +1186,14 @@ class Environment(Environment):
                     # Update the jet profile alya file
                     jet.update_file(simu_path)
 
+            elif self.case == "channel":
+                for ijet, jet in enumerate(
+                    self.Jets.values()
+                ):
+                    jet.update(
+
+                    )
+
             cr_stop("ENV.actions_MASTER_thread1", 0)
 
         # Start an alya run
@@ -1238,9 +1230,9 @@ class Environment(Environment):
         # Compute the reward
         reward = self.compute_reward()
         self.save_reward(reward)
-        print("reward: {}".format(reward))
+        print(f"reward: {reward}")
 
-        print("The actual action is {} of {}".format(self.action_count, nb_actuations))
+        print(f"The actual action is {self.action_count} of {nb_actuations}")
 
         self.action_count += 1
 
@@ -1258,12 +1250,10 @@ class Environment(Environment):
             self.save_final_reward(reward)
 
             print(
-                "Actual episode: {} is finished and saved".format(self.episode_number)
+                f"Actual episode: {self.episode_number} is finished and saved"
             )
             print(
-                "Results : \n\tAverage drag : {}\n\tAverage lift : {}".format(
-                    average_drag, average_lift
-                )
+                f"Results : \n\tAverage drag : {average_drag}\n\tAverage lift : {average_lift}"
             )
 
         print("\n\Action : extract the probes")
@@ -1272,13 +1262,15 @@ class Environment(Environment):
         NWIT_TO_READ = 1
         filename = os.path.join(
             "alya_files",
-            "%s" % self.host,
+            f"{self.host}",
             "1",
-            "EP_%d" % self.episode_number,
-            "%s.nsi.wit" % self.case,
+            f"EP_{self.episode_number}",
+            f"{self.case}.nsi.wit",
         )
 
-        if self.case == "cylinder":     # TODO: check if only cylinder or can be channel too
+        if (
+            self.case == "cylinder"
+        ):  # TODO: check if only cylinder or can be channel too
             # read witness file and extract the entire array list
             self.probes_values_global = read_last_wit(
                 filename,
@@ -1294,7 +1286,7 @@ class Environment(Environment):
 
     # -----------------------------------------------------------------------------------------------------
 
-    def compute_reward(self):
+    def compute_reward(self) -> float:
         # NOTE: reward should be computed over the whole number of iterations in each execute loop
         if (
             self.reward_function == "plain_drag"
@@ -1374,8 +1366,6 @@ class Environment(Environment):
                 avg_lift / avg_drag + self.optimization_params["offset_reward"]
             )
 
-        elif (
-            self.reward_function == "q_event_volume"
-        ):
+        elif self.reward_function == "q_event_volume":
             # TODO: implement q-event volume reward function @pietero
             pass

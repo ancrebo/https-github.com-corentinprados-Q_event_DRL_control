@@ -7,6 +7,8 @@
 from __future__ import print_function, division
 
 import os, subprocess
+from typing import Union, List
+import numpy as np
 
 from configuration import ALYA_GMSH, ALYA_INCON
 from env_utils import run_subprocess
@@ -35,7 +37,7 @@ def run_mesh(runpath, casename, ndim, ini_vel=["0", "0", "0"]):
 ### Functions to write ALYA configuration files ###
 
 
-def write_case_file(filepath, casename, simu_name):
+def write_case_file(filepath: str, casename: str, simu_name: str) -> None:
     """
     Writes the casename.dat file
     """
@@ -79,7 +81,7 @@ $-------------------------------------------------------------------"""
     file.close()
 
 
-def write_run_type(filepath, type, freq=1):
+def write_run_type(filepath: str, type: str, freq: int = 1) -> None:
     """
     Writes the run type file that is included in the .dat
     """
@@ -89,7 +91,7 @@ def write_run_type(filepath, type, freq=1):
     file.close()
 
 
-def write_time_interval(filepath, start_time, end_time):
+def write_time_interval(filepath: str, start_time: float, end_time: float) -> None:
     """
     Writes the time interval file that is included in the .dat
     """
@@ -99,7 +101,7 @@ def write_time_interval(filepath, start_time, end_time):
     file.close()
 
 
-def detect_last_timeinterval(filename):
+def detect_last_timeinterval(filename: str) -> Union[float, None]:
     # Open the file in read mode
     with open(filename, "r") as file:
         # Read all lines from the file
@@ -125,7 +127,7 @@ def detect_last_timeinterval(filename):
     return None
 
 
-def write_dom_file(filepath, casename, ncpus):
+def write_dom_file(filepath: str, casename: str, ncpus: int) -> None:
     """
     Write the case_name.dom.dat
     """
@@ -163,8 +165,10 @@ $-------------------------------------------------------------"""
     file.close()
 
 
-def write_ker_file(filepath, casename, jetlist, steps, postprocess=[]):
+def write_ker_file(filepath: str, casename: str, jetlist: List[str], steps: int, postprocess: List[str] = []) -> None:
     """
+    THIS FUNCTION IS CURRENTLY UNUSED as of July 10, 2024
+
     Write the casename.ker.dat
 
     postprocess can include CODNO, MASSM, COMMU, EXNOR
@@ -219,7 +223,7 @@ $------------------------------------------------------------"""
     file.close()
 
 
-def write_physical_properties(filepath, rho, mu):
+def write_physical_properties(filepath: str, rho: float, mu: float) -> None:
     """
     Writes the physical properties file that is included in the .ker.dat
     """
@@ -232,7 +236,7 @@ def write_physical_properties(filepath, rho, mu):
     file.close()
 
 
-def write_inflow_file(filepath, functions):
+def write_inflow_file(filepath: str, functions: List[str]) -> None:
     """
     Writes the inflow file that is included in the .ker.dat
     """
@@ -245,7 +249,7 @@ def write_inflow_file(filepath, functions):
     file.close()
 
 
-def write_jet_file(filepath, name, functions):
+def write_jet_file(filepath: str, name: str, functions: List[str]) -> None:
     """
     Writes the inflow file that is included in the .ker.dat
     """
@@ -258,7 +262,7 @@ def write_jet_file(filepath, name, functions):
     file.close()
 
 
-def write_witness_file(filepath, probes_positions):
+def write_witness_file(filepath: str, probes_positions: np.ndarray) -> None:
     """
     Writes the witness file that is included in the .ker.dat
     """
@@ -281,11 +285,11 @@ def write_witness_file(filepath, probes_positions):
 
 
 def write_nsi_file(
-    filepath,
-    casename,
-    varlist=["VELOC", "PRESS"],
-    witlist=["VELOX", "VELOY", "VELOZ", "PRESS"],
-):
+    filepath: str,
+    casename: str,
+    varlist: List[str] = ["VELOC", "PRESS"],
+    witlist: List[str] = ["VELOX", "VELOY", "VELOZ", "PRESS"],
+) -> None:
     """
     Write the casename.nsi.dat
 

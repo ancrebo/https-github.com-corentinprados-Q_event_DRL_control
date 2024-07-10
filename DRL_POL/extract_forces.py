@@ -540,7 +540,7 @@ def _avNrms(
         )
 
 
-def compute_avg_lift_drag(ep_num, cpuid="", nb_inv=-1, global_rew=False):
+def compute_avg_lift_drag(ep_num: int, cpuid: str ="", nb_inv: int =-1, global_rew: bool =False) -> Tuple[float, float]:
 
     (
         filename,
