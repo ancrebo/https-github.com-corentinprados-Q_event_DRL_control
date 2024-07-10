@@ -759,7 +759,7 @@ class Environment(Environment):
         if not DEBUG and self.episode_number > 0:
             if not self.bool_restart_prevEP:
                 runbin = "rm -rf"
-                runargs = os.path.join("%s" % self.host, "%s" % self.ENV_ID[1], "EP_*")
+                runargs = os.path.join("%s" % self.host, "%s" % self.ENV_ID[1], "EP_%d" % self.episode_number)
                 # avoid checks in deterministic
                 if self.deterministic == False:
                     run_subprocess(runpath, runbin, runargs)

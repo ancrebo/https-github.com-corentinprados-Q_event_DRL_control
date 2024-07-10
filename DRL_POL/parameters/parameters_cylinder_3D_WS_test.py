@@ -41,7 +41,7 @@ neighbor_state = False
 ### RUN BASELINE ****************************************
 
 run_baseline = False
-bool_restart = True
+bool_restart = False
 
 ### **********************************************************
 ### DOMAIN BOX ***********************************************
@@ -84,7 +84,7 @@ mem_per_srun = mem_per_node
 
 num_episodes = 2000  # Total number of episodes
 if Re_case != 5:
-    nb_actuations = 120  # Number of actuation of the neural network for each episode
+    nb_actuations = 2  # Number of actuation of the neural network for each episode
 else:
     nb_actuations = 150  # TODO: debugging! (i estimate 200... OJO! for N6 150 is in the limit for 24h :( ))
 
