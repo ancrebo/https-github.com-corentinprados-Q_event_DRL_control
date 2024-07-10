@@ -13,12 +13,13 @@
 # TODO: clean up commented cylinder code @pietero
 
 from __future__ import print_function, division
+from typing import List, Tuple
 
 import numpy as np
 import math
 import os
 
-from jets import build_jets, JetCylinder
+from jets import build_jets, JetChannel
 
 ### CASE NAME ************************************************
 
@@ -210,18 +211,30 @@ norm_Q = 0.176  # (0.088/2)/5 asa said in papers, limited Q for no momentum or d
 # location jet over the cylinder 0 is top centre
 jet_angle = 0
 
-nz_Qs = nb_inv_per_CFD  ## DEBUG param --> define how many Qs to control in the span (needs to define Q profile)
+nz_Qs: int = 2  # number of agents along z direction # TODO: is this really where we want to define agents along x and z??? @pietero
+nx_Qs: int = 2  # number of agents along x direction
 
 ## it will place many slices of witness as Qs locations we have
 
-Qs_position_z = []
-for nq in range(nz_Qs):
-    Qs_position_z.append((Lz / (nz_Qs)) * (0.5 + nq))
-print("Jets are placed in Z coordinates: ", Qs_position_z)
-
-delta_Q_z = Lz / (nz_Qs)
 
 
+
+delta_Q_z: float = Lz / nz_Qs
+delta_Q_x: float = Lx / nx_Qs
+
+Qs_position_z: np.ndarray = np.linspace(delta_Q_z / 2, Lz - delta_Q_z / 2, nz_Qs)
+Qs_position_x: np.ndarray = np.linspace(delta_Q_x / 2, Lx - delta_Q_x / 2, nx_Qs)
+
+jet_coordinates: np.ndarray = np.array([(x, z) for x in Qs_position_x for z in Qs_position_z]).reshape(nx_Qs, nz_Qs, 2)
+
+print("Jets are placed in the following X, Z coordinates with their indices:\n")
+for i in range(nx_Qs):
+    for j in range(nz_Qs):
+        x, z = jet_coordinates[i, j]
+        print(f"Agent ({i}, {j}): X: {x:.2f}, Z: {z:.2f}")
+
+
+# TODO: Update for channel parameters!! @canordq
 jets_definition = {
     "JET_TOP": {
         "width": 10,

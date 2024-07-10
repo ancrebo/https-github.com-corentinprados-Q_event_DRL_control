@@ -8,11 +8,13 @@
 # 07/07/2022
 from __future__ import print_function, division
 
+from typing import Tuple, TextIO, Dict, Union
+
 import os, numpy as np
 from cr import cr_start, cr_stop
 
 
-def readWitnessHeader(file):
+def readWitnessHeader(file: TextIO) -> Dict[str, Union[int, Dict[str, int]]]:
     """
     Reads a header line by line from an ALYA witness file.
     File needs to be previouly opened.
@@ -49,7 +51,7 @@ def readWitnessHeader(file):
     return header
 
 
-def readWitnessInstant(file, nwit):
+def readWitnessInstant(file: TextIO, nwit: int) -> Tuple[int, float, np.ndarray]:
     """
     Reads an instant from an ALYA witness file.
     Cursor should be already positioned at the start of the instant
@@ -66,7 +68,7 @@ def readWitnessInstant(file, nwit):
     return it, time, data
 
 
-def witnessReadNByFront(filename, n):  # TODO: this function is not used
+def witnessReadNByFront(filename: str, n: int) -> Tuple[np.ndarray, np.ndarray, Dict[str, np.ndarray]]:  # TODO: this function is not used
     """
     Reads N instants starting from the top of the witness file.
     """
@@ -96,9 +98,9 @@ def witnessReadNByFront(filename, n):  # TODO: this function is not used
     return iter, time, data
 
 
-def witnessReadNByBehind(filename, n):
+def witnessReadNByBehind(filename: str, n: int) -> Tuple[np.ndarray, np.ndarray, Dict[str, np.ndarray]]:
     """
-    Reads N instants starting from the top of the witness file.
+    Reads N instants starting from the bottom of the witness file.
     """
     # Open file for reading
     file = open(filename, "r")
@@ -141,7 +143,7 @@ def witnessReadNByBehind(filename, n):
     return iter, time, data
 
 
-def read_last_wit(filename, probe_type, norm, n_to_read=1):
+def read_last_wit(filename: str, probe_type: str, norm: float, n_to_read: int = 1) -> np.ndarray:
     """
     function that skips all the data from the entire time domain and gives the last value from nsi.wit
     expected increase the IO time extracting probes to send, restart are so much quicker
@@ -158,10 +160,11 @@ def read_last_wit(filename, probe_type, norm, n_to_read=1):
     if probe_type == "pressure":
         var = "PRESS"
     if probe_type == "velocity":
-        var = "VELOX"
+        var = "VELOX"   # TODO: check if this needs to include all the components @pietero
 
     if var is None:
-        raise ValueError("Crash very hard!")  # TODO: Do crash very hard
+        raise ValueError("Invalid probe_type: must be 'pressure' or 'velocity'")
+        # raise ValueError("Crash very hard!")  # TODO: Do crash very hard
 
     # If we have more than one instant, average them
     if n_to_read > 1:

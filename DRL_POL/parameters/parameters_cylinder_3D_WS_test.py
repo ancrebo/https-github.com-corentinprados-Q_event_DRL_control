@@ -13,21 +13,22 @@ from __future__ import print_function, division
 import numpy as np
 import math
 import os
+from typing import List, Dict, Any, Tuple, Union
 
 from jets import build_jets, JetCylinder
 
 ### CASE NAME ************************************************
 
-case = "cylinder"
-simu_name = "3DCyl"
-dimension = 3
-reward_function = (
+case: str = "cylinder"
+simu_name: str = "3DCyl"
+dimension: int = 3
+reward_function: str = (
     "drag_plain_lift"  # at this moment, the only one used and parametrized
 )
 
-Re_case = 0
-slices_probes_per_jet = 3
-neighbor_state = False
+Re_case: int = 0
+slices_probes_per_jet: int = 3
+neighbor_state: bool = False
 
 #### Reynolds cases
 #### 0 --> Re = 100
@@ -40,55 +41,55 @@ neighbor_state = False
 ### *****************************************************
 ### RUN BASELINE ****************************************
 
-run_baseline = False
-bool_restart = False
+run_baseline: bool = False
+bool_restart: bool = False
 
 ### **********************************************************
 ### DOMAIN BOX ***********************************************
 
-radius = 0.5  # cylinder_radius
-D = 2 * radius
-length = 40 * D
-width = 25 * D
+radius: float = 0.5  # cylinder_radius
+D: float = 2 * radius
+length: float = 40 * D
+width: float = 25 * D
 if Re_case != 5:
-    Lz = 4 * D
+    Lz: float = 4 * D
 else:
-    Lz = np.pi * D
+    Lz: float = np.pi * D
 
-cylinder_coordinates = [width * 0.25, width * 0.5, 0.0]
-xkarman = 3 * int(2 * cylinder_coordinates[0])
+cylinder_coordinates: List[float] = [width * 0.25, width * 0.5, 0.0]
+xkarman: float = 3 * int(2 * cylinder_coordinates[0])
 
-Parabolic_max_velocity = 1.5
+Parabolic_max_velocity: float = 1.5
 
 ### **********************************************************
 ### MULTI-ENVIRONMENT SETUP FOR DARDEL **********************************
 
-num_nodes_srun = 24
+num_nodes_srun: int = 24
 # nb_proc = 100 * num_nodes_srun  # Number of calculation processors
-nb_proc = 18 # Local??
+nb_proc: int = 18   # Local??
 # num_servers = 6  # number of environment in parallel
-num_servers = 1 # Local??
+num_servers: int = 1    # Local??
 
 # proc_per_node = 128
-proc_per_node = 32 # Local??
+proc_per_node: int = 32 # Local??
 # proc_per_node = int(os.getenv('SLURM_NTASKS_PER_NODE'))*int(os.getenv('SLURM_CPUS_PER_TASK'))
 
-mem_per_node = 210000  # MB RAM in each node
+mem_per_node: int = 210000  # MB RAM in each node
 # mem_per_node   = int(os.getenv('SLURM_MEM_PER_NODE'))
 
-mem_per_cpu = mem_per_node // proc_per_node
+mem_per_cpu: int = mem_per_node // proc_per_node
 # mem_per_cpu   = int(os.getenv('SLURM_MEM_PER_CPU'))
 
 # mem_per_srun  = int(nb_proc*mem_per_cpu) # partition in memory allocation
-mem_per_srun = mem_per_node
+mem_per_srun: int = mem_per_node
 
-num_episodes = 2000  # Total number of episodes
+num_episodes: int = 2000  # Total number of episodes
 if Re_case != 5:
-    nb_actuations = 2  # Number of actuation of the neural network for each episode
+    nb_actuations: int = 2  # Number of actuation of the neural network for each episode
 else:
-    nb_actuations = 150  # TODO: debugging! (i estimate 200... OJO! for N6 150 is in the limit for 24h :( ))
+    nb_actuations: int = 150  # TODO: debugging! (i estimate 200... OJO! for N6 150 is in the limit for 24h :( ))
 
-nb_actuations_deterministic = nb_actuations * 10
+nb_actuations_deterministic: int = nb_actuations * 10
 
 ### **********************************************************
 ### MULTI-ENVIRONMENT SETUP FOR WORKSTATIONS **********************************
@@ -99,55 +100,55 @@ nb_actuations_deterministic = nb_actuations * 10
 
 ### *****************************************************
 ### RUN BASELINE ****************************************
-use_MARL = True
+use_MARL: bool = True
 
 # inv = invariant
 
-nb_inv_per_CFD = 10  # same as nz_Qs¿¿¿
-actions_per_inv = 1  # how many actions to control per pseudoenvironment
-batch_size = nb_inv_per_CFD * num_servers
-frontal_area = Lz / nb_inv_per_CFD
+nb_inv_per_CFD: int = 10  # same as nz_Qs¿¿¿
+actions_per_inv: int = 1  # how many actions to control per pseudoenvironment
+batch_size: int = nb_inv_per_CFD * num_servers
+frontal_area: float = Lz / nb_inv_per_CFD
 
 if num_servers == 1 and not use_MARL:
-    sync_episodes = False
+    sync_episodes: bool = False
 else:
-    sync_episodes = True
+    sync_episodes: bool = True
 
 
 ### *****************************************************
 ### TIMESCALES ******************************************
 
-baseline_duration = 5.003E+00  # to converge with velocity max = 1 (CHANGE THIS TO SAME AS TEST BASELINE DURATION)
-baseline_time_start = 0.0
+baseline_duration: float = 5.003E+00  # to converge with velocity max = 1 (CHANGE THIS TO SAME AS TEST BASELINE DURATION)
+baseline_time_start: float = 0.0
 
-delta_t_smooth = 0.25  # ACTION DURATION smooth law duration
-delta_t_converge = 0.0  # Total time that the DRL waits before executing a new action
-smooth_func = (
+delta_t_smooth: float = 0.25  # ACTION DURATION smooth law duration
+delta_t_converge: float = 0.0  # Total time that the DRL waits before executing a new action
+smooth_func: str = (
     "EXPONENTIAL"  # 'LINEAR', 'EXPONENTIAL', 'CUBIC' (# TODO: cubic is still not coded)
 )
-short_spacetime_func = False  # override smooth func --> TODO: need to fix string size --> FIXED in def_kintyp_functions.f90 (waiting for merging)
+short_spacetime_func: bool = False  # override smooth func --> TODO: need to fix string size --> FIXED in def_kintyp_functions.f90 (waiting for merging)
 
 ### *****************************************************
 ### FLUID PROPERTIES ************************************
 
-mu_list = [10e-3, 50e-4, 33e-4, 25e-4, 10e-4, 0.00025641025]
-mu = mu_list[Re_case]
-rho = 1.0
+mu_list: List[float] = [10e-3, 50e-4, 33e-4, 25e-4, 10e-4, 0.00025641025]
+mu: float = mu_list[Re_case]
+rho: float = 1.0
 
 ### *****************************************************
 ### POSTPROCESS OPTIONS *********************************
 
 
-norm_reward = 5  # like PRESS, try to be between -1,1
-penal_cl = 0.6  # avoid asymmetrical strategies
-alpha_rew = 0.80  # balance between global and local reward
-norm_press = 2.0
+norm_reward: float = 5  # like PRESS, try to be between -1,1
+penal_cl: float = 0.6  # avoid asymmetrical strategies
+alpha_rew: float = 0.80  # balance between global and local reward
+norm_press: float = 2.0
 if Re_case != 5:
-    time_avg = 5.00
+    time_avg: float = 5.00
 else:
-    time_avg = 5.65  # 5.65 #corresponds to the last Tk (avg Cd Cl, not witness)
-post_process_steps = 50  # TODO: put this into a include
-offset_reward_list = [
+    time_avg: float = 5.65  # 5.65 #corresponds to the last Tk (avg Cd Cl, not witness)
+post_process_steps: int = 50  # TODO: put this into a include
+offset_reward_list: List[float] = [
     1.381,
     1.374,
     1.325,
@@ -155,29 +156,32 @@ offset_reward_list = [
     1.079,
     1.05,
 ]  # for re3900, still working on it
-offset_reward = offset_reward_list[Re_case]
+offset_reward: float = offset_reward_list[Re_case]
 
 ### *****************************************************
 ### JET SETUP *******************************************
 
-norm_Q = 0.176  # (0.088/2)/5 asa said in papers, limited Q for no momentum or discontinuities in the CFD solver
+norm_Q: float = 0.176  # (0.088/2)/5 asa said in papers, limited Q for no momentum or discontinuities in the CFD solver
 
 # location jet over the cylinder 0 is top centre
-jet_angle = 0
+jet_angle: float = 0
 
-nz_Qs = nb_inv_per_CFD  ## DEBUG param --> define how many Qs to control in the span (needs to define Q profile)
+nz_Qs: int = nb_inv_per_CFD  ## DEBUG param --> define how many Qs to control in the span (needs to define Q profile)
 
 ## it will place many slices of witness as Qs locations we have
 
-Qs_position_z = []
+Qs_position_z: List[float] = []
+delta_Q_z: float = Lz / (nz_Qs)
+
 for nq in range(nz_Qs):
-    Qs_position_z.append((Lz / (nz_Qs)) * (0.5 + nq))
+    Qs_position_z.append(delta_Q_z * (0.5 + nq))
+
 print("Jets are placed in Z coordinates: ", Qs_position_z)
 
-delta_Q_z = Lz / (nz_Qs)
 
 
-jets_definition = {
+# TODO: Update `jets_definition` for channel case instead of cylinder case @canordq
+jets_definition: Dict[str, Union[Dict[str, Union[int, float, list[float], bool]], Dict[str, Union[int, float, list[float], bool]]]] = {
     "JET_TOP": {
         "width": 10,
         "radius": radius,
@@ -198,9 +202,10 @@ jets_definition = {
     },
 }
 
+
 # Build the jets
-jets = build_jets(JetCylinder, jets_definition, delta_t_smooth)
-n_jets = len(jets)
+jets: Dict[str, Any] = build_jets(JetCylinder, jets_definition, delta_t_smooth)
+n_jets: int = len(jets)
 
 geometry_params = (
     {  # Kept for legacy purposes but to be deleted when reworking the mesh script

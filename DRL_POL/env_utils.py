@@ -5,34 +5,35 @@
 # Pol Suarez, Arnau Miro, Francisco Alcantara, Xavi Garcia
 # 01/02/2023
 from __future__ import print_function, division
+from typing import Optional
 
 import os, subprocess
 from configuration import NODELIST, USE_SLURM, DEBUG
 
 
 def run_subprocess(
-    runpath,
-    runbin,
-    runargs,
-    parallel=False,
-    log=None,
-    check_return=True,
-    host=None,
+    runpath: str,
+    runbin: str,
+    runargs: str,
+    parallel: bool = False,
+    log: Optional[str] = None,
+    check_return: bool = True,
+    host: Optional[str] = None,
     **kwargs
-):
+) -> int:
     """
     Use python to call a terminal command
     """
 
     # Auxilar function to build parallel command
-    def _cmd_parallel(runbin, **kwargs):
+    def _cmd_parallel(runbin: str, **kwargs) -> str:
         """
         Build the command to run in parallel
         """
-        nprocs = kwargs.get("nprocs", 1)
-        mem_per_srun = kwargs.get("mem_per_srun", 1)
-        num_nodes_srun = kwargs.get("num_nodes_srun", 1)
-        slurm = kwargs.get("slurm", USE_SLURM)
+        nprocs: int = kwargs.get("nprocs", 1)
+        mem_per_srun: int = kwargs.get("mem_per_srun", 1)
+        num_nodes_srun: int = kwargs.get("num_nodes_srun", 1)
+        slurm: bool = kwargs.get("slurm", USE_SLURM)
 
         # Switch to run srun or mpirun
         arg_hosts = ""
