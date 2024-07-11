@@ -360,18 +360,18 @@ class JetCylinder(Jet):
 
             # create the new Q string
             string_heav = heav_func(Qs_position_z[0], delta_Q_z)
-            string_all_Q_pre = f"{string_heav}{Q_pre[0]:.4f}"
+            string_all_Q_pre = f"{string_heav}*({Q_pre[0]:.4f})"
             # string_all_Q_pre = "%s*(%.4f)" % (string_heav, Q_pre[0])
-            string_all_Q_new = f"{string_heav}{Q_new[0]:.4f}"
+            string_all_Q_new = f"{string_heav}*({Q_new[0]:.4f})"
             # string_all_Q_new = "%s*(%.4f)" % (string_heav, Q_new[0])
 
             for i in range(1, self.nb_inv_per_CFD):
                 string_heav = heav_func(Qs_position_z[i], delta_Q_z)
-                string_all_Q_pre += f"+ {string_heav}{Q_pre[i]:.4f}"
+                string_all_Q_pre += f"+ {string_heav}*({Q_pre[i]:.4f})"
                 # string_all_Q_pre += "+ %s*(%.4f)" % (string_heav, Q_pre[i])
-                string_all_Q_new += f"+ {string_heav}{Q_new[i]:.4f}"
+                string_all_Q_new += f"+ {string_heav}*({Q_new[i]:.4f})"
                 # string_all_Q_new += "+ %s*(%.4f)" % (string_heav, Q_new[i])
-            string_Q = f"(({string_all_Q_pre}) + ({string_h})(({string_all_Q_new})-({string_all_Q_pre})))"
+            string_Q = f"(({string_all_Q_pre}) + ({string_h})*(({string_all_Q_new})-({string_all_Q_pre})))"
             # string_Q = "((%s) + (%s)*((%s)-(%s)))" % (
             #     string_all_Q_pre,
             #     string_h,
