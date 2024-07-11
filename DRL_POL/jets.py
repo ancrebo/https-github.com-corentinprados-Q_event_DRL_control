@@ -350,6 +350,7 @@ class JetCylinder(Jet):
         string_all_Q_new = "0"
         string_heav = ""
 
+        print(f"JetCylinder: create_smooth_funcs: smooth_func: {smooth_func}")
         if smooth_func == "EXPONENTIAL":
 
             ## Q_pre and Q_new --> list! with nz_Qs dimensions
