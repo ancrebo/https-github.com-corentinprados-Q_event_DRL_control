@@ -45,14 +45,14 @@ def atan2_str(X: str, Y: str) -> str:
 
 
 def Q_smooth_linear(
-    Qnew: np.array, Qpre: np.array, timestart: float, Tsmooth: float
+    Qnew_single: float, Qpre_single: float, timestart: float, Tsmooth: float
 ) -> str:
     """
     Linear smoothing law:
         Q(t) = (Qn - Qs)*(t - ts)/Tsmooth + Qs
     """
-    deltaQ = Qnew - Qpre
-    return f"({deltaQ}/{Tsmooth}*(t-{timestart}) + ({Qpre}))"
+    deltaQ_single = Qnew_single - Qpre_single
+    return f"({deltaQ_single}/{Tsmooth}*(t-{timestart}) + ({Qpre_single}))"
 
 
 def Q_smooth_exp(ts: float, Tsmooth: float) -> str:
