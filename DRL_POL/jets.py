@@ -274,8 +274,8 @@ class JetCylinder(Jet):
             self.time_start,
             self.T_smoo,
             self.smooth_func,
-            self.Qs_position_z,
-            self.delta_Q_z,
+            Qs_position_z=self.Qs_position_z,
+            delta_Q_z=self.delta_Q_z,
         )
 
         # Create the velocities (function?) using the smoothing functions,
