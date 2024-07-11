@@ -72,7 +72,7 @@ def Q_smooth_exp(ts: float, Tsmooth: float) -> str:
     t1 = ts
     t2 = ts + Tsmooth
 
-    xp = f"(pos((t-{t1:.2f})/{t2 - t1:%.2f}))"
+    xp = f"(pos((t-{t1:.2f})/{t2 - t1:.2f}))"
     f1 = f"exp(-1/{xp})"
     f2 = f"exp(-1/pos(1-{xp}))"
     h = f"{f1}/({f1}+{f2})"
