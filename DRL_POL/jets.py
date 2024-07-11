@@ -177,8 +177,8 @@ class Jet(ABC):
     @abstractmethod
     def create_smooth_funcs(
         self,
-        Q_new: float,
-        Q_pre: float,
+        Q_new: Dict[str, float],
+        Q_pre: Dict[str, float],
         time_start: float,
         T_smoo: float,
         smooth_func: str,
@@ -228,8 +228,8 @@ class JetCylinder(Jet):
 
     def update(
         self,
-        Q_pre: float,
-        Q_new: float,
+        Q_pre: Dict[str, float],
+        Q_new: Dict[str, float],
         time_start: float,
         smooth_func: str,
         *args: Any,
@@ -385,6 +385,7 @@ class JetCylinder(Jet):
         Y = f"(y - {cylinder_coordinates[1]})"
         return atan2_str(X, Y)
 
+
 # TODO: finish updating JetAirfoil for new base class code @pietero
 class JetAirfoil(Jet):
     """
@@ -422,8 +423,8 @@ class JetAirfoil(Jet):
 
     def create_smooth_funcs(
         self,
-        Q_new: float,
-        Q_pre: float,
+        Q_new: List[float],
+        Q_pre: List[float],
         time_start: float,
         T_smoo: float,
         smooth_func: str,
@@ -462,6 +463,7 @@ class JetAirfoil(Jet):
         X = "({}-({}))".format(self.y2, self.y1)
         Y = "({}-({}))".format(self.x1, self.x2)
         return atan2_str(X, Y)
+
 
 # TODO: finish updating JetChannel for new base class code and channel-specific stuff @pietero
 class JetChannel(Jet):
@@ -544,92 +546,24 @@ class JetChannel(Jet):
         self.Qs_position_x: List[float] = Qs_position_x
         self.delta_Q_x: List[float] = delta_Q_x
 
+    # TODO: adjust this function for 2D channel
     def create_smooth_funcs(
         self,
-        Q_new: float,
-        Q_pre: float,
+        Q_new: List[float],
+        Q_pre: List[float],
         time_start: float,
         T_smoo: float,
         smooth_func: str,
-        *args: Any,
         **kwargs: Any,
-    ) -> str:
-        """
-        Specialized method that creates the smooth functions
-        """
-        Qs_position_x = kwargs.get("Qs_position_x")
-        delta_Q_x = kwargs.get("delta_Q_x")
-        Qs_position_z = kwargs.get("Qs_position_z")
-        delta_Q_z = kwargs.get("delta_Q_z")
-
-        if (
-            Qs_position_z is None
-            or delta_Q_z is None
-            or Qs_position_x is None
-            or delta_Q_x is None
-        ):
-            raise ValueError(
-                "Missing required keyword arguments: 'Qs_position_z' and/or 'delta_Q_z' and/or 'Qs_position_x' and/or 'delta_Q_x'"
-            )
-
-        string_all_Q_pre = "0"
-        string_all_Q_new = "0"
-        string_heav = ""
-
-        if smooth_func == "EXPONENTIAL":
-
-            ## Q_pre and Q_new --> list! with nz_Qs dimensions
-            string_h = Q_smooth_exp(time_start, T_smoo)
-
-            # create the new Q string
-            string_heav = heav_func(Qs_position_z[0], delta_Q_z)
-            string_all_Q_pre = f"{string_heav}*{Q_pre[0]:.4f}"
-            string_all_Q_new = f"{string_heav}*{Q_new[0]:.4f}"
-
-            for i in range(1, self.nb_inv_per_CFD):
-                string_heav = heav_func(Qs_position_z[i], delta_Q_z)
-                string_all_Q_pre += f"+ {string_heav}*{Q_pre[i]:.4f}"
-                string_all_Q_new += f"+ {string_heav}*{Q_new[i]:.4f}"
-            string_Q = "((%s) + (%s)*((%s)-(%s)))" % (
-                string_all_Q_pre,
-                string_h,
-                string_all_Q_new,
-                string_all_Q_pre,
-            )
-
-        else:
-            string_Q = Q_smooth_linear(Q_new, Q_pre, time_start, T_smoo)
-
-        if self.short_spacetime_func == True:
-            # just with Qnorm*Qi -- no projection or smoothing in time/space
-            return "(%.1f)*(%s)" % (scale, string_all_Q_new)
-        else:
-            string_C = "cos(%.3f/%.3f*(%s-(%.3f)))" % (
-                np.pi,
-                w,
-                self.theta,
-                self.theta0,
-            )
-            return f"({scale:.1f})*({string_Q})*({string_C})"
-
-        pass
-
-    # TODO: adjust this function for 2D channel
-    def create_smooth_funcs_2D(
-        self,
-        Q_new: list,
-        Q_pre: list,
-        time_start: float,
-        T_smoo: float,
-        smooth_func: str,
-        Qs_position_z: list,
-        delta_Q_z: float,
-        Qs_position_x: list,
-        delta_Q_x: float,
     ) -> str:
         """
         Specialized method that creates the smooth functions in 2D
         """
+
+        Qs_position_z: List[float] = kwargs.get("Qs_position_z")
+        delta_Q_z: float = kwargs.get("delta_Q_z")
+        Qs_position_x: List[float] = kwargs.get("Qs_position_x")
+        delta_Q_x: float = kwargs.get("delta_Q_x")
 
         # scale = ? for channel
         w = self.width * (np.pi / 180)  # deg2rad
@@ -646,33 +580,23 @@ class JetChannel(Jet):
 
             # create the new Q string
             string_heav = heav_func(Qs_position_z[0], delta_Q_z)
-            string_all_Q_pre = "%s*(%.4f)" % (string_heav, Q_pre[0])
-            string_all_Q_new = "%s*(%.4f)" % (string_heav, Q_new[0])
+            string_all_Q_pre = f"{string_heav}*({Q_pre[0]:.4f})"
+            string_all_Q_new = f"{string_heav}*({Q_new[0]:.4f})"
 
             for i in range(1, self.nb_inv_per_CFD):
                 string_heav = heav_func(Qs_position_z[i], delta_Q_z)
-                string_all_Q_pre += "+ %s*(%.4f)" % (string_heav, Q_pre[i])
-                string_all_Q_new += "+ %s*(%.4f)" % (string_heav, Q_new[i])
-            string_Q = "((%s) + (%s)*((%s)-(%s)))" % (
-                string_all_Q_pre,
-                string_h,
-                string_all_Q_new,
-                string_all_Q_pre,
-            )
+                string_all_Q_pre += f"+ {string_heav}*({Q_pre[i]:.4f})"
+                string_all_Q_new += f"+ {string_heav}*({Q_new[i]:.4f})"
+            string_Q = f"(({string_all_Q_pre}) + ({string_h})*(({string_all_Q_new})-({string_all_Q_pre})))"
 
         else:
             string_Q = Q_smooth_linear(Q_new, Q_pre, time_start, T_smoo)
 
         if self.short_spacetime_func == True:
             # just with Qnorm*Qi -- no projection or smoothing in time/space
-            return "(%.1f)*(%s)" % (scale, string_all_Q_new)
+            return f"({scale:.1f})*({string_all_Q_new})"
         else:
-            string_C = "cos(%.3f/%.3f*(%s-(%.3f)))" % (
-                np.pi,
-                w,
-                self.theta,
-                self.theta0,
-            )
-            return "(%.1f)*(%s)*(%s)" % (scale, string_Q, string_C)
+            string_C = f"cos({np.pi:.3f}/{w:.3f}*({self.theta}-({self.theta0:.3f})))"
+            return f"({scale:.1f})*({string_Q})*({string_C})"
 
     pass
