@@ -40,7 +40,7 @@ def atan2_str(X: str, Y: str) -> str:
 
 
 # Smoothing functions
-# TODO: fix typing for Qnew and Qpre @pietero
+# TODO: fix typing for Q_new and Q_pre @pietero
 def Q_smooth_linear(Qnew: float, Qpre: float, timestart: float, Tsmooth: float) -> str:
     """
     Linear smoothing law:
@@ -99,8 +99,8 @@ class Jet(ABC):
         self,
         name: str,
         params: Dict[str, Dict[str, Any]],
-        Q_pre: float = 0.0,
-        Q_new: float = 0.0,
+        Q_pre: float = 0.0,  # TODO: Is this actually a float? Determine type! @pietero
+        Q_new: float = 0.0,  # TODO: Is this actually a float? Determine type! @pietero
         time_start: float = 0.0,
         dimension: int = 2,
         T_smoo: float = 0.2,
@@ -139,8 +139,8 @@ class Jet(ABC):
     @abstractmethod
     def update(
         self,
-        Q_pre: float,
-        Q_new: float,
+        Q_pre: float,  # TODO: Is this actually a float? Determine type! @pietero
+        Q_new: float,  # TODO: Is this actually a float? Determine type! @pietero
         time_start: float,
         smooth_func: str,
         *args: Any,
@@ -177,8 +177,12 @@ class Jet(ABC):
     @abstractmethod
     def create_smooth_funcs(
         self,
-        Q_new: Dict[str, float],
-        Q_pre: Dict[str, float],
+        Q_new: Dict[
+            str, float
+        ],  # TODO: Is this actually a float? Determine type! @pietero
+        Q_pre: Dict[
+            str, float
+        ],  # TODO: Is this actually a float? Determine type! @pietero
         time_start: float,
         T_smoo: float,
         smooth_func: str,
@@ -203,8 +207,8 @@ class JetCylinder(Jet):
         self,
         name: str,
         params: Dict[str, Any],
-        Q_pre: float = 0.0,
-        Q_new: float = 0.0,
+        Q_pre: float = 0.0,  # TODO: Is this actually a float? Determine type! @pietero
+        Q_new: float = 0.0,  # TODO: Is this actually a float? Determine type! @pietero
         time_start: float = 0.0,
         dimension: int = 2,
         T_smoo: float = 0.2,
@@ -228,8 +232,12 @@ class JetCylinder(Jet):
 
     def update(
         self,
-        Q_pre: Dict[str, float],
-        Q_new: Dict[str, float],
+        Q_pre: Dict[
+            str, float
+        ],  # TODO: Is this actually a float? Determine type! @pietero
+        Q_new: Dict[
+            str, float
+        ],  # TODO: Is this actually a float? Determine type! @pietero
         time_start: float,
         smooth_func: str,
         *args: Any,
@@ -244,7 +252,7 @@ class JetCylinder(Jet):
         delta_Q_z: List[float] = kwargs.get("delta_Q_z")
 
         # Up # TODO: IS THIS NECESSARY? I think all of these were just updated @pietero
-        # TODO: fix typing for Qnew and Qpre @pietero
+        # TODO: fix typing for Q_new and Q_pre @pietero
         self.Q_pre = Q_pre
         self.Q_new = Q_new
         self.time_start: float = time_start
@@ -298,8 +306,12 @@ class JetCylinder(Jet):
 
     def create_smooth_funcs(
         self,
-        Q_new: Dict[str, float],
-        Q_pre: Dict[str, float],
+        Q_new: Dict[
+            str, float
+        ],  # TODO: Is this actually a float? Determine type! @pietero
+        Q_pre: Dict[
+            str, float
+        ],  # TODO: Is this actually a float? Determine type! @pietero
         time_start: float,
         T_smoo: float,
         smooth_func: str,
@@ -309,8 +321,8 @@ class JetCylinder(Jet):
         """
         Specialized method that creates the smooth functions for cylinder cases
         """
-        Qs_position_z = kwargs.get("Qs_position_z")
-        delta_Q_z = kwargs.get("delta_Q_z")
+        Qs_position_z = kwargs.get("Qs_position_z")  # TODO: Determine type! @pietero
+        delta_Q_z = kwargs.get("delta_Q_z")  # TODO: Determine type! @pietero
 
         if Qs_position_z is None or delta_Q_z is None:
             raise ValueError(
@@ -423,8 +435,8 @@ class JetAirfoil(Jet):
 
     def create_smooth_funcs(
         self,
-        Q_new: List[float],
-        Q_pre: List[float],
+        Q_new: List[float],  # TODO: Is this actually a float? Determine type! @pietero
+        Q_pre: List[float],  # TODO: Is this actually a float? Determine type! @pietero
         time_start: float,
         T_smoo: float,
         smooth_func: str,
@@ -433,8 +445,10 @@ class JetAirfoil(Jet):
         """
         Specialized method that creates the smooth functions
         """
-        Qs_position_z: List[float] = kwargs.get("Qs_position_z")
-        delta_Q_z: List[float] = kwargs.get("delta_Q_z")
+        Qs_position_z: List[float] = kwargs.get(
+            "Qs_position_z"
+        )  # TODO: Determine type! @pietero
+        delta_Q_z: List[float] = kwargs.get("delta_Q_z")  # Determine type! @pietero
 
         if Qs_position_z is None or delta_Q_z is None:
             raise ValueError(
@@ -477,8 +491,8 @@ class JetChannel(Jet):
         self,
         name: str,
         params: Dict[str, Any],
-        Q_pre: float = 0.0,
-        Q_new: float = 0.0,
+        Q_pre: float = 0.0,  # TODO: Is this actually a float? Determine type! @pietero
+        Q_new: float = 0.0,  # TODO: Is this actually a float? Determine type! @pietero
         time_start: float = 0.0,
         dimension: int = 2,
         T_smoo: float = 0.2,
@@ -504,8 +518,8 @@ class JetChannel(Jet):
 
     def update(
         self,
-        Q_pre: float,
-        Q_new: float,
+        Q_pre: float,  # TODO: Is this actually a float? Determine type! @pietero
+        Q_new: float,  # TODO: Is this actually a float? Determine type! @pietero
         time_start: float,
         smooth_func: str,
         *args: Any,
@@ -549,8 +563,8 @@ class JetChannel(Jet):
     # TODO: adjust this function for 2D channel
     def create_smooth_funcs(
         self,
-        Q_new: List[float],
-        Q_pre: List[float],
+        Q_new: List[float],  # TODO: Is this actually a float? Determine type! @pietero
+        Q_pre: List[float],  # TODO: Is this actually a float? Determine type! @pietero
         time_start: float,
         T_smoo: float,
         smooth_func: str,
@@ -560,8 +574,10 @@ class JetChannel(Jet):
         Specialized method that creates the smooth functions in 2D
         """
 
-        Qs_position_z: List[float] = kwargs.get("Qs_position_z")
-        delta_Q_z: float = kwargs.get("delta_Q_z")
+        Qs_position_z: List[float] = kwargs.get(
+            "Qs_position_z"
+        )  # TODO: Determine type! @pietero
+        delta_Q_z: float = kwargs.get("delta_Q_z")  # TODO: Determine type! @pietero
         Qs_position_x: List[float] = kwargs.get("Qs_position_x")
         delta_Q_x: float = kwargs.get("delta_Q_x")
 
