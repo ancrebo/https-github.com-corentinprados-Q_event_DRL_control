@@ -176,7 +176,7 @@ jet_angle: float = 0
 nz_Qs: int = (
     nb_inv_per_CFD  ## DEBUG param --> define how many Qs to control in the span (needs to define Q profile)
 )
-nx_Qs: int = 0 # NOT USED FOR CYLINDER CASE
+nx_Qs: int = 0  # NOT USED FOR CYLINDER CASE
 
 ## it will place many slices of witness as Qs locations we have
 

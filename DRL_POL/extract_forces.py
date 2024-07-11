@@ -1,5 +1,6 @@
 import numpy as np
 import math
+from typing import Tuple
 
 from parameters import variational_input, case
 
