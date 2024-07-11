@@ -228,6 +228,13 @@ class JetCylinder(Jet):
         self.Qs_position_z: List[float] = params["Qs_position_z"]
         self.delta_Q_z: List[float] = params["delta_Q_z"]
 
+        # DEBUG: print Qs_position_z and delta_Q_z from parameters and self
+        print(f"\nJetCylinder init:\n")
+        print(f"jet_parameters Qs_position_z: {params['Qs_position_z']}")
+        print(f"class Qs_position_z: {self.Qs_position_z}")
+        print(f"jet_parameters delta_Q_z: {params['delta_Q_z']}")
+        print(f"class delta_Q_z: {self.delta_Q_z}\n")
+
         self.update(
             Q_pre,
             Q_new,
@@ -256,7 +263,7 @@ class JetCylinder(Jet):
         per each of the child classes.
         """
         Qs_position_z: List[float] = kwargs.get("Qs_position_z")
-        delta_Q_z: List[float] = kwargs.get("delta_Q_z")
+        delta_Q_z: float = kwargs.get("delta_Q_z")
 
         # Up # TODO: IS THIS NECESSARY? I think all of these were just updated @pietero
         # TODO: fix typing for Q_new and Q_pre @pietero
