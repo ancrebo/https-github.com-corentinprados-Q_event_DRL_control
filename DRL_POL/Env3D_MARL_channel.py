@@ -11,6 +11,7 @@ AUTHORS ->  POL
 
 ## IMPORT PYTHON LIBRARIES
 import os, csv, numpy as np
+import sys
 import shutil
 import time
 from typing import List, Tuple, Union, Any, Dict
@@ -1049,7 +1050,19 @@ class Environment(Environment):
 
     # -----------------------------------------------------------------------------------------------------
     # TODO: figure our where the actions in `execute` argument are coming from @pietero
+    # TODO: figure out structure/type of actions in `execute` argument @pietero
     def execute(self, actions: Dict[float]) -> Tuple[np.ndarray, bool, float]:
+
+        # DEBUG - find the type/structure of `actions`
+        print(f"\n\n\nActions type: {type(actions)}\n")
+        print(f"Actions structure: {actions}\n")
+        print(f"Actions shape: {actions.shape}\n")
+        print(f"Actions content: {actions}\n")
+
+        print(f"STOPPING THE PROGRAM NOW!!!\n\n\n")
+
+        # Stop the program execution
+        sys.exit()
 
         action = []
         for i in range(self.actions_per_inv):
@@ -1100,11 +1113,11 @@ class Environment(Environment):
                 for i in range(1, self.nb_inv_per_CFD):
                     dir_name = os.path.join(
                         "alya_files",
-                        "%s" % self.host,
+                        f"{self.host}",
                         "1",
-                        "EP_%s" % self.episode_number,
+                        f"EP_{self.episode_number}",
                         "flags_MARL",
-                        "%d_inv_action_%d_ready" % (i, self.action_count),
+                        f"{i}_inv_action_{self.action_count}_ready",
                     )
                     all_actions_ready = True
                     if not os.path.exists(dir_name):
@@ -1121,9 +1134,7 @@ class Environment(Environment):
             # open the file for reading
 
             for i in range(self.nb_inv_per_CFD):
-                path_action_file = "actions/{}/{}_{}/ep_{}/output_actions.csv".format(
-                    self.host, self.ENV_ID[0], i + 1, self.episode_number
-                )
+                path_action_file = f"actions/{self.host}/{self.ENV_ID[0]}_{i+1}/ep_{self.episode_number}/output_actions.csv"
                 with open(path_action_file, "r") as file:
                     # read the lines of the file into a list
                     lines = csv.reader(file, delimiter=";")
@@ -1194,7 +1205,12 @@ class Environment(Environment):
 
             elif self.case == "channel":
                 for ijet, jet in enumerate(self.Jets.values()):
-                    jet.update()  # TODO: make sure this works for channel @pietero
+                    jet.update(
+                        self.previous_action_global,
+                        self.action_global,
+                        self.simulation_timeframe[0],
+                        self.smooth_func,
+                    )  # TODO: make sure this works for channel @pietero
 
             cr_stop("ENV.actions_MASTER_thread1", 0)
 

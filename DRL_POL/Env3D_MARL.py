@@ -759,7 +759,11 @@ class Environment(Environment):
         if not DEBUG and self.episode_number > 0:
             if not self.bool_restart_prevEP:
                 runbin = "rm -rf"
-                runargs = os.path.join("%s" % self.host, "%s" % self.ENV_ID[1], "EP_%d" % self.episode_number)
+                runargs = os.path.join(
+                    "%s" % self.host,
+                    "%s" % self.ENV_ID[1],
+                    "EP_%d" % self.episode_number,
+                )
                 # runargs = os.path.join("%s" % self.host, "%s" % self.ENV_ID[1], "EP_*")     # TODO: diagnose error caused by this line
                 # avoid checks in deterministic
                 if self.deterministic == False:
@@ -1056,7 +1060,9 @@ class Environment(Environment):
         return probes_values_2
 
     # -----------------------------------------------------------------------------------------------------
-    def execute(self, actions):
+    def execute(self, actions: np.ndarray):
+
+        # DEBUG - find the type/structure of `actions`
 
         action = []
         for i in range(self.actions_per_inv):
@@ -1174,10 +1180,10 @@ class Environment(Environment):
                     # Q_pre, Q_new, time_start, select smoothing law of the action
                     # print("POOOOOOL jet.update : ",self.previous_action_global,self.action_global,self.simulation_timeframe[0],self.smooth_func)
                     jet.update(
-                        self.previous_action_global,
-                        self.action_global,
-                        self.simulation_timeframe[0],
-                        self.smooth_func,
+                        self.previous_action_global,  # Q_pre:
+                        self.action_global,  # Q_new:
+                        self.simulation_timeframe[0],  # time_start
+                        self.smooth_func,  # smooth_func
                     )
                     # Update the jet profile alya file
                     jet.update_file(simu_path)

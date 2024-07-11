@@ -41,7 +41,12 @@ def atan2_str(X: str, Y: str) -> str:
 
 # Smoothing functions
 # TODO: fix typing for Q_new and Q_pre @pietero
-def Q_smooth_linear(Qnew: float, Qpre: float, timestart: float, Tsmooth: float) -> str:
+[]
+
+
+def Q_smooth_linear(
+    Qnew: np.array, Qpre: np.array, timestart: float, Tsmooth: float
+) -> str:
     """
     Linear smoothing law:
         Q(t) = (Qn - Qs)*(t - ts)/Tsmooth + Qs
@@ -595,9 +600,12 @@ class JetChannel(Jet):
             string_h = Q_smooth_exp(time_start, T_smoo)
 
             # create the new Q string
-            string_heav = heav_func(Qs_position_z[0], delta_Q_z)
-            string_all_Q_pre = f"{string_heav}*({Q_pre[0]:.4f})"
-            string_all_Q_new = f"{string_heav}*({Q_new[0]:.4f})"
+            # string_Q_new format: heav(z1)*heav(x1)*Q1,1 + heav(z1)*heav(x2)*Q1,2 + ... + heav(z2)*heav(x1)*Q2,1 + ...
+
+            string_heav_z = heav_func(Qs_position_z[0], delta_Q_z)
+            string_heav_x = heav_func(Qs_position_x[0], delta_Q_x)
+            string_all_Q_pre = f"{string_heav_x}*{string_heav_z}*({Q_pre[0]:.4f})"
+            string_all_Q_new = f"{string_heav_x}*{string_heav_z}*({Q_new[0]:.4f})"
 
             for i in range(1, self.nb_inv_per_CFD):
                 string_heav = heav_func(Qs_position_z[i], delta_Q_z)

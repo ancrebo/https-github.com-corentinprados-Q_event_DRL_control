@@ -25,19 +25,19 @@ from configuration import ALYA_ULTCL
 run_subprocess("./", ALYA_ULTCL, "", preprocess=True)
 
 # Set up which case to run
-training_case = "channel_3D_MARL_coco"  # cylinder_2D, airfoil_2D, cylinder_3D, channel_3D_MARL_coco
+training_case = (
+    "channel_3D_MARL_coco"  # cylinder_2D, airfoil_2D, cylinder_3D, channel_3D_MARL_coco
+)
 run_subprocess(
     "./", "rm -f", "parameters.py", preprocess=True
 )  # Ensure deleting old parameters
 run_subprocess(
     "./",
     "ln -s",
-    "parameters/parameters_{}.py parameters.py".format(training_case),
+    f"parameters/parameters_{training_case}.py parameters.py",
     preprocess=True,
 )
-run_subprocess(
-    "alya_files", "cp -r", "case_{} case".format(training_case), preprocess=True
-)
+run_subprocess("alya_files", "cp -r", f"case_{training_case} case", preprocess=True)
 
 from Env3D_MARL import Environment
 from parameters import (
@@ -51,6 +51,7 @@ from parameters import (
     simu_name,
     run_baseline,
     nz_Qs,
+    # TODO: add nx_Qs?
 )
 
 from cr import cr_reset, cr_info, cr_report
@@ -64,9 +65,7 @@ initial_time = time.time()
 
 # Generate the list of nodes
 # TODO --- ADD NUM_CFD (MARL)
-generate_node_list(
-    num_servers=num_servers, num_cores_server=nb_proc
-)
+generate_node_list(num_servers=num_servers, num_cores_server=nb_proc)
 # TODO: check if this works in MN!
 # TODO: Update to local nodelists with num_servers
 
@@ -135,7 +134,7 @@ def split(environment, np):  # called 1 time in PARALLEL_TRAINING.py
             np,
             (j + 1),
         ]  # Adjust for two dimensions? or translate two to one dimension (n, m) -> (j)
-        env.host = "environment{}".format(np)
+        env.host = f"environment{np}"
         list_inv_envs.append(env)
     return list_inv_envs
 
@@ -148,7 +147,7 @@ parallel_environments = [
     Environment(
         simu_name=simu_name,
         ENV_ID=[i, 0],
-        host="environment{}".format(i + 1),
+        host=f"environment{i + 1}",
         node=nodelist[i + 1],
     )
     for i in range(num_servers)
@@ -190,10 +189,9 @@ agent.close()
 end_time = time.time()
 
 print(
-    "DRL simulation :\nStart at : {}.\nEnd at {}\nDone in : {}".format(
-        initial_time, end_time, end_time - initial_time
-    )
+    f"DRL simulation :\nStart at : {initial_time}.\nEnd at {end_time}\nDone in : {end_time - initial_time}"
 )
+
 
 cr_info()
 cr_report("DRL_TRAINING.csv")
