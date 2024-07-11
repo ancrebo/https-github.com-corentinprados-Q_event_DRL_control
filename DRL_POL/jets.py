@@ -239,6 +239,16 @@ class JetCylinder(Jet):
             name, params, Q_pre, Q_new, time_start, dimension, T_smoo, smooth_func
         )
 
+        # DEBUG: print Q_pre and Q_new
+        print(f"\nJetCylinder init AFTER SUPER:\n")
+        print(f"Q_pre type: {type(Q_pre)}")
+        print(f"Q_pre structure: {Q_pre}")
+        print(f"Q_pre values: {Q_pre}")
+        print(f"Q_new type: {type(Q_new)}")
+        print(f"Q_new structure: {Q_new}")
+        print(f"Q_new values: {Q_new}\n")
+
+
         self.Qs_position_z: List[float] = params["Qs_position_z"]
         self.delta_Q_z: float = params["delta_Q_z"]
         self.smooth_func = params["smooth_func"]
