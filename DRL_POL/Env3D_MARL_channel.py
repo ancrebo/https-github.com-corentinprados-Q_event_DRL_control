@@ -35,6 +35,10 @@ from parameters import (
     nb_inv_per_CFD,
     nz_Qs,
     nx_Qs,  # added for 2D channel
+    Qs_position_z,
+    Qs_position_x, # added for 2D channel
+    delta_Q_z,
+    delta_Q_x, # added for 2D channel
     mem_per_srun,
     dimension,
     case,
@@ -110,6 +114,10 @@ class Environment(Environment):
         self.Jets: Dict[str, Any] = jets
         self.n_jets: int = len(jets)
         self.nz_Qs: int = nz_Qs
+        self.Qs_position_z: List[float] = Qs_position_z
+        self.delta_Q_z: float = delta_Q_z
+        self.Qs_position_x: List[float] = Qs_position_x
+        self.delta_Q_x: float = delta_Q_x
         self.actions_per_inv: int = actions_per_inv
         self.nb_inv_per_CFD: int = nb_inv_per_CFD
         self.bound_inv: int = 6 + self.ENV_ID[1]  # 6 is from ALYA boundary code ??
@@ -1171,6 +1179,8 @@ class Environment(Environment):
                         self.action_global,
                         self.simulation_timeframe[0],
                         self.smooth_func,
+                        Qs_position_z=self.Qs_position_z,
+                        delta_Q_z=self.delta_Q_z,
                     )
                     # Update the jet profile alya file
                     jet.update_file(simu_path)
@@ -1201,6 +1211,10 @@ class Environment(Environment):
                         self.action_global,
                         self.simulation_timeframe[0],
                         self.smooth_func,
+                        Qs_position_z=self.Qs_position_z,
+                        delta_Q_z=self.delta_Q_z,
+                        Qs_position_x=self.Qs_position_x,
+                        delta_Q_x=self.delta_Q_x,
                     )  # TODO: make sure this works for channel @pietero
 
             cr_stop("ENV.actions_MASTER_thread1", 0)
