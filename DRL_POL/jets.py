@@ -394,7 +394,7 @@ class JetCylinder(Jet):
             #     self.theta,
             #     self.theta0,
             # )
-            return f"({scale:.1f})({string_Q})({string_C})"
+            return f"({scale:.1f})*({string_Q})*({string_C})"
 
     @staticmethod
     def normalize_angle(angle: float) -> float:
