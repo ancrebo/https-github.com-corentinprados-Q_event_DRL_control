@@ -39,7 +39,7 @@ run_subprocess(
 )
 run_subprocess("alya_files", "cp -r", f"case_{training_case} case", preprocess=True)
 
-from Env3D_MARL import Environment
+from Env3D_MARL_channel import Environment
 from parameters import (
     nb_inv_per_CFD,
     sync_episodes,
