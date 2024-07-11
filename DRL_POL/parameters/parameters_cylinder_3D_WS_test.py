@@ -188,8 +188,6 @@ for nq in range(nz_Qs):
 
 print("Jets are placed in Z coordinates: ", Qs_position_z)
 
-
-# TODO: Update `jets_definition` for channel case instead of cylinder case @canordq
 jets_definition: Dict[
     str,
     Union[

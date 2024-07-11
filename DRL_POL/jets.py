@@ -226,7 +226,7 @@ class JetCylinder(Jet):
             name, params, Q_pre, Q_new, time_start, dimension, T_smoo, smooth_func
         )
         self.Qs_position_z: List[float] = params["Qs_position_z"]
-        self.delta_Q_z: List[float] = params["delta_Q_z"]
+        self.delta_Q_z: float = params["delta_Q_z"]
 
         # DEBUG: print Qs_position_z and delta_Q_z from parameters and self
         print(f"\nJetCylinder init:\n")
@@ -265,6 +265,11 @@ class JetCylinder(Jet):
         Qs_position_z: List[float] = kwargs.get("Qs_position_z")
         delta_Q_z: float = kwargs.get("delta_Q_z")
 
+        if Qs_position_z is None:
+            raise ValueError("Missing required keyword arguments: 'Qs_position_z'")
+        if delta_Q_z is None:
+            raise ValueError("Missing required keyword arguments: 'delta_Q_z'")
+
         # Up # TODO: IS THIS NECESSARY? I think all of these were just updated @pietero
         # TODO: fix typing for Q_new and Q_pre @pietero
         self.Q_pre = Q_pre
@@ -272,7 +277,7 @@ class JetCylinder(Jet):
         self.time_start: float = time_start
         self.smooth_func: str = smooth_func
         self.Qs_position_z: List[float] = Qs_position_z
-        self.delta_Q_z: List[float] = delta_Q_z
+        self.delta_Q_z: float = delta_Q_z
 
         # Call the specialized method that creates a smoothing function for the current time
         smooth_fun: str = self.create_smooth_funcs(
@@ -335,13 +340,15 @@ class JetCylinder(Jet):
         """
         Specialized method that creates the smooth functions for cylinder cases
         """
-        Qs_position_z = kwargs.get("Qs_position_z")  # TODO: Determine type! @pietero
-        delta_Q_z = kwargs.get("delta_Q_z")  # TODO: Determine type! @pietero
+        Qs_position_z: List[float] = kwargs.get(
+            "Qs_position_z"
+        )  # TODO: Determine type! @pietero
+        delta_Q_z: float = kwargs.get("delta_Q_z")  # TODO: Determine type! @pietero
 
-        if Qs_position_z is None or delta_Q_z is None:
-            raise ValueError(
-                "Missing required keyword arguments: 'Qs_position_z' and/or 'delta_Q_z'"
-            )
+        if Qs_position_z is None:
+            raise ValueError("Missing required keyword arguments: 'Qs_position_z'")
+        if delta_Q_z is None:
+            raise ValueError("Missing required keyword arguments: 'delta_Q_z'")
 
         w = self.width * (np.pi / 180)  # deg2rad
         scale = np.pi / (2.0 * w * self.radius)  #### FIX: NOT R**2 --> D
