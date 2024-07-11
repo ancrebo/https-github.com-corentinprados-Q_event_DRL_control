@@ -108,7 +108,7 @@ class Jet(ABC):
         time_start: float = 0.0,
         dimension: int = 2,
         T_smoo: float = 0.2,
-        smooth_func: str = "",
+        smooth_func: str = None,
     ) -> None:
         """
         Class initializer, generic.
@@ -126,6 +126,8 @@ class Jet(ABC):
             Q_new = [0.0]
         if Q_pre is None:
             Q_pre = [0.0]
+        if smooth_func is None:
+            smooth_func = ""
 
         # DEBUG: print Q_pre and Q_new type, structure, and values
         print(f"\nJet init:\n")
@@ -228,7 +230,7 @@ class JetCylinder(Jet):
         time_start: float = 0.0,
         dimension: int = 2,
         T_smoo: float = 0.2,
-        smooth_func: str = "",
+        smooth_func: str = None,
     ) -> None:
         """
         Initialize the JetCylinder class.
@@ -350,8 +352,8 @@ class JetCylinder(Jet):
         string_all_Q_new = "0"
         string_heav = ""
 
-        print(f"JetCylinder: create_smooth_funcs: smooth_func: {smooth_func}")
-        if smooth_func == "EXPONENTIAL":
+        print(f"JetCylinder: create_smooth_funcs: self.smooth_func: {self.smooth_func}")
+        if self.smooth_func == "EXPONENTIAL":
 
             ## Q_pre and Q_new --> list! with nz_Qs dimensions
             string_h = Q_smooth_exp(time_start, T_smoo)
@@ -366,11 +368,11 @@ class JetCylinder(Jet):
                 string_all_Q_pre += f"+ {string_heav}*({Q_pre[i]:.4f})"
                 string_all_Q_new += f"+ {string_heav}*({Q_new[i]:.4f})"
             string_Q = f"(({string_all_Q_pre}) + ({string_h})*(({string_all_Q_new})-({string_all_Q_pre})))"
-        elif smooth_func == "LINEAR":
+        elif self.smooth_func == "LINEAR":
             string_Q = Q_smooth_linear(Q_new[0], Q_pre[0], time_start, T_smoo)
         else:
             raise ValueError(
-                f"`JetCylinder` class: `create_smooth_funcs` method: `smooth_func` arg: Invalid smoothing function: {smooth_func}"
+                f"`JetCylinder` class: `create_smooth_funcs` method: `smooth_func` arg: Invalid smoothing function: {self.smooth_func}"
             )
 
         if self.short_spacetime_func == True:
