@@ -244,12 +244,12 @@ class JetCylinder(Jet):
 
         # DEBUG: print Q_pre and Q_new
         print(f"\nJetCylinder init AFTER SUPER:\n")
-        print(f"Q_pre type: {type(Q_pre)}")
-        print(f"Q_pre structure: {Q_pre}")
-        print(f"Q_pre values: {Q_pre}")
-        print(f"Q_new type: {type(Q_new)}")
-        print(f"Q_new structure: {Q_new}")
-        print(f"Q_new values: {Q_new}\n")
+        print(f"self.Q_pre type: {type(self.Q_pre)}")
+        print(f"self.Q_pre structure: {self.Q_pre}")
+        print(f"self.Q_pre values: {self.Q_pre}")
+        print(f"self.Q_new type: {type(self.Q_new)}")
+        print(f"self.Q_new structure: {self.Q_new}")
+        print(f"self.Q_new values: {self.Q_new}\n")
 
         self.Qs_position_z: List[float] = params["Qs_position_z"]
         self.delta_Q_z: float = params["delta_Q_z"]
