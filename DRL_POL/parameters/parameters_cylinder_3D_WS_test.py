@@ -61,12 +61,6 @@ xkarman: float = 3 * int(2 * cylinder_coordinates[0])
 
 Parabolic_max_velocity: float = 1.5
 
-# FOR CHANNEL CASE - UNUSED IN CYLINDER
-h = 2.0
-Lx = 2.67 * h
-Ly = h
-# Lz = 0.8*h
-
 ### **********************************************************
 ### MULTI-ENVIRONMENT SETUP FOR DARDEL **********************************
 
@@ -182,16 +176,12 @@ jet_angle: float = 0
 nz_Qs: int = (
     nb_inv_per_CFD  ## DEBUG param --> define how many Qs to control in the span (needs to define Q profile)
 )
-nx_Qs: Union[None, int] = None  # NOT USED FOR CYLINDER CASE
 
 ## it will place many slices of witness as Qs locations we have
 
 delta_Q_z: float = Lz / nz_Qs
 
 Qs_position_z: np.ndarray = np.linspace(delta_Q_z / 2, Lz - delta_Q_z / 2, nz_Qs)
-if not nx_Qs:
-    delta_Q_x: float = Lx / nx_Qs
-    Qs_position_x: np.ndarray = np.linspace(delta_Q_x / 2, Lx - delta_Q_x / 2, nx_Qs)
 
 print("Jets are placed in Z coordinates: ", Qs_position_z)
 

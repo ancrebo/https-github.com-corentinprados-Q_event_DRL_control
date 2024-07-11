@@ -34,11 +34,8 @@ from parameters import (
     actions_per_inv,
     nb_inv_per_CFD,
     nz_Qs,
-    nx_Qs,  # added for 2D channel
     Qs_position_z,
-    Qs_position_x,  # added for 2D channel
     delta_Q_z,
-    delta_Q_x,  # added for 2D channel
     mem_per_srun,
     dimension,
     case,
@@ -116,8 +113,12 @@ class Environment(Environment):
         self.nz_Qs: int = nz_Qs
         self.Qs_position_z: List[float] = Qs_position_z
         self.delta_Q_z: float = delta_Q_z
-        self.Qs_position_x: List[float] = Qs_position_x
-        self.delta_Q_x: float = delta_Q_x
+        if self.case == "channel":
+            from parameters import nx_Qs, Qs_position_x, delta_Q_x
+
+            self.nx_Qs: int = nx_Qs
+            self.Qs_position_x: List[float] = Qs_position_x
+            self.delta_Q_x: float = delta_Q_x
         self.actions_per_inv: int = actions_per_inv
         self.nb_inv_per_CFD: int = nb_inv_per_CFD
         self.bound_inv: int = 6 + self.ENV_ID[1]  # 6 is from ALYA boundary code ??
