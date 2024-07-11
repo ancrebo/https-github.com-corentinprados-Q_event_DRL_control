@@ -11,9 +11,11 @@
 
 from __future__ import print_function, division
 
-import os, sys
+import os
+import sys
 import copy as cp
 import time
+import argparse
 
 from tensorforce.agents import Agent
 from tensorforce.execution import Runner
@@ -21,14 +23,33 @@ from tensorforce.execution import Runner
 from env_utils import run_subprocess, generate_node_list, read_node_list
 from configuration import ALYA_ULTCL
 
+# Parser for command line arguments
+# example use: `python3 PARALLEL_TRAINING.py --case cylinder_2D`
+parser = argparse.ArgumentParser(
+    description="Run parallel training for 3D channel MARL.",
+    formatter_class=argparse.RawTextHelpFormatter,
+)
+parser.add_argument(
+    "--case",
+    type=str,
+    required=True,
+    help=(
+        "Specify the training case to run. Options:\n"
+        "  - cylinder_2D\n"
+        "  - airfoil_2D\n"
+        "  - cylinder_3D\n"
+        "  - cylinder_3D_WS_test\n"
+        "  - channel_3D_MARL"
+    ),
+)
+args = parser.parse_args()
+
 # Run the cleaner
 run_subprocess("./", ALYA_ULTCL, "", preprocess=True)
 
-# TODO: Add argument for which case to run??? @pietero
 # Set up which case to run
-training_case = (
-    "cylinder_3D_WS_test"  # cylinder_2D, airfoil_2D, cylinder_3D, channel_3D_MARL_coco
-)
+training_case = args.case
+
 run_subprocess(
     "./", "rm -f", "parameters.py", preprocess=True
 )  # Ensure deleting old parameters
