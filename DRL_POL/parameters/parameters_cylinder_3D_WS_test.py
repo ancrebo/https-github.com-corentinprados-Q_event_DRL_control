@@ -203,6 +203,7 @@ jets_definition: Dict[
         + jet_angle,  # make sure the width doesn't not coincide with 0,90,180 or 270
         "positions": [cylinder_coordinates[0], cylinder_coordinates[1] + radius],
         "remesh": False,
+        "smooth_func": smooth_func,
         "Qs_position_z": Qs_position_z,
         "delta_Q_z": delta_Q_z,
     },
@@ -214,6 +215,7 @@ jets_definition: Dict[
         - jet_angle,  # make sure the width doesn't not coincide with 0,90,180 or 270
         "positions": [cylinder_coordinates[0], cylinder_coordinates[1] - radius],
         "remesh": False,
+        "smooth_func": smooth_func,
         "Qs_position_z": Qs_position_z,
         "delta_Q_z": delta_Q_z,
     },

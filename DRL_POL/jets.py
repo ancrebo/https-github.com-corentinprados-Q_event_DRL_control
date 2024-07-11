@@ -40,8 +40,7 @@ def atan2_str(X: str, Y: str) -> str:
 
 
 # Smoothing functions
-# TODO: fix typing for Q_new and Q_pre @pietero
-[]
+#
 
 
 def Q_smooth_linear(
@@ -139,6 +138,7 @@ class Jet(ABC):
 
         # Basic jet variables
         self.name: str = name
+        self.smooth_func = params["smooth_func"]
         self.T_smoo: float = T_smoo
         self.dimension: int = dimension
         self.theta: float = 0  # to be updated during DRL
@@ -368,7 +368,7 @@ class JetCylinder(Jet):
             string_Q = Q_smooth_linear(Q_new[0], Q_pre[0], time_start, T_smoo)
         else:
             raise ValueError(
-                "`JetCylinder` class: `create_smooth_funcs` method: `smooth_func` arg: Invalid smoothing function "
+                f"`JetCylinder` class: `create_smooth_funcs` method: `smooth_func` arg: Invalid smoothing function: {smooth_func}"
             )
 
         if self.short_spacetime_func == True:
@@ -654,7 +654,7 @@ class JetChannel(Jet):
             string_Q = Q_smooth_linear(Q_new[0], Q_pre[0], time_start, T_smoo)
         else:
             raise ValueError(
-                "JetChannel: `create_smooth_funcs` method: `smooth_func` arg: Invalid smoothing function"
+                f"JetChannel: `create_smooth_funcs` method: `smooth_func` arg: Invalid smoothing function: {smooth_func}"
             )
 
         if self.short_spacetime_func == True:
