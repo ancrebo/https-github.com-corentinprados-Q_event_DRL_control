@@ -1051,7 +1051,7 @@ class Environment(Environment):
     # -----------------------------------------------------------------------------------------------------
     # TODO: figure our where the actions in `execute` argument are coming from @pietero
     # TODO: figure out structure/type of actions in `execute` argument @pietero
-    def execute(self, actions: Dict[float]) -> Tuple[np.ndarray, bool, float]:
+    def execute(self, actions: Dict[str, float]) -> Tuple[np.ndarray, bool, float]:
 
         # DEBUG - find the type/structure of `actions`
         print(f"\n\n\nActions type: {type(actions)}\n")
