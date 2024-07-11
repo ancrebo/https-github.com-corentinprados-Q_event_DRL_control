@@ -384,10 +384,10 @@ class JetCylinder(Jet):
 
         if self.short_spacetime_func == True:
             # just with Qnorm*Qi -- no projection or smoothing in time/space
-            return f"({scale:.1f})*({string_all_Q_new})"
+            return f"({scale:.1f})({string_all_Q_new})"
             # return "(%.1f)*(%s)" % (scale, string_all_Q_new)
         else:
-            string_C = f"cos({np.pi:.3f}/{w:.3f}*({self.theta} - {self.theta0:.3f}))"
+            string_C = f"cos({np.pi:.3f}/{w:.3f}({self.theta} - {self.theta0:.3f}))"
             # string_C = "cos(%.3f/%.3f*(%s-(%.3f)))" % (
             #     np.pi,
             #     w,
