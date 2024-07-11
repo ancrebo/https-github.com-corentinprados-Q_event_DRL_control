@@ -137,7 +137,7 @@ class Jet(ABC):
         print(f"Q_new type: {type(Q_new)}")
         print(f"Q_new structure: {Q_new}")
         print(f"Q_new values: {Q_new}\n")
-        print(f"smooth_func: {params['smooth_func']}\n")
+        # print(f"smooth_func: {params['smooth_func']}\n")
 
         # Basic jet variables
         self.name: str = name
@@ -149,6 +149,9 @@ class Jet(ABC):
         self.Vx: str = ""
         self.Vy: str = ""
         self.Vz: str = ""
+        # Jet Action List
+        self.Q_pre: List[float] = Q_pre
+        self.Q_new: List[float] = Q_new
         # Call specialized method to set up the jet geometry
         self.set_geometry(params)
         # Update to this current timestep
@@ -247,7 +250,6 @@ class JetCylinder(Jet):
         print(f"Q_new type: {type(Q_new)}")
         print(f"Q_new structure: {Q_new}")
         print(f"Q_new values: {Q_new}\n")
-
 
         self.Qs_position_z: List[float] = params["Qs_position_z"]
         self.delta_Q_z: float = params["delta_Q_z"]
