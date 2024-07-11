@@ -1051,20 +1051,10 @@ class Environment(Environment):
     # -----------------------------------------------------------------------------------------------------
     # TODO: figure our where the actions in `execute` argument are coming from @pietero
     # TODO: figure out structure/type of actions in `execute` argument @pietero
-    def execute(self, actions: Dict[str, float]) -> Tuple[np.ndarray, bool, float]:
+    def execute(self, actions: np.ndarray) -> Tuple[np.ndarray, bool, float]:
 
-        # DEBUG - find the type/structure of `actions`
-        print(f"\n\n\nActions type: {type(actions)}\n")
-        print(f"Actions structure: {actions}\n")
-        print(f"Actions shape: {actions.shape}\n")
-        print(f"Actions content: {actions}\n")
-
-        print(f"STOPPING THE PROGRAM NOW!!!\n\n\n")
-
-        # Stop the program execution
-        sys.exit()
-
-        action = []
+        action: List[np.ndarray] = []
+        # action = []
         for i in range(self.actions_per_inv):
             action.append(self.optimization_params["norm_Q"] * actions[i])
             action.append(
@@ -1168,6 +1158,7 @@ class Environment(Environment):
                 f"EP_{self.episode_number}",
             )
 
+            # TODO: Do we need to separate these now that JetCylinder/Airfoil/Channel have their own `update` method?
             if self.case == "cylinder":
 
                 for ijet, jet in enumerate(
@@ -1243,10 +1234,13 @@ class Environment(Environment):
 
         elif self.case == "channel":
             # TODO: implement history parameters for channel if needed
-            pass
+            # Raise a not implemented error
+            raise NotImplementedError(
+                "Channel case not implemented yet in `execute` method, line 1236"
+            )
 
         # Compute the reward
-        reward = self.compute_reward()
+        reward: float = self.compute_reward()
         self.save_reward(reward)
         print(f"reward: {reward}")
 
@@ -1272,7 +1266,7 @@ class Environment(Environment):
                 f"Results : \n\tAverage drag : {average_drag}\n\tAverage lift : {average_lift}"
             )
 
-        print("\n\Action : extract the probes")
+        print("\n\nAction : extract the probes")
 
         # Read witness file from behind, last instant (FROM THE INVARIANT running [*,1])
         NWIT_TO_READ = 1

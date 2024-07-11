@@ -5,7 +5,7 @@
 # Pol Suarez, Arnau Miro, Francisco Alcantara, Xavi Garcia
 # 01/02/2023
 from __future__ import print_function, division
-from typing import Optional
+from typing import Optional, List
 
 import os, subprocess
 from configuration import NODELIST, USE_SLURM, DEBUG
@@ -95,7 +95,7 @@ def run_subprocess(
     return retval
 
 
-def detect_system(override=None):
+def detect_system(override: str = None) -> str:
     """
     Test if we are in a cluster or on a local machine
     """
@@ -112,7 +112,7 @@ def detect_system(override=None):
     return out
 
 
-def _slurm_generate_node_list(outfile, num_servers, num_cores_server, **kwargs):
+def _slurm_generate_node_list(outfile, num_servers, num_cores_server, **kwargs) -> None:
     """
     Generate the list of nodes using slurm.
             > num_servers:      number of parallel runs
@@ -181,7 +181,7 @@ def _slurm_generate_node_list(outfile, num_servers, num_cores_server, **kwargs):
         file.write("\n")
 
 
-def _localhost_generate_node_list(outfile, num_servers):
+def _localhost_generate_node_list(outfile, num_servers) -> None:
     """
     Generate the list of nodes for a local run
     """
@@ -195,7 +195,7 @@ def _localhost_generate_node_list(outfile, num_servers):
 
 def generate_node_list(
     override=None, outfile=NODELIST, num_servers=1, num_cores_server=1
-):
+) -> None:
     """
     Detect the system and generate the node list
     """
@@ -206,7 +206,7 @@ def generate_node_list(
         _slurm_generate_node_list(outfile, num_servers, num_cores_server)
 
 
-def read_node_list(file=NODELIST):
+def read_node_list(file: str = NODELIST) -> List[str]:
     """
     Read the list of nodes
     """
@@ -216,7 +216,7 @@ def read_node_list(file=NODELIST):
     return nodelist
 
 
-def printDebug(*args):
+def printDebug(*args) -> None:
     """
     ...
     """
