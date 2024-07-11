@@ -225,6 +225,8 @@ class JetCylinder(Jet):
         super().__init__(
             name, params, Q_pre, Q_new, time_start, dimension, T_smoo, smooth_func
         )
+        self.Qs_position_z: List[float] = params["Qs_position_z"]
+        self.delta_Q_z: List[float] = params["delta_Q_z"]
 
         self.update(
             Q_pre,
@@ -409,6 +411,35 @@ class JetAirfoil(Jet):
     Specialized jet class to deal with jets specificed in cartesian coordinates.
     """
 
+    def __init__(
+        self,
+        name: str,
+        params: Dict[str, Any],
+        Q_pre: float = 0.0,  # TODO: Is this actually a float? Determine type! @pietero
+        Q_new: float = 0.0,  # TODO: Is this actually a float? Determine type! @pietero
+        time_start: float = 0.0,
+        dimension: int = 2,
+        T_smoo: float = 0.2,
+        smooth_func: str = "",
+    ) -> None:
+        """
+        Initialize the JetCylinder class.
+        """
+        super().__init__(
+            name, params, Q_pre, Q_new, time_start, dimension, T_smoo, smooth_func
+        )
+        self.Qs_position_z: List[float] = params["Qs_position_z"]
+        self.delta_Q_z: List[float] = params["delta_Q_z"]
+
+        self.update(
+            Q_pre,
+            Q_new,
+            time_start,
+            smooth_func,
+            Qs_position_z=self.Qs_position_z,
+            delta_Q_z=self.delta_Q_z,
+        )
+
     def set_geometry(self, params):
         """
         Specialized method that sets up the geometry of the jet
@@ -509,6 +540,10 @@ class JetChannel(Jet):
         super().__init__(
             name, params, Q_pre, Q_new, time_start, dimension, T_smoo, smooth_func
         )
+        self.Qs_position_z: List[float] = params["Qs_position_z"]
+        self.delta_Q_z: List[float] = params["delta_Q_z"]
+        self.Qs_position_x: List[float] = params["Qs_position_x"]
+        self.delta_Q_x: float = params["delta_Q_x"]
 
         self.update(
             Q_pre,
