@@ -24,9 +24,10 @@ from configuration import ALYA_ULTCL
 # Run the cleaner
 run_subprocess("./", ALYA_ULTCL, "", preprocess=True)
 
+# TODO: Add argument for which case to run??? @pietero
 # Set up which case to run
 training_case = (
-    "channel_3D_MARL_coco"  # cylinder_2D, airfoil_2D, cylinder_3D, channel_3D_MARL_coco
+    "cylinder_3D_WS_test"  # cylinder_2D, airfoil_2D, cylinder_3D, channel_3D_MARL_coco
 )
 run_subprocess(
     "./", "rm -f", "parameters.py", preprocess=True

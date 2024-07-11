@@ -66,12 +66,12 @@ Parabolic_max_velocity: float = 1.5
 
 num_nodes_srun: int = 24
 # nb_proc = 100 * num_nodes_srun  # Number of calculation processors
-nb_proc: int = 18   # Local??
+nb_proc: int = 18  # Local??
 # num_servers = 6  # number of environment in parallel
-num_servers: int = 1    # Local??
+num_servers: int = 1  # Local??
 
 # proc_per_node = 128
-proc_per_node: int = 32 # Local??
+proc_per_node: int = 32  # Local??
 # proc_per_node = int(os.getenv('SLURM_NTASKS_PER_NODE'))*int(os.getenv('SLURM_CPUS_PER_TASK'))
 
 mem_per_node: int = 210000  # MB RAM in each node
@@ -87,15 +87,14 @@ num_episodes: int = 2000  # Total number of episodes
 if Re_case != 5:
     nb_actuations: int = 2  # Number of actuation of the neural network for each episode
 else:
-    nb_actuations: int = 150  # TODO: debugging! (i estimate 200... OJO! for N6 150 is in the limit for 24h :( ))
+    nb_actuations: int = (
+        150  # TODO: debugging! (i estimate 200... OJO! for N6 150 is in the limit for 24h :( ))
+    )
 
 nb_actuations_deterministic: int = nb_actuations * 10
 
 ### **********************************************************
 ### MULTI-ENVIRONMENT SETUP FOR WORKSTATIONS **********************************
-
-
-
 
 
 ### *****************************************************
@@ -118,15 +117,21 @@ else:
 ### *****************************************************
 ### TIMESCALES ******************************************
 
-baseline_duration: float = 5.003E+00  # to converge with velocity max = 1 (CHANGE THIS TO SAME AS TEST BASELINE DURATION)
+baseline_duration: float = (
+    5.003e00  # to converge with velocity max = 1 (CHANGE THIS TO SAME AS TEST BASELINE DURATION)
+)
 baseline_time_start: float = 0.0
 
 delta_t_smooth: float = 0.25  # ACTION DURATION smooth law duration
-delta_t_converge: float = 0.0  # Total time that the DRL waits before executing a new action
+delta_t_converge: float = (
+    0.0  # Total time that the DRL waits before executing a new action
+)
 smooth_func: str = (
     "EXPONENTIAL"  # 'LINEAR', 'EXPONENTIAL', 'CUBIC' (# TODO: cubic is still not coded)
 )
-short_spacetime_func: bool = False  # override smooth func --> TODO: need to fix string size --> FIXED in def_kintyp_functions.f90 (waiting for merging)
+short_spacetime_func: bool = (
+    False  # override smooth func --> TODO: need to fix string size --> FIXED in def_kintyp_functions.f90 (waiting for merging)
+)
 
 ### *****************************************************
 ### FLUID PROPERTIES ************************************
@@ -161,12 +166,16 @@ offset_reward: float = offset_reward_list[Re_case]
 ### *****************************************************
 ### JET SETUP *******************************************
 
-norm_Q: float = 0.176  # (0.088/2)/5 asa said in papers, limited Q for no momentum or discontinuities in the CFD solver
+norm_Q: float = (
+    0.176  # (0.088/2)/5 asa said in papers, limited Q for no momentum or discontinuities in the CFD solver
+)
 
 # location jet over the cylinder 0 is top centre
 jet_angle: float = 0
 
-nz_Qs: int = nb_inv_per_CFD  ## DEBUG param --> define how many Qs to control in the span (needs to define Q profile)
+nz_Qs: int = (
+    nb_inv_per_CFD  ## DEBUG param --> define how many Qs to control in the span (needs to define Q profile)
+)
 
 ## it will place many slices of witness as Qs locations we have
 
@@ -179,9 +188,14 @@ for nq in range(nz_Qs):
 print("Jets are placed in Z coordinates: ", Qs_position_z)
 
 
-
 # TODO: Update `jets_definition` for channel case instead of cylinder case @canordq
-jets_definition: Dict[str, Union[Dict[str, Union[int, float, list[float], bool]], Dict[str, Union[int, float, list[float], bool]]]] = {
+jets_definition: Dict[
+    str,
+    Union[
+        Dict[str, Union[int, float, List[float], bool]],
+        Dict[str, Union[int, float, List[float], bool]],
+    ],
+] = {
     "JET_TOP": {
         "width": 10,
         "radius": radius,
