@@ -371,7 +371,7 @@ class JetCylinder(Jet):
                 # string_all_Q_pre += "+ %s*(%.4f)" % (string_heav, Q_pre[i])
                 string_all_Q_new += f"+ {string_heav}{Q_new[i]:.4f}"
                 # string_all_Q_new += "+ %s*(%.4f)" % (string_heav, Q_new[i])
-            string_Q = f"(({string_all_Q_pre}) + ({string_h})*(({string_all_Q_new})-({string_all_Q_pre})))"
+            string_Q = f"(({string_all_Q_pre}) + ({string_h})(({string_all_Q_new})-({string_all_Q_pre})))"
             # string_Q = "((%s) + (%s)*((%s)-(%s)))" % (
             #     string_all_Q_pre,
             #     string_h,
@@ -394,7 +394,7 @@ class JetCylinder(Jet):
             #     self.theta,
             #     self.theta0,
             # )
-            return f"({scale:.1f})*({string_Q})*({string_C})"
+            return f"({scale:.1f})({string_Q})({string_C})"
 
     @staticmethod
     def normalize_angle(angle: float) -> float:
