@@ -241,12 +241,13 @@ class JetCylinder(Jet):
 
         self.Qs_position_z: List[float] = params["Qs_position_z"]
         self.delta_Q_z: float = params["delta_Q_z"]
+        self.smooth_func = params["smooth_func"]
 
         self.update(
             Q_pre,
             Q_new,
             time_start,
-            smooth_func,
+            self.smooth_func,
             Qs_position_z=self.Qs_position_z,
             delta_Q_z=self.delta_Q_z,
         )
