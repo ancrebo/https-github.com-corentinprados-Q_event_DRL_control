@@ -40,8 +40,13 @@ def atan2_str(X: str, Y: str) -> str:
 
 
 # Smoothing functions
-# TODO: fix typing for Qnew and Qpre @pietero
-def Q_smooth_linear(Qnew: float, Qpre: float, timestart: float, Tsmooth: float) -> str:
+# TODO: fix typing for Q_new and Q_pre @pietero
+[]
+
+
+def Q_smooth_linear(
+    Qnew: np.array, Qpre: np.array, timestart: float, Tsmooth: float
+) -> str:
     """
     Linear smoothing law:
         Q(t) = (Qn - Qs)*(t - ts)/Tsmooth + Qs
@@ -67,7 +72,7 @@ def Q_smooth_exp(ts: float, Tsmooth: float) -> str:
     t1 = ts
     t2 = ts + Tsmooth
 
-    xp = f"(pos((t-{t1:.2f})/{t2 - t1:%.2f}))"
+    xp = f"(pos((t-{t1:.2f})/{t2 - t1:.2f}))"
     f1 = f"exp(-1/{xp})"
     f2 = f"exp(-1/pos(1-{xp}))"
     h = f"{f1}/({f1}+{f2})"
@@ -99,8 +104,8 @@ class Jet(ABC):
         self,
         name: str,
         params: Dict[str, Dict[str, Any]],
-        Q_pre: float = 0.0,
-        Q_new: float = 0.0,
+        Q_pre: List[float] = None,
+        Q_new: List[float] = None,
         time_start: float = 0.0,
         dimension: int = 2,
         T_smoo: float = 0.2,
@@ -117,6 +122,20 @@ class Jet(ABC):
             short_spacetime_func,
             nb_inv_per_CFD,
         )
+
+        if Q_new is None:
+            Q_new = [0.0]
+        if Q_pre is None:
+            Q_pre = [0.0]
+
+        # DEBUG: print Q_pre and Q_new type, structure, and values
+        print(f"\nJet init:\n")
+        print(f"Q_pre type: {type(Q_pre)}")
+        print(f"Q_pre structure: {Q_pre}")
+        print(f"Q_pre values: {Q_pre}")
+        print(f"Q_new type: {type(Q_new)}")
+        print(f"Q_new structure: {Q_new}")
+        print(f"Q_new values: {Q_new}\n")
 
         # Basic jet variables
         self.name: str = name
@@ -139,8 +158,8 @@ class Jet(ABC):
     @abstractmethod
     def update(
         self,
-        Q_pre: float,
-        Q_new: float,
+        Q_pre: List[float],
+        Q_new: List[float],
         time_start: float,
         smooth_func: str,
         *args: Any,
@@ -177,8 +196,8 @@ class Jet(ABC):
     @abstractmethod
     def create_smooth_funcs(
         self,
-        Q_new: float,
-        Q_pre: float,
+        Q_new: List[float],
+        Q_pre: List[float],
         time_start: float,
         T_smoo: float,
         smooth_func: str,
@@ -203,8 +222,8 @@ class JetCylinder(Jet):
         self,
         name: str,
         params: Dict[str, Any],
-        Q_pre: float = 0.0,
-        Q_new: float = 0.0,
+        Q_pre: List[float] = None,
+        Q_new: List[float] = None,
         time_start: float = 0.0,
         dimension: int = 2,
         T_smoo: float = 0.2,
@@ -217,6 +236,9 @@ class JetCylinder(Jet):
             name, params, Q_pre, Q_new, time_start, dimension, T_smoo, smooth_func
         )
 
+        self.Qs_position_z: List[float] = params["Qs_position_z"]
+        self.delta_Q_z: float = params["delta_Q_z"]
+
         self.update(
             Q_pre,
             Q_new,
@@ -228,8 +250,8 @@ class JetCylinder(Jet):
 
     def update(
         self,
-        Q_pre: float,
-        Q_new: float,
+        Q_pre: List[float],
+        Q_new: List[float],
         time_start: float,
         smooth_func: str,
         *args: Any,
@@ -241,16 +263,21 @@ class JetCylinder(Jet):
         per each of the child classes.
         """
         Qs_position_z: List[float] = kwargs.get("Qs_position_z")
-        delta_Q_z: List[float] = kwargs.get("delta_Q_z")
+        delta_Q_z: float = kwargs.get("delta_Q_z")
+
+        if Qs_position_z is None:
+            raise ValueError("Missing required keyword arguments: 'Qs_position_z'")
+        if delta_Q_z is None:
+            raise ValueError("Missing required keyword arguments: 'delta_Q_z'")
 
         # Up # TODO: IS THIS NECESSARY? I think all of these were just updated @pietero
-        # TODO: fix typing for Qnew and Qpre @pietero
+        # TODO: fix typing for Q_new and Q_pre @pietero
         self.Q_pre = Q_pre
         self.Q_new = Q_new
         self.time_start: float = time_start
         self.smooth_func: str = smooth_func
         self.Qs_position_z: List[float] = Qs_position_z
-        self.delta_Q_z: List[float] = delta_Q_z
+        self.delta_Q_z: float = delta_Q_z
 
         # Call the specialized method that creates a smoothing function for the current time
         smooth_fun: str = self.create_smooth_funcs(
@@ -259,8 +286,8 @@ class JetCylinder(Jet):
             self.time_start,
             self.T_smoo,
             self.smooth_func,
-            self.Qs_position_z,
-            self.delta_Q_z,
+            Qs_position_z=self.Qs_position_z,
+            delta_Q_z=self.delta_Q_z,
         )
 
         # Create the velocities (function?) using the smoothing functions,
@@ -278,28 +305,26 @@ class JetCylinder(Jet):
         """
         Specialized method that sets up the geometry of the jet, including importing Qs_position_z and delta_Q_z
         """
-        from parameters import cylinder_coordinates, Qs_position_z, delta_Q_z
+        from parameters import cylinder_coordinates
 
         # Sanity check
         # TODO: asserts are dangerous... we need a function that stops everything!!
         if params["width"] <= 0.0:
-            raise ValueError("Invalid jet width=%f" % params["width"])
+            raise ValueError(f"Invalid jet width={params['width']}")
         if params["radius"] <= 0.0:
-            raise ValueError("Invalid jet radius=%f" % params["radius"])
+            raise ValueError(f"Invalid jet radius={params['radius']}")
         if params["positions_angle"] <= 0.0:
-            raise ValueError("Invalid jet angle=%f" % params["positions_angle"])
+            raise ValueError(f"Invalid jet angle={params['positions_angle']}")
         # Recover parameters from dictionary
         self.radius: float = params["radius"]
         self.width: float = params["width"]
         self.theta0: float = self.normalize_angle(np.deg2rad(params["positions_angle"]))
         self.theta: str = self.get_theta(cylinder_coordinates)
-        self.Qs_position_z: List[float] = Qs_position_z
-        self.delta_Q_z: List[float] = delta_Q_z
 
     def create_smooth_funcs(
         self,
-        Q_new: Dict[str, float],
-        Q_pre: Dict[str, float],
+        Q_new: List[float],
+        Q_pre: List[float],
         time_start: float,
         T_smoo: float,
         smooth_func: str,
@@ -309,13 +334,13 @@ class JetCylinder(Jet):
         """
         Specialized method that creates the smooth functions for cylinder cases
         """
-        Qs_position_z = kwargs.get("Qs_position_z")
-        delta_Q_z = kwargs.get("delta_Q_z")
+        Qs_position_z: List[float] = kwargs.get("Qs_position_z")
+        delta_Q_z: float = kwargs.get("delta_Q_z")
 
-        if Qs_position_z is None or delta_Q_z is None:
-            raise ValueError(
-                "Missing required keyword arguments: 'Qs_position_z' and/or 'delta_Q_z'"
-            )
+        if Qs_position_z is None:
+            raise ValueError("Missing required keyword arguments: 'Qs_position_z'")
+        if delta_Q_z is None:
+            raise ValueError("Missing required keyword arguments: 'delta_Q_z'")
 
         w = self.width * (np.pi / 180)  # deg2rad
         scale = np.pi / (2.0 * w * self.radius)  #### FIX: NOT R**2 --> D
@@ -331,37 +356,23 @@ class JetCylinder(Jet):
 
             # create the new Q string
             string_heav = heav_func(Qs_position_z[0], delta_Q_z)
-            string_all_Q_pre = f"{string_heav}*{Q_pre[0]:.4f}"
-            # string_all_Q_pre = "%s*(%.4f)" % (string_heav, Q_pre[0])
-            string_all_Q_new = f"{string_heav}*{Q_new[0]:.4f}"
-            # string_all_Q_new = "%s*(%.4f)" % (string_heav, Q_new[0])
+            string_all_Q_pre = f"{string_heav}*({Q_pre[0]:.4f})"
+            string_all_Q_new = f"{string_heav}*({Q_new[0]:.4f})"
 
             for i in range(1, self.nb_inv_per_CFD):
                 string_heav = heav_func(Qs_position_z[i], delta_Q_z)
-                string_all_Q_pre += f"+ {string_heav}*{Q_pre[i]:.4f}"
-                # string_all_Q_pre += "+ %s*(%.4f)" % (string_heav, Q_pre[i])
-                string_all_Q_new += f"+ {string_heav}*{Q_new[i]:.4f}"
-                # string_all_Q_new += "+ %s*(%.4f)" % (string_heav, Q_new[i])
-            string_Q = "((%s) + (%s)*((%s)-(%s)))" % (
-                string_all_Q_pre,
-                string_h,
-                string_all_Q_new,
-                string_all_Q_pre,
-            )
+                string_all_Q_pre += f"+ {string_heav}*({Q_pre[i]:.4f})"
+                string_all_Q_new += f"+ {string_heav}*({Q_new[i]:.4f})"
+            string_Q = f"(({string_all_Q_pre}) + ({string_h})*(({string_all_Q_new})-({string_all_Q_pre})))"
 
         else:
             string_Q = Q_smooth_linear(Q_new, Q_pre, time_start, T_smoo)
 
         if self.short_spacetime_func == True:
             # just with Qnorm*Qi -- no projection or smoothing in time/space
-            return "(%.1f)*(%s)" % (scale, string_all_Q_new)
+            return f"({scale:.1f})({string_all_Q_new})"
         else:
-            string_C = "cos(%.3f/%.3f*(%s-(%.3f)))" % (
-                np.pi,
-                w,
-                self.theta,
-                self.theta0,
-            )
+            string_C = f"cos({np.pi:.3f}/{w:.3f}*({self.theta}-({self.theta0:.3f})))"
             return f"({scale:.1f})*({string_Q})*({string_C})"
 
     @staticmethod
@@ -385,11 +396,41 @@ class JetCylinder(Jet):
         Y = f"(y - {cylinder_coordinates[1]})"
         return atan2_str(X, Y)
 
+
 # TODO: finish updating JetAirfoil for new base class code @pietero
 class JetAirfoil(Jet):
     """
     Specialized jet class to deal with jets specificed in cartesian coordinates.
     """
+
+    def __init__(
+        self,
+        name: str,
+        params: Dict[str, Any],
+        Q_pre: List[float] = None,
+        Q_new: List[float] = None,
+        time_start: float = 0.0,
+        dimension: int = 2,
+        T_smoo: float = 0.2,
+        smooth_func: str = "",
+    ) -> None:
+        """
+        Initialize the JetCylinder class.
+        """
+        super().__init__(
+            name, params, Q_pre, Q_new, time_start, dimension, T_smoo, smooth_func
+        )
+        self.Qs_position_z: List[float] = params["Qs_position_z"]
+        self.delta_Q_z: float = params["delta_Q_z"]
+
+        self.update(
+            Q_pre,
+            Q_new,
+            time_start,
+            smooth_func,
+            Qs_position_z=self.Qs_position_z,
+            delta_Q_z=self.delta_Q_z,
+        )
 
     def set_geometry(self, params):
         """
@@ -422,8 +463,8 @@ class JetAirfoil(Jet):
 
     def create_smooth_funcs(
         self,
-        Q_new: float,
-        Q_pre: float,
+        Q_new: List[float],
+        Q_pre: List[float],
         time_start: float,
         T_smoo: float,
         smooth_func: str,
@@ -432,8 +473,10 @@ class JetAirfoil(Jet):
         """
         Specialized method that creates the smooth functions
         """
-        Qs_position_z: List[float] = kwargs.get("Qs_position_z")
-        delta_Q_z: List[float] = kwargs.get("delta_Q_z")
+        Qs_position_z: List[float] = kwargs.get(
+            "Qs_position_z"
+        )  # TODO: Determine type! @pietero
+        delta_Q_z: float = kwargs.get("delta_Q_z")  # Determine type! @pietero
 
         if Qs_position_z is None or delta_Q_z is None:
             raise ValueError(
@@ -463,6 +506,7 @@ class JetAirfoil(Jet):
         Y = "({}-({}))".format(self.x1, self.x2)
         return atan2_str(X, Y)
 
+
 # TODO: finish updating JetChannel for new base class code and channel-specific stuff @pietero
 class JetChannel(Jet):
     # TODO: implement this class for channel
@@ -475,8 +519,8 @@ class JetChannel(Jet):
         self,
         name: str,
         params: Dict[str, Any],
-        Q_pre: float = 0.0,
-        Q_new: float = 0.0,
+        Q_pre: List[float] = None,
+        Q_new: List[float] = None,
         time_start: float = 0.0,
         dimension: int = 2,
         T_smoo: float = 0.2,
@@ -488,6 +532,10 @@ class JetChannel(Jet):
         super().__init__(
             name, params, Q_pre, Q_new, time_start, dimension, T_smoo, smooth_func
         )
+        self.Qs_position_z: List[float] = params["Qs_position_z"]
+        self.delta_Q_z: float = params["delta_Q_z"]
+        self.Qs_position_x: List[float] = params["Qs_position_x"]
+        self.delta_Q_x: float = params["delta_Q_x"]
 
         self.update(
             Q_pre,
@@ -502,8 +550,8 @@ class JetChannel(Jet):
 
     def update(
         self,
-        Q_pre: float,
-        Q_new: float,
+        Q_pre: List[float],
+        Q_new: List[float],
         time_start: float,
         smooth_func: str,
         *args: Any,
@@ -529,150 +577,82 @@ class JetChannel(Jet):
         # Sanity check
         # TODO: asserts are dangerous... we need a function that stops everything!!
         if params["width"] <= 0.0:
-            raise ValueError("Invalid jet width=%f" % params["width"])
+            raise ValueError(f"Invalid jet width=%f" % params["width"])
         if params["radius"] <= 0.0:
             raise ValueError("Invalid jet radius=%f" % params["radius"])
         if params["positions_angle"] <= 0.0:
             raise ValueError("Invalid jet angle=%f" % params["positions_angle"])
+
         # Recover parameters from dictionary
         self.radius: float = params["radius"]
         self.width: float = params["width"]
         self.theta0: float = self.normalize_angle(np.deg2rad(params["positions_angle"]))
         self.theta: str = self.get_theta(cylinder_coordinates)
         self.Qs_position_z: List[float] = Qs_position_z
-        self.delta_Q_z: List[float] = delta_Q_z
+        self.delta_Q_z: float = delta_Q_z
         self.Qs_position_x: List[float] = Qs_position_x
-        self.delta_Q_x: List[float] = delta_Q_x
-
-    def create_smooth_funcs(
-        self,
-        Q_new: float,
-        Q_pre: float,
-        time_start: float,
-        T_smoo: float,
-        smooth_func: str,
-        *args: Any,
-        **kwargs: Any,
-    ) -> str:
-        """
-        Specialized method that creates the smooth functions
-        """
-        Qs_position_x = kwargs.get("Qs_position_x")
-        delta_Q_x = kwargs.get("delta_Q_x")
-        Qs_position_z = kwargs.get("Qs_position_z")
-        delta_Q_z = kwargs.get("delta_Q_z")
-
-        if (
-            Qs_position_z is None
-            or delta_Q_z is None
-            or Qs_position_x is None
-            or delta_Q_x is None
-        ):
-            raise ValueError(
-                "Missing required keyword arguments: 'Qs_position_z' and/or 'delta_Q_z' and/or 'Qs_position_x' and/or 'delta_Q_x'"
-            )
-
-        string_all_Q_pre = "0"
-        string_all_Q_new = "0"
-        string_heav = ""
-
-        if smooth_func == "EXPONENTIAL":
-
-            ## Q_pre and Q_new --> list! with nz_Qs dimensions
-            string_h = Q_smooth_exp(time_start, T_smoo)
-
-            # create the new Q string
-            string_heav = heav_func(Qs_position_z[0], delta_Q_z)
-            string_all_Q_pre = f"{string_heav}*{Q_pre[0]:.4f}"
-            string_all_Q_new = f"{string_heav}*{Q_new[0]:.4f}"
-
-            for i in range(1, self.nb_inv_per_CFD):
-                string_heav = heav_func(Qs_position_z[i], delta_Q_z)
-                string_all_Q_pre += f"+ {string_heav}*{Q_pre[i]:.4f}"
-                string_all_Q_new += f"+ {string_heav}*{Q_new[i]:.4f}"
-            string_Q = "((%s) + (%s)*((%s)-(%s)))" % (
-                string_all_Q_pre,
-                string_h,
-                string_all_Q_new,
-                string_all_Q_pre,
-            )
-
-        else:
-            string_Q = Q_smooth_linear(Q_new, Q_pre, time_start, T_smoo)
-
-        if self.short_spacetime_func == True:
-            # just with Qnorm*Qi -- no projection or smoothing in time/space
-            return "(%.1f)*(%s)" % (scale, string_all_Q_new)
-        else:
-            string_C = "cos(%.3f/%.3f*(%s-(%.3f)))" % (
-                np.pi,
-                w,
-                self.theta,
-                self.theta0,
-            )
-            return f"({scale:.1f})*({string_Q})*({string_C})"
-
-        pass
+        self.delta_Q_x: float = delta_Q_x
 
     # TODO: adjust this function for 2D channel
-    def create_smooth_funcs_2D(
+    def create_smooth_funcs(
         self,
-        Q_new: list,
-        Q_pre: list,
+        Q_new: List[float],
+        Q_pre: List[float],
         time_start: float,
         T_smoo: float,
         smooth_func: str,
-        Qs_position_z: list,
-        delta_Q_z: float,
-        Qs_position_x: list,
-        delta_Q_x: float,
+        **kwargs: Any,
     ) -> str:
         """
         Specialized method that creates the smooth functions in 2D
         """
 
+        Qs_position_z: List[float] = kwargs.get("Qs_position_z")
+        delta_Q_z: float = kwargs.get("delta_Q_z")
+        Qs_position_x: List[float] = kwargs.get("Qs_position_x")
+        delta_Q_x: float = kwargs.get("delta_Q_x")
+
         # scale = ? for channel
-        w = self.width * (np.pi / 180)  # deg2rad
-        scale = np.pi / (2.0 * w * self.radius)  #### FIX: NOT R**2 --> D
+        w = 1.0  # TODO: fix this with correct width?
+        # w = self.width * (np.pi / 180)  # deg2rad
+        scale = 1.0  # TODO: fix this with correct scaling value
+        # scale = np.pi / (2.0 * w * self.radius)  #### FIX: NOT R**2 --> D
 
         string_all_Q_pre = "0"
         string_all_Q_new = "0"
         string_heav = ""
 
+        # TODO: implement smoothing for channel case
         if smooth_func == "EXPONENTIAL":
 
             ## Q_pre and Q_new --> list! with nz_Qs dimensions
             string_h = Q_smooth_exp(time_start, T_smoo)
 
             # create the new Q string
+            # ??? string_Q_new format: heav(z1)*heav(x1)*Q1,1 + heav(z1)*heav(x2)*Q1,2 + ... + heav(z2)*heav(x1)*Q2,1 + ...
+            # need to iterate over every existing agent pair
             string_heav = heav_func(Qs_position_z[0], delta_Q_z)
-            string_all_Q_pre = "%s*(%.4f)" % (string_heav, Q_pre[0])
-            string_all_Q_new = "%s*(%.4f)" % (string_heav, Q_new[0])
+            string_all_Q_pre = f"{string_heav}*({Q_pre[0]:.4f})"
+            string_all_Q_new = f"{string_heav}*({Q_new[0]:.4f})"
 
             for i in range(1, self.nb_inv_per_CFD):
                 string_heav = heav_func(Qs_position_z[i], delta_Q_z)
-                string_all_Q_pre += "+ %s*(%.4f)" % (string_heav, Q_pre[i])
-                string_all_Q_new += "+ %s*(%.4f)" % (string_heav, Q_new[i])
-            string_Q = "((%s) + (%s)*((%s)-(%s)))" % (
-                string_all_Q_pre,
-                string_h,
-                string_all_Q_new,
-                string_all_Q_pre,
-            )
+                string_all_Q_pre += f"+ {string_heav}*({Q_pre[i]:.4f})"
+                string_all_Q_new += f"+ {string_heav}*({Q_new[i]:.4f})"
+            string_Q = f"(({string_all_Q_pre}) + ({string_h})*(({string_all_Q_new})-({string_all_Q_pre})))"
 
-        else:
+        elif smooth_func == "LINEAR":
             string_Q = Q_smooth_linear(Q_new, Q_pre, time_start, T_smoo)
+        else:
+            raise ValueError(
+                "JetChannel: `create_smooth_funcs` method: Invalid smoothing function `smooth_func`"
+            )
 
         if self.short_spacetime_func == True:
             # just with Qnorm*Qi -- no projection or smoothing in time/space
-            return "(%.1f)*(%s)" % (scale, string_all_Q_new)
+            return f"({scale:.1f})({string_all_Q_new})"
         else:
-            string_C = "cos(%.3f/%.3f*(%s-(%.3f)))" % (
-                np.pi,
-                w,
-                self.theta,
-                self.theta0,
-            )
-            return "(%.1f)*(%s)*(%s)" % (scale, string_Q, string_C)
+            string_C = f"cos({np.pi:.3f}/{w:.3f}*({self.theta}-({self.theta0:.3f})))"
+            return f"({scale:.1f})*({string_Q})*({string_C})"
 
     pass

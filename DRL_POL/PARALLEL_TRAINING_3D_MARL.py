@@ -135,10 +135,12 @@ def split(environment, np):  # called 1 time in PARALLEL_TRAINING.py
     return list_inv_envs
 
 
-### Here the array of environments is defined, will be n-1 host (the 1st one is MASTER) #TODO: assign more nodes to an environment:
+### Here the array of environments is defined, will be n-1 host (the 1st one is MASTER)
+# #TODO: assign more nodes to an environment:
 print("Here is the nodelist: ", nodelist)
 
-# here the array of environments is defined, will be n-1 host (the 1st one is MASTER) #TODO: assign more nodes to an environment
+# here the array of environments is defined, will be n-1 host (the 1st one is MASTER)
+# #TODO: assign more nodes to an environment
 parallel_environments = [
     Environment(
         simu_name=simu_name,

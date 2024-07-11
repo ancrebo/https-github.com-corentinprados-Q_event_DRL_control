@@ -14,21 +14,23 @@ from configuration import ALYA_GMSH, ALYA_INCON
 from env_utils import run_subprocess
 
 
-def run_mesh(runpath, casename, ndim, ini_vel=["0", "0", "0"]):
+def run_mesh(runpath, casename, ndim, ini_vel=None):
     """
     Use pyAlya tools to generate the mesh from gmsh
     """
     # Build arguments string
     # Convert from GMSH to ALYA
+    if ini_vel is None:
+        ini_vel = ["0", "0", "0"]
     args = "-2 " if ndim == 2 else ""
-    args += "-c %s %s" % (casename, casename)
+    args += f"-c {casename} {casename}"
     run_subprocess(os.path.join(runpath, "mesh"), ALYA_GMSH, args)
     # TODO: generate periodicity if applicable
     # Generate initial condition
-    args = "--vx %s --vy %s " % (ini_vel[0], ini_vel[1])
+    args = f"--vx {ini_vel[0]} --vy {ini_vel[1]} "
     if len(ini_vel) > 2:
-        args += "--vz %s " % ini_vel[2]
-    args += "%s" % casename
+        args += f"--vz {ini_vel[2]} "
+    args += f"{casename}"
     run_subprocess(os.path.join(runpath, "mesh"), ALYA_INCON, args)
     # Symbolic link the mesh to the case main folder
     run_subprocess(runpath, "ln", "-s mesh/*.mpio.bin .")
@@ -41,11 +43,11 @@ def write_case_file(filepath: str, casename: str, simu_name: str) -> None:
     """
     Writes the casename.dat file
     """
-    file = open(os.path.join(filepath, "%s.dat" % casename), "w")
+    file = open(os.path.join(filepath, f"{casename}.dat"), "w")
     file.write(
-        """$-------------------------------------------------------------------
+        f"""$-------------------------------------------------------------------
 RUN_DATA
-  ALYA:                   %s
+  ALYA:                   {simu_name}
   INCLUDE                 run_type.dat
   LATEX_INFO_FILE:        YES
   LIVE_INFORMATION:       Screen
@@ -76,7 +78,6 @@ MPI_IO:        ON
   POSTPROCESS: ON
 END_MPI_IO
 $-------------------------------------------------------------------"""
-        % simu_name
     )
     file.close()
 
@@ -87,7 +88,7 @@ def write_run_type(filepath: str, type: str, freq: int = 1) -> None:
     """
     file = open(os.path.join(filepath, "run_type.dat"), "w")
     # Write file
-    file.write("RUN_TYPE: %s, PRELIMINARY, FREQUENCY=%d\n" % (type, freq))
+    file.write(f"RUN_TYPE: {type}, PRELIMINARY, FREQUENCY={freq}\n")
     file.close()
 
 
@@ -97,7 +98,7 @@ def write_time_interval(filepath: str, start_time: float, end_time: float) -> No
     """
     file = open(os.path.join(filepath, "time_interval.dat"), "w")
     # Write file
-    file.write("TIME_INTERVAL: %f, %f\n" % (start_time, end_time))
+    file.write(f"TIME_INTERVAL: {start_time}, {end_time}\n")
     file.close()
 
 
@@ -165,7 +166,13 @@ $-------------------------------------------------------------"""
     file.close()
 
 
-def write_ker_file(filepath: str, casename: str, jetlist: List[str], steps: int, postprocess: List[str] = []) -> None:
+def write_ker_file(
+    filepath: str,
+    casename: str,
+    jetlist: List[str],
+    steps: int,
+    postprocess: List[str] = [],
+) -> None:
     """
     THIS FUNCTION IS CURRENTLY UNUSED as of July 10, 2024
 
@@ -176,13 +183,13 @@ def write_ker_file(filepath: str, casename: str, jetlist: List[str], steps: int,
     # Create jet includes
     jet_includes = ""
     for jet in jetlist:
-        jet_includes += "    INCLUDE %s.dat\n" % jet
+        jet_includes += f"    INCLUDE {jet}.dat\n"
     # Create variable postprocess
     var_includes = ""
     for var in postprocess:
-        var_includes += "  POSTPROCESS %s\n" % var
+        var_includes += f"  POSTPROCESS {var}\n"
     # Write file
-    file = open(os.path.join(filepath, "%s.ker.dat" % casename), "w")
+    file = open(os.path.join(filepath, f"{casename}.ker.dat"), "w")
     file.write(
         """$------------------------------------------------------------
 PHYSICAL_PROBLEM
@@ -230,8 +237,8 @@ def write_physical_properties(filepath: str, rho: float, mu: float) -> None:
     file = open(os.path.join(filepath, "physical_properties.dat"), "w")
     # Write file
     file.write("MATERIAL: 1\n")
-    file.write("  DENSITY:   CONSTANT, VALUE=%f\n" % rho)
-    file.write("  VISCOSITY: CONSTANT: VALUE=%f\n" % mu)
+    file.write(f"  DENSITY:   CONSTANT, VALUE={rho}\n")
+    file.write(f"  VISCOSITY: CONSTANT, VALUE={mu}\n")
     file.write("END_MATERIAL\n")
     file.close()
 
@@ -242,9 +249,9 @@ def write_inflow_file(filepath: str, functions: List[str]) -> None:
     """
     file = open(os.path.join(filepath, "inflow.dat"), "w")
     # Write file
-    file.write("FUNCTION=INFLOW, DIMENSION=%d\n" % len(functions))
+    file.write(f"FUNCTION=INFLOW, DIMENSION={len(functions)}\n")
     for f in functions:
-        file.write("  %s\n" % f)
+        file.write(f"  {f}\n")
     file.write("END_FUNCTION\n")
     file.close()
 
@@ -253,11 +260,11 @@ def write_jet_file(filepath: str, name: str, functions: List[str]) -> None:
     """
     Writes the inflow file that is included in the .ker.dat
     """
-    file = open(os.path.join(filepath, "%s.dat" % name), "w")
+    file = open(os.path.join(filepath, f"{name}.dat"), "w")
     # Write file
-    file.write("FUNCTION=%s, DIMENSION=%d\n" % (name.upper(), len(functions)))
+    file.write(f"FUNCTION={name.upper()}, DIMENSION={len(functions)}\n")
     for f in functions:
-        file.write("  %s\n" % f)
+        file.write(f"  {f}\n")
     file.write("END_FUNCTION\n")
     file.close()
 
@@ -271,14 +278,14 @@ def write_witness_file(filepath: str, probes_positions: np.ndarray) -> None:
     # Open file for writing
     file = open(os.path.join(filepath, "witness.dat"), "w")
     # Write header
-    file.write("WITNESS_POINTS, NUMBER=%d\n" % nprobes)
+    file.write(f"WITNESS_POINTS, NUMBER={nprobes}\n")
     # Write probes
     if ndim == 2:
         for pos in probes_positions:
-            file.write("%f,%f\n" % (pos[0], pos[1]))
+            file.write(f"{pos[0]},{pos[1]}\n")
     else:
         for pos in probes_positions:
-            file.write("%f,%f,%f\n" % (pos[0], pos[1], pos[2]))
+            file.write(f"{pos[0]},{pos[1]},{pos[2]}\n")
     # Write end
     file.write("END_WITNESS_POINTS\n")
     file.close()
@@ -287,8 +294,8 @@ def write_witness_file(filepath: str, probes_positions: np.ndarray) -> None:
 def write_nsi_file(
     filepath: str,
     casename: str,
-    varlist: List[str] = ["VELOC", "PRESS"],
-    witlist: List[str] = ["VELOX", "VELOY", "VELOZ", "PRESS"],
+    varlist=None,
+    witlist=None,
 ) -> None:
     """
     Write the casename.nsi.dat
@@ -296,17 +303,23 @@ def write_nsi_file(
     postprocess can include VELOC, PRESS, etc.
     """
     # Create variable postprocess
+    if witlist is None:
+        witlist = ["VELOX", "VELOY", "VELOZ", "PRESS"]
+
+    if varlist is None:
+        varlist = ["VELOC", "PRESS"]
+
     var_includes = ""
     for var in varlist:
-        var_includes += "  POSTPROCESS %s\n" % var
+        var_includes += f"  POSTPROCESS {var}\n"
     # Create jet includes
     wit_includes = ""
     for var in witlist:
-        wit_includes += "    %s\n" % var
+        wit_includes += f"    {var}\n"
     # Write file
-    file = open(os.path.join(filepath, "%s.nsi.dat" % casename), "w")
+    file = open(os.path.join(filepath, f"{casename}.nsi.dat"), "w")
     file.write(
-        """$------------------------------------------------------------
+        f"""$------------------------------------------------------------
 PHYSICAL_PROBLEM
   PROBLEM_DEFINITION       
     TEMPORAL_DERIVATIVES:	On  
@@ -363,14 +376,14 @@ $------------------------------------------------------------
 OUTPUT_&_POST_PROCESS
   START_POSTPROCES_AT STEP  = 0
   $ Variables
-%s  
+{var_includes}  
   $ Forces at boundaries
   BOUNDARY_SET
 	  FORCE
   END_BOUNDARY_SET
   $ Variables at witness points
   WITNESS_POINTS
-%s
+{wit_includes}
   END_WITNESS
 END_OUTPUT_&_POST_PROCESS  
 $------------------------------------------------------------
@@ -384,6 +397,5 @@ BOUNDARY_CONDITIONS, NON_CONSTANT
   INCLUDE boundary_codes.dat
 END_BOUNDARY_CONDITIONS  
 $------------------------------------------------------------"""
-        % (var_includes, wit_includes)
     )
     file.close()

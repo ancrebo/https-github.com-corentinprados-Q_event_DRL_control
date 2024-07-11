@@ -1,5 +1,6 @@
 import numpy as np
 import math
+from typing import Tuple
 
 from parameters import variational_input, case
 
@@ -540,7 +541,9 @@ def _avNrms(
         )
 
 
-def compute_avg_lift_drag(ep_num: int, cpuid: str ="", nb_inv: int =-1, global_rew: bool =False) -> Tuple[float, float]:
+def compute_avg_lift_drag(
+    ep_num: int, cpuid: str = "", nb_inv: int = -1, global_rew: bool = False
+) -> Tuple[float, float]:
 
     (
         filename,

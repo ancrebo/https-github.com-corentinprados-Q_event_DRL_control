@@ -11,6 +11,7 @@ AUTHORS ->  POL
 
 ## IMPORT PYTHON LIBRARIES
 import os, csv, numpy as np
+import sys
 import shutil
 import time
 from typing import List, Tuple, Union, Any, Dict
@@ -33,7 +34,8 @@ from parameters import (
     actions_per_inv,
     nb_inv_per_CFD,
     nz_Qs,
-    nx_Qs,  # added for 2D channel
+    Qs_position_z,
+    delta_Q_z,
     mem_per_srun,
     dimension,
     case,
@@ -109,6 +111,14 @@ class Environment(Environment):
         self.Jets: Dict[str, Any] = jets
         self.n_jets: int = len(jets)
         self.nz_Qs: int = nz_Qs
+        self.Qs_position_z: List[float] = Qs_position_z
+        self.delta_Q_z: float = delta_Q_z
+        if self.case == "channel":
+            from parameters import nx_Qs, Qs_position_x, delta_Q_x
+
+            self.nx_Qs: int = nx_Qs
+            self.Qs_position_x: List[float] = Qs_position_x
+            self.delta_Q_x: float = delta_Q_x
         self.actions_per_inv: int = actions_per_inv
         self.nb_inv_per_CFD: int = nb_inv_per_CFD
         self.bound_inv: int = 6 + self.ENV_ID[1]  # 6 is from ALYA boundary code ??
@@ -1049,9 +1059,11 @@ class Environment(Environment):
 
     # -----------------------------------------------------------------------------------------------------
     # TODO: figure our where the actions in `execute` argument are coming from @pietero
-    def execute(self, actions: Dict[float]) -> Tuple[np.ndarray, bool, float]:
+    # TODO: figure out structure/type of actions in `execute` argument @pietero
+    def execute(self, actions: np.ndarray) -> Tuple[np.ndarray, bool, float]:
 
-        action = []
+        action: List[np.ndarray] = []
+        # action = []
         for i in range(self.actions_per_inv):
             action.append(self.optimization_params["norm_Q"] * actions[i])
             action.append(
@@ -1100,11 +1112,11 @@ class Environment(Environment):
                 for i in range(1, self.nb_inv_per_CFD):
                     dir_name = os.path.join(
                         "alya_files",
-                        "%s" % self.host,
+                        f"{self.host}",
                         "1",
-                        "EP_%s" % self.episode_number,
+                        f"EP_{self.episode_number}",
                         "flags_MARL",
-                        "%d_inv_action_%d_ready" % (i, self.action_count),
+                        f"{i}_inv_action_{self.action_count}_ready",
                     )
                     all_actions_ready = True
                     if not os.path.exists(dir_name):
@@ -1121,9 +1133,7 @@ class Environment(Environment):
             # open the file for reading
 
             for i in range(self.nb_inv_per_CFD):
-                path_action_file = "actions/{}/{}_{}/ep_{}/output_actions.csv".format(
-                    self.host, self.ENV_ID[0], i + 1, self.episode_number
-                )
+                path_action_file = f"actions/{self.host}/{self.ENV_ID[0]}_{i+1}/ep_{self.episode_number}/output_actions.csv"
                 with open(path_action_file, "r") as file:
                     # read the lines of the file into a list
                     lines = csv.reader(file, delimiter=";")
@@ -1157,6 +1167,7 @@ class Environment(Environment):
                 f"EP_{self.episode_number}",
             )
 
+            # TODO: Do we need to separate these now that JetCylinder/Airfoil/Channel have their own `update` method?
             if self.case == "cylinder":
 
                 for ijet, jet in enumerate(
@@ -1169,6 +1180,8 @@ class Environment(Environment):
                         self.action_global,
                         self.simulation_timeframe[0],
                         self.smooth_func,
+                        Qs_position_z=self.Qs_position_z,
+                        delta_Q_z=self.delta_Q_z,
                     )
                     # Update the jet profile alya file
                     jet.update_file(simu_path)
@@ -1194,7 +1207,16 @@ class Environment(Environment):
 
             elif self.case == "channel":
                 for ijet, jet in enumerate(self.Jets.values()):
-                    jet.update()  # TODO: make sure this works for channel @pietero
+                    jet.update(
+                        self.previous_action_global,
+                        self.action_global,
+                        self.simulation_timeframe[0],
+                        self.smooth_func,
+                        Qs_position_z=self.Qs_position_z,
+                        delta_Q_z=self.delta_Q_z,
+                        Qs_position_x=self.Qs_position_x,
+                        delta_Q_x=self.delta_Q_x,
+                    )  # TODO: make sure this works for channel @pietero
 
             cr_stop("ENV.actions_MASTER_thread1", 0)
 
@@ -1227,10 +1249,13 @@ class Environment(Environment):
 
         elif self.case == "channel":
             # TODO: implement history parameters for channel if needed
-            pass
+            # Raise a not implemented error
+            raise NotImplementedError(
+                "Channel case not implemented yet in `execute` method, line 1236"
+            )
 
         # Compute the reward
-        reward = self.compute_reward()
+        reward: float = self.compute_reward()
         self.save_reward(reward)
         print(f"reward: {reward}")
 
@@ -1256,7 +1281,7 @@ class Environment(Environment):
                 f"Results : \n\tAverage drag : {average_drag}\n\tAverage lift : {average_lift}"
             )
 
-        print("\n\Action : extract the probes")
+        print("\n\nAction : extract the probes")
 
         # Read witness file from behind, last instant (FROM THE INVARIANT running [*,1])
         NWIT_TO_READ = 1
