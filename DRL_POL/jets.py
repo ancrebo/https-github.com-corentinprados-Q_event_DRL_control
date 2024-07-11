@@ -141,8 +141,8 @@ class Jet(ABC):
 
         # Basic jet variables
         self.name: str = name
-        self.smooth_func = params["smooth_func"]
         self.T_smoo: float = T_smoo
+        self.smooth_func = smooth_func
         self.dimension: int = dimension
         self.theta: float = 0  # to be updated during DRL
         # Jet velocity functions (to be updated during DRL)
@@ -253,7 +253,6 @@ class JetCylinder(Jet):
 
         self.Qs_position_z: List[float] = params["Qs_position_z"]
         self.delta_Q_z: float = params["delta_Q_z"]
-        self.smooth_func = params["smooth_func"]
 
         self.update(
             self.Q_pre,
@@ -288,8 +287,8 @@ class JetCylinder(Jet):
 
         # Up # TODO: IS THIS NECESSARY? I think all of these were just updated @pietero
         # TODO: fix typing for Q_new and Q_pre @pietero
-        self.Q_pre = Q_pre
-        self.Q_new = Q_new
+        self.Q_pre: List[float] = Q_pre
+        self.Q_new: List[float] = Q_new
         self.time_start: float = time_start
         self.smooth_func: str = smooth_func
         self.Qs_position_z: List[float] = Qs_position_z
@@ -383,6 +382,8 @@ class JetCylinder(Jet):
                 string_all_Q_new += f"+ {string_heav}*({Q_new[i]:.4f})"
             string_Q = f"(({string_all_Q_pre}) + ({string_h})*(({string_all_Q_new})-({string_all_Q_pre})))"
         elif self.smooth_func == "LINEAR":
+            string_Q = Q_smooth_linear(Q_new[0], Q_pre[0], time_start, T_smoo)
+        elif self.smooth_func == "":
             string_Q = Q_smooth_linear(Q_new[0], Q_pre[0], time_start, T_smoo)
         else:
             raise ValueError(
