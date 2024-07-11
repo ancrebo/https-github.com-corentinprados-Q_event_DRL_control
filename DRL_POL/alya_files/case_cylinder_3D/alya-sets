@@ -1,0 +1,119 @@
+#!/usr/bin/perl
+#
+#
+print "\n";
+print "--| alya-sets |-- \n";
+print "--| \n";
+print "--| Postprocess set file by adding set contributions\n";
+print "--| The output file is \"alya-sets.out\" \n";
+print "--| \n";
+
+$fils = $ARGV[0];
+
+if ((@ARGV < 1) || ($ARGV[0] =~ /-h/)) { 
+  print "    Usage:   alya-sets \"file-name.nsi.set\" [set1 set2 set3 set4...] \n\n";
+  exit 1;
+}
+
+shift(@ARGV);
+@sets   =  @ARGV;
+$ksets  =  @sets; 
+$outfils = ">alya-sets.out";
+
+#print "\n";
+#print "--| Integrals           :   $ncosas \n";
+#print "--| Sets to be summed up:   $nsets \n";
+#print "\n";
+
+#print "--| Writing output file ...\n";
+#print "\n";
+
+#print "--| Reading input, writing output...\n";
+
+open (IN,$fils);
+open (OUT,$outfils);
+print OUT "# \n";
+print OUT "# ALYA alya-sets output file \n";
+print OUT "# \n";
+print OUT "#    Adding $ksets sets \n";
+print OUT "#    Set List: @sets \n";
+print OUT "# \n";
+print OUT "# Time  , Column : 1 \n";
+
+$i=0;
+$icout=1;
+$kread=0;
+while (<IN>) {
+    if ($kread == 0) {
+	@myline = split;
+	if ($myline[1] =~ /HEADER/)     {
+	    $kread = 1;
+	} 
+    }
+    elsif ($kread == 1) {
+	@myline = split(/:/, $_);	
+	if ($myline[0] =~ /START/)     {
+	    print "--|   Number of variables (columns) = $ncolu \n";
+	    print "--|   Number of sets = $ncolu \n";
+	    print OUT "# START \n";
+	    $kread = 2;
+	    $ifoun = 0;
+	}elsif ($myline[0] =~ /NUMVARIA/i) {
+	    $ncolu = $myline[1];
+	}elsif ($myline[0] =~ /NUMSET/i)  {
+	    $nsets = $myline[1];
+	}elsif ($myline[0] =~ /ISET/i)  {
+	    
+	}else { 
+	    $icout++;
+	    print OUT "$myline[0] : $icout  \n";	    
+	}	
+    }
+    elsif ($kread == 2) {
+	@myline = split(/=/, $_);
+	if ($_ =~ /time/i)    {$tim  =@myline[1];$is=1;$kread=3}	
+    }
+    elsif ($kread == 3) {
+	@myline = split;
+	$ks=$myline[0];
+	foreach (@sets) {
+	    if ($_ == $ks){
+		$i=1; while ($i<=$ncolu) {$values[$i]+= $myline[$i];$i++};
+		$ifoun = 1;
+	    }
+	}	
+	if ($is==$nsets){
+	    $kread=4;
+	    if ($ifoun == 0){
+		print "--|   \n";		
+		print "--|   Error: Sets  @sets  not found in input file.\n";		
+		print "--|   Leaving...\n";	
+		print "--|   \n";		
+		$kread= 20;	
+	    }
+	};
+	$is++;
+    }	
+    elsif ($kread == 4) {
+	chomp($tim); 
+	$tim=~s/\r$//;
+	print OUT "$tim  ";
+	foreach (@values) {print OUT "  $_   "};	
+	#$i=1; while ($i<=$ncolu) {write (OUT);$i++;}; 
+	print OUT " \n";
+	$kread = 2;
+	$i=1; while ($i<=$ncolu) {$values[$i]=0;$i++};
+    }	
+
+}
+
+format OUT =
+@######.#########
+$values[$i]
+.
+
+close(IN);
+close(OUT);
+
+print "--| bye! \n\n";
+

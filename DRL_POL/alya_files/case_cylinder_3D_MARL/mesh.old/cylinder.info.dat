@@ -1,0 +1,18 @@
+BOUNDARY_CODES
+    3    top
+    4    out
+    5    bot
+    6    in
+    7    cylinder_inv1
+    8    cylinder_inv2
+    9    cylinder_inv3
+    10    cylinder_inv4
+    11    cylinder_inv5
+    12    cylinder_inv6
+    13    cylinder_inv7
+    14    cylinder_inv8
+    15    cylinder_inv9
+    16    cylinder_inv10
+    17    jet_top
+    18    jet_bot
+END_BOUNDARY_CODES

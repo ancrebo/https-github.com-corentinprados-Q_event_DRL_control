@@ -1,0 +1,86 @@
+$------------------------------------------------------------
+PHYSICAL_PROBLEM
+  PROBLEM_DEFINITION       
+    TEMPORAL_DERIVATIVES:	On  
+    CONVECTIVE_TERM:	    EMAC
+    VISCOUS_TERM:	        LAPLACIAN
+  END_PROBLEM_DEFINITION  
+
+  PROPERTIES
+  END_PROPERTIES  
+END_PHYSICAL_PROBLEM  
+$------------------------------------------------------------
+NUMERICAL_TREATMENT 
+  TIME_STEP:            EIGENVALUE
+  ELEMENT_LENGTH:       Minimum
+  STABILIZATION:        OFF
+  TIME_INTEGRATION:     RUNGE, ORDER:2
+  SAFETY_FACTOR:        1.0
+  STEADY_STATE_TOLER:   1e-10
+  ASSEMBLY:             GPU2
+  VECTOR:               ON
+  NORM_OF_CONVERGENCE:  LAGGED_ALGEBRAIC_RESIDUAL
+  MAXIMUM_NUMBER_OF_IT:	1
+  GRAD_DIV:             ON
+  DIRICHLET:            MATRIX
+
+  ALGORITHM: SEMI_IMPLICIT
+  END_ALGORITHM
+
+  MOMENTUM
+    ALGEBRAIC_SOLVER     
+      SOLVER: EXPLICIT, LUMPED
+    END_ALGEBRAIC_SOLVER        
+  END_MOMENTUM
+
+  CONTINUITY 
+     ALGEBRAIC_SOLVER
+       SOLVER:         DEFLATED_CG, COARSE: SPARSE
+       CONVERGENCE:    ITERA=1000, TOLER=1.0e-10, ADAPTATIVE, RATIO=1e-2
+       OUTPUT:         CONVERGENCE
+       PRECONDITIONER: LINELET, NEVER_CHANGE
+     END_ALGEBRAIC_SOLVER        
+  END_CONTINUITY
+
+  VISCOUS
+    ALGEBRAIC_SOLVER
+       SOLVER:         CG, COARSE: SPARSE, KRYLOV:10
+       CONVERGENCE:    ITERA=500, TOLER=1.0e-10, ADAPTIVE, RATIO=1e-3
+       OUTPUT:         CONVERGENCE
+       PRECONDITIONER: DIAGONAL
+    END_ALGEBRAIC_SOLVER    
+  END_VISCOUS
+END_NUMERICAL_TREATMENT  
+$------------------------------------------------------------
+OUTPUT_&_POST_PROCESS
+  START_POSTPROCES_AT STEP  = 0
+  $ Variables
+  POSTPROCESS VELOC
+  POSTPROCESS PRESS
+  POSTPROCESS AVVEL
+  POSTPROCESS AVPRE
+  
+  $ Forces at boundaries
+  BOUNDARY_SET
+	  FORCE
+  END_BOUNDARY_SET
+  $ Variables at witness points
+  WITNESS_POINTS
+    VELOX
+    VELOY
+    VELOZ
+    PRESS
+
+  END_WITNESS
+END_OUTPUT_&_POST_PROCESS  
+$------------------------------------------------------------
+BOUNDARY_CONDITIONS, NON_CONSTANT
+  PARAMETERS
+    INITIAL_CONDITIONS: VALUE_FUNCTION = 1 $ use field 1 for initial condition
+	  FIX_PRESSURE:       OFF
+    VARIATION:          NON_CONSTANT
+  END_PARAMETERS
+  $ Boundary codes
+  INCLUDE boundary_codes.dat
+END_BOUNDARY_CONDITIONS  
+$------------------------------------------------------------
