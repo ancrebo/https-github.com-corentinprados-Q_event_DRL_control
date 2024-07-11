@@ -40,19 +40,18 @@ def atan2_str(X: str, Y: str) -> str:
 
 
 # Smoothing functions
-# TODO: fix typing for Q_new and Q_pre @pietero
-[]
+#
 
 
 def Q_smooth_linear(
-    Qnew: np.array, Qpre: np.array, timestart: float, Tsmooth: float
+    Qnew_single: float, Qpre_single: float, timestart: float, Tsmooth: float
 ) -> str:
     """
     Linear smoothing law:
         Q(t) = (Qn - Qs)*(t - ts)/Tsmooth + Qs
     """
-    deltaQ = Qnew - Qpre
-    return f"({deltaQ}/{Tsmooth}*(t-{timestart}) + ({Qpre}))"
+    deltaQ_single = Qnew_single - Qpre_single
+    return f"({deltaQ_single}/{Tsmooth}*(t-{timestart}) + ({Qpre_single}))"
 
 
 def Q_smooth_exp(ts: float, Tsmooth: float) -> str:
@@ -128,29 +127,25 @@ class Jet(ABC):
         if Q_pre is None:
             Q_pre = [0.0]
 
-        # DEBUG: print Q_pre and Q_new type, structure, and values
-        print(f"\nJet init:\n")
-        print(f"Q_pre type: {type(Q_pre)}")
-        print(f"Q_pre structure: {Q_pre}")
-        print(f"Q_pre values: {Q_pre}")
-        print(f"Q_new type: {type(Q_new)}")
-        print(f"Q_new structure: {Q_new}")
-        print(f"Q_new values: {Q_new}\n")
-
         # Basic jet variables
         self.name: str = name
         self.T_smoo: float = T_smoo
+        self.smooth_func = smooth_func
         self.dimension: int = dimension
         self.theta: float = 0  # to be updated during DRL
         # Jet velocity functions (to be updated during DRL)
         self.Vx: str = ""
         self.Vy: str = ""
         self.Vz: str = ""
+        # Jet Action List
+        self.Q_pre: List[float] = Q_pre
+        self.Q_new: List[float] = Q_new
         # Call specialized method to set up the jet geometry
         self.set_geometry(params)
         # Update to this current timestep
         # self.Qs_position_z: float = self.Qs_position_z
         # self.delta_Q_z: float = self.delta_Q_z
+        self.time_start = time_start
         self.short_spacetime_func: bool = short_spacetime_func
         self.nb_inv_per_CFD: int = nb_inv_per_CFD
         # self.update(Q_pre, Q_new, time_start, smooth_func)
@@ -240,10 +235,10 @@ class JetCylinder(Jet):
         self.delta_Q_z: float = params["delta_Q_z"]
 
         self.update(
-            Q_pre,
-            Q_new,
-            time_start,
-            smooth_func,
+            self.Q_pre,
+            self.Q_new,
+            self.time_start,
+            self.smooth_func,
             Qs_position_z=self.Qs_position_z,
             delta_Q_z=self.delta_Q_z,
         )
@@ -270,10 +265,9 @@ class JetCylinder(Jet):
         if delta_Q_z is None:
             raise ValueError("Missing required keyword arguments: 'delta_Q_z'")
 
-        # Up # TODO: IS THIS NECESSARY? I think all of these were just updated @pietero
-        # TODO: fix typing for Q_new and Q_pre @pietero
-        self.Q_pre = Q_pre
-        self.Q_new = Q_new
+        # Up
+        self.Q_pre: List[float] = Q_pre
+        self.Q_new: List[float] = Q_new
         self.time_start: float = time_start
         self.smooth_func: str = smooth_func
         self.Qs_position_z: List[float] = Qs_position_z
@@ -303,7 +297,7 @@ class JetCylinder(Jet):
 
     def set_geometry(self, params: Dict[str, Any]) -> None:
         """
-        Specialized method that sets up the geometry of the jet, including importing Qs_position_z and delta_Q_z
+        Specialized method that sets up the geometry of the jet
         """
         from parameters import cylinder_coordinates
 
@@ -348,8 +342,10 @@ class JetCylinder(Jet):
         string_all_Q_pre = "0"
         string_all_Q_new = "0"
         string_heav = ""
-
-        if smooth_func == "EXPONENTIAL":
+        # print(f"\nJetCylinder: create_smooth_funcs: Q_new: {Q_new}\n")
+        # print(f"JetCylinder: create_smooth_funcs: Q_pre: {Q_pre}\n")
+        # print(f"JetCylinder: create_smooth_funcs: self.smooth_func: {self.smooth_func}\n")
+        if self.smooth_func == "EXPONENTIAL":
 
             ## Q_pre and Q_new --> list! with nz_Qs dimensions
             string_h = Q_smooth_exp(time_start, T_smoo)
@@ -365,8 +361,16 @@ class JetCylinder(Jet):
                 string_all_Q_new += f"+ {string_heav}*({Q_new[i]:.4f})"
             string_Q = f"(({string_all_Q_pre}) + ({string_h})*(({string_all_Q_new})-({string_all_Q_pre})))"
 
+        elif self.smooth_func == "LINEAR":  # Same as "" currently
+            string_Q = Q_smooth_linear(Q_new[0], Q_pre[0], time_start, T_smoo)
+
+        elif self.smooth_func == "":
+            string_Q = Q_smooth_linear(Q_new[0], Q_pre[0], time_start, T_smoo)
+
         else:
-            string_Q = Q_smooth_linear(Q_new, Q_pre, time_start, T_smoo)
+            raise ValueError(
+                f"`JetCylinder` class: `create_smooth_funcs` method: `smooth_func` arg: Invalid smoothing function: {self.smooth_func}"
+            )
 
         if self.short_spacetime_func == True:
             # just with Qnorm*Qi -- no projection or smoothing in time/space
@@ -392,15 +396,17 @@ class JetCylinder(Jet):
         """
         TODO: documentation!
         """
-        X = f"(x - {cylinder_coordinates[0]})"
-        Y = f"(y - {cylinder_coordinates[1]})"
+        X = f"(x-{cylinder_coordinates[0]})"
+        Y = f"(y-{cylinder_coordinates[1]})"
         return atan2_str(X, Y)
 
 
 # TODO: finish updating JetAirfoil for new base class code @pietero
 class JetAirfoil(Jet):
     """
-    Specialized jet class to deal with jets specificed in cartesian coordinates.
+    NOT IMPLEMENTED YET
+
+    Specialized jet class to deal with jets specified in cartesian coordinates.
     """
 
     def __init__(
@@ -415,7 +421,7 @@ class JetAirfoil(Jet):
         smooth_func: str = "",
     ) -> None:
         """
-        Initialize the JetCylinder class.
+        Initialize the JetAirfoil class.
         """
         super().__init__(
             name, params, Q_pre, Q_new, time_start, dimension, T_smoo, smooth_func
@@ -487,10 +493,14 @@ class JetAirfoil(Jet):
         scale = np.pi / (2 * w)
 
         if smooth_func == "EXPONENTIAL":
-            string_Q = Q_smooth_exp(Q_new, Q_pre, time_start, T_smoo)
+            string_Q = Q_smooth_exp(Q_new[0], Q_pre[0], time_start, T_smoo)
 
+        elif smooth_func == "LINEAR":
+            string_Q = Q_smooth_linear(Q_new[0], Q_pre[0], time_start, T_smoo)
         else:
-            string_Q = Q_smooth_linear(Q_new, Q_pre, time_start, T_smoo)
+            raise ValueError(
+                "JetChannel: `create_smooth_funcs` method: `smooth_func` arg: Invalid smoothing function"
+            )
 
         # delta_Q  = Q_new - Q_pre
         # string_Q = '{}*({}/{}*(t-{}) + ({}))'.format(scale, delta_Q, T_smoo, time_start, Q_pre) # Change this for Xavi's approach
@@ -532,16 +542,17 @@ class JetChannel(Jet):
         super().__init__(
             name, params, Q_pre, Q_new, time_start, dimension, T_smoo, smooth_func
         )
+
         self.Qs_position_z: List[float] = params["Qs_position_z"]
         self.delta_Q_z: float = params["delta_Q_z"]
         self.Qs_position_x: List[float] = params["Qs_position_x"]
         self.delta_Q_x: float = params["delta_Q_x"]
 
         self.update(
-            Q_pre,
-            Q_new,
-            time_start,
-            smooth_func,
+            self.Q_pre,
+            self.Q_new,
+            self.time_start,
+            self.smooth_func,
             Qs_position_z=self.Qs_position_z,
             delta_Q_z=self.delta_Q_z,
             Qs_position_x=self.Qs_position_x,
@@ -558,16 +569,17 @@ class JetChannel(Jet):
         **kwargs: Any,
     ) -> None:
         """
-        TO BE IMPLEMENTED
+        TO BE IMPLEMENTED FOR CHANNEL CASE
         """
         pass
 
+    # TODO: Update this function for channel
     def set_geometry(self, params: Dict[str, Any]) -> None:
         """
         Specialized method that sets up the geometry of the jet, including importing Qs_position_z and delta_Q_z
         """
         from parameters import (
-            cylinder_coordinates,
+            cylinder_coordinates,  # Remove?? Necessary??
             Qs_position_z,
             delta_Q_z,
             Qs_position_x,
@@ -613,7 +625,7 @@ class JetChannel(Jet):
         delta_Q_x: float = kwargs.get("delta_Q_x")
 
         # scale = ? for channel
-        w = 1.0  # TODO: fix this with correct width?
+        w = 1.0  # TODO: fix this with correct width for channel
         # w = self.width * (np.pi / 180)  # deg2rad
         scale = 1.0  # TODO: fix this with correct scaling value
         # scale = np.pi / (2.0 * w * self.radius)  #### FIX: NOT R**2 --> D
@@ -642,10 +654,12 @@ class JetChannel(Jet):
             string_Q = f"(({string_all_Q_pre}) + ({string_h})*(({string_all_Q_new})-({string_all_Q_pre})))"
 
         elif smooth_func == "LINEAR":
-            string_Q = Q_smooth_linear(Q_new, Q_pre, time_start, T_smoo)
+            string_Q = Q_smooth_linear(Q_new[0], Q_pre[0], time_start, T_smoo)
+        elif smooth_func == "":
+            string_Q = Q_smooth_linear(Q_new[0], Q_pre[0], time_start, T_smoo)
         else:
             raise ValueError(
-                "JetChannel: `create_smooth_funcs` method: Invalid smoothing function `smooth_func`"
+                f"JetChannel: `create_smooth_funcs` method: `smooth_func` arg: Invalid smoothing function: {smooth_func}"
             )
 
         if self.short_spacetime_func == True:
@@ -654,5 +668,3 @@ class JetChannel(Jet):
         else:
             string_C = f"cos({np.pi:.3f}/{w:.3f}*({self.theta}-({self.theta0:.3f})))"
             return f"({scale:.1f})*({string_Q})*({string_C})"
-
-    pass
