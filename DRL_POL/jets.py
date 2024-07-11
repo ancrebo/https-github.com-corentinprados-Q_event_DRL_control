@@ -135,6 +135,7 @@ class Jet(ABC):
         print(f"Q_new type: {type(Q_new)}")
         print(f"Q_new structure: {Q_new}")
         print(f"Q_new values: {Q_new}\n")
+        print(f"smooth_func: {params['smooth_func']}\n")
 
         # Basic jet variables
         self.name: str = name
