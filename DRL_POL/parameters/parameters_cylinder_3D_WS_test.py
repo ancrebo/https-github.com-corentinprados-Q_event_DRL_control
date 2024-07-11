@@ -188,6 +188,9 @@ for nq in range(nz_Qs):
 
 print("Jets are placed in Z coordinates: ", Qs_position_z)
 
+print(f"Qs_position_z: {Qs_position_z}")
+print(f"delta_Q_z: {delta_Q_z}")
+
 jets_definition: Dict[
     str,
     Union[
@@ -219,6 +222,12 @@ jets_definition: Dict[
     },
 }
 
+print(
+    f"\njets_definition: Qs_position_z value: {jets_definition['JET_TOP']['Qs_position_z']}\n"
+)
+print(
+    f"jets_definition: delta_Q_z value: {jets_definition['JET_TOP']['delta_Q_z']}\n\n\n\n"
+)
 
 # Build the jets
 jets: Dict[str, Any] = build_jets(JetCylinder, jets_definition, delta_t_smooth)
