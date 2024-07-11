@@ -36,9 +36,9 @@ from parameters import (
     nz_Qs,
     nx_Qs,  # added for 2D channel
     Qs_position_z,
-    Qs_position_x, # added for 2D channel
+    Qs_position_x,  # added for 2D channel
     delta_Q_z,
-    delta_Q_x, # added for 2D channel
+    delta_Q_x,  # added for 2D channel
     mem_per_srun,
     dimension,
     case,
