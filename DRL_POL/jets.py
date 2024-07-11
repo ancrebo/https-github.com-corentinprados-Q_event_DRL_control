@@ -325,12 +325,8 @@ class JetCylinder(Jet):
 
     def create_smooth_funcs(
         self,
-        Q_new: Dict[
-            str, float
-        ],  # TODO: Is this actually a float? Determine type! @pietero
-        Q_pre: Dict[
-            str, float
-        ],  # TODO: Is this actually a float? Determine type! @pietero
+        Q_new: List[float],  # TODO: Is this actually a float? Determine type! @pietero
+        Q_pre: List[float],  # TODO: Is this actually a float? Determine type! @pietero
         time_start: float,
         T_smoo: float,
         smooth_func: str,
@@ -375,26 +371,29 @@ class JetCylinder(Jet):
                 # string_all_Q_pre += "+ %s*(%.4f)" % (string_heav, Q_pre[i])
                 string_all_Q_new += f"+ {string_heav}*{Q_new[i]:.4f}"
                 # string_all_Q_new += "+ %s*(%.4f)" % (string_heav, Q_new[i])
-            string_Q = "((%s) + (%s)*((%s)-(%s)))" % (
-                string_all_Q_pre,
-                string_h,
-                string_all_Q_new,
-                string_all_Q_pre,
-            )
+            string_Q = f"(({string_all_Q_pre}) + ({string_h})*(({string_all_Q_new})-({string_all_Q_pre})))"
+            # string_Q = "((%s) + (%s)*((%s)-(%s)))" % (
+            #     string_all_Q_pre,
+            #     string_h,
+            #     string_all_Q_new,
+            #     string_all_Q_pre,
+            # )
 
         else:
             string_Q = Q_smooth_linear(Q_new, Q_pre, time_start, T_smoo)
 
         if self.short_spacetime_func == True:
             # just with Qnorm*Qi -- no projection or smoothing in time/space
-            return "(%.1f)*(%s)" % (scale, string_all_Q_new)
+            return f"({scale:.1f})*({string_all_Q_new})"
+            # return "(%.1f)*(%s)" % (scale, string_all_Q_new)
         else:
-            string_C = "cos(%.3f/%.3f*(%s-(%.3f)))" % (
-                np.pi,
-                w,
-                self.theta,
-                self.theta0,
-            )
+            string_C = f"cos({np.pi:.3f}/{w:.3f}*({self.theta} - {self.theta0:.3f}))"
+            # string_C = "cos(%.3f/%.3f*(%s-(%.3f)))" % (
+            #     np.pi,
+            #     w,
+            #     self.theta,
+            #     self.theta0,
+            # )
             return f"({scale:.1f})*({string_Q})*({string_C})"
 
     @staticmethod
