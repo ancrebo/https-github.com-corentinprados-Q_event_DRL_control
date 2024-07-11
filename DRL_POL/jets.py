@@ -256,8 +256,8 @@ class JetCylinder(Jet):
         self.smooth_func = params["smooth_func"]
 
         self.update(
-            Q_pre,
-            Q_new,
+            self.Q_pre,
+            self.Q_new,
             time_start,
             self.smooth_func,
             Qs_position_z=self.Qs_position_z,
@@ -364,7 +364,8 @@ class JetCylinder(Jet):
         string_all_Q_pre = "0"
         string_all_Q_new = "0"
         string_heav = ""
-
+        print(f"JetCylinder: create_smooth_funcs: Q_new: {Q_new}")
+        print(f"JetCylinder: create_smooth_funcs: Q_pre: {Q_pre}")
         print(f"JetCylinder: create_smooth_funcs: self.smooth_func: {self.smooth_func}")
         if self.smooth_func == "EXPONENTIAL":
 
