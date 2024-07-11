@@ -184,8 +184,9 @@ delta_Q_z: float = Lz / nz_Qs
 Qs_position_z: np.ndarray = np.linspace(delta_Q_z / 2, Lz - delta_Q_z / 2, nz_Qs)
 
 print("Jets are placed in Z coordinates: ", Qs_position_z)
-
+print(f"Qs_position_z type: {type(Qs_position_z)}")
 print(f"Qs_position_z: {Qs_position_z}")
+print(f"delta_Q_z type: {type(delta_Q_z)}")
 print(f"delta_Q_z: {delta_Q_z}")
 
 jets_definition: Dict[
