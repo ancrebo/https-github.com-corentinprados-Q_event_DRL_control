@@ -126,6 +126,7 @@ nodelist = read_node_list()
 
 # IMPORTANT: this environment base is needed to do the baseline, the main one
 environment_base = Environment(simu_name=simu_name, node=nodelist[0])  # Baseline
+print(f"\nDEBUG: Environment Base ENV_ID: {environment_base.ENV_ID}\n")
 
 if run_baseline:
     run_subprocess("alya_files", "rm -rf", "baseline")  # Ensure deleting old parameters

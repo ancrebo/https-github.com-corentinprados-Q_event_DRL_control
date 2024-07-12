@@ -13,7 +13,7 @@
 # TODO: clean up commented cylinder code @pietero
 
 from __future__ import print_function, division
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Any, Union
 
 import numpy as np
 import math
@@ -21,6 +21,8 @@ import os
 
 from jets import build_jets, JetChannel
 from env_utils import index_2d_to_1d, index 1d_to_2d
+from witness import calculate_channel_witness_coordinates
+from alya import write_witness_file
 
 ### CASE NAME ************************************************
 
@@ -214,8 +216,11 @@ index1d_Qs: np.ndarray = np.array([index_2d_to_1d(i, j, nz_Qs) for i, j in index
 delta_Q_z: float = Lz / nz_Qs
 delta_Q_x: float = Lx / nx_Qs
 
-Qs_position_z: np.ndarray = np.linspace(delta_Q_z / 2, Lz - delta_Q_z / 2, nz_Qs)
-Qs_position_x: np.ndarray = np.linspace(delta_Q_x / 2, Lx - delta_Q_x / 2, nx_Qs)
+Qs_position_z_array: np.ndarray = np.linspace(delta_Q_z / 2, Lz - delta_Q_z / 2, nz_Qs)
+Qs_position_x_array: np.ndarray = np.linspace(delta_Q_x / 2, Lx - delta_Q_x / 2, nx_Qs)
+
+Qs_position_z: List[float] = Qs_position_z_array.tolist()
+Qs_position_x: List[float] = Qs_position_x_array.tolist()
 
 jet_coordinates: np.ndarray = np.array(
     [(x, z) for x in Qs_position_x for z in Qs_position_z]
@@ -298,6 +303,7 @@ assert (
 ## 2-- S99 ETMM and NATURE MI //
 ## 4-- 5 probes experiment from jean //
 ## 3-- working on it with re3900 (at the same time witness to postprocess: fft, wake profiles, pressure distribution, etc)
+## 5-- 3D channel
 ## TODO: explain criteria of ordering history points, to "call" them quickly
 
 # new setup observation state for it>30 --> f(slices_probes_per_jet)
@@ -310,8 +316,54 @@ for nq in range(nz_Qs * slices_probes_per_jet):
     )
 print("Probes are placed in Z coordinates: ", positions_probes_for_grid_z)
 
-probes_location = 3
+probes_location = 5
+
 list_position_probes = []
+
+probe_type: str = "velocity"  # Probe type ('pressure' or 'velocity')
+
+pattern: str = "X"  # Pattern type ('X' or '+')
+y_value_density: int = 8  # Number of y values total
+y_skipping: bool = False  # Whether to skip full pattern placement on certain layers
+y_skip_values: int = 3  # Number of layers to skip if y_skipping is True
+
+if probes_location == 5:
+    probe_dict = calculate_channel_witness_coordinates(
+        nx_Qs,
+        nz_Qs,
+        Lx,
+        Ly,
+        Lz,
+        y_value_density,
+        pattern,
+        y_skipping,
+        y_skip_values,
+    )
+    probes_coordinates: List[Tuple[float, float, float]] = probe_dict[0]
+    probe_indices2D: List[Tuple[float, float]] = probe_dict[1]
+    probe_indices1D: List[float] = probe_dict[2]
+    probe_tags: Dict[str, List[int]] = probe_dict[3]
+
+    print(f"\n\n{len(probes_coordinates)} witness points calculated!\n")
+    print("2D Witness Indices Saved!")
+    print("1D Witness Indices Saved!")
+    print(f"Probe Type: {probe_type}\n\n")
+
+    output_params: Dict[str, Any] = {
+        "locations": probes_coordinates,
+        "tag_probes": probe_tags,
+        "probe_type": probe_type,
+        "probe_indices2D": probe_indices2D,
+        "probe_indices1D": probe_indices1D,
+    }
+
+    need_witness_file: bool = False
+
+    if need_witness_file:
+        write_witness_file(
+            f"alya_files/case_{case}",
+            output_params["locations"],
+        )
 
 ############################################################################################
 ####    These are the probe positions for S85   ####
@@ -567,7 +619,7 @@ list_position_probes = []
 ###############################################################################
 ######################################################################
 
-simulation_params = {
+simulation_params: Dict[str, Any] = {
     "simulation_duration": baseline_duration,  # the time the simulation is in permanant regime
     "simulation_timeframe": [
         baseline_time_start,
@@ -583,7 +635,7 @@ simulation_params = {
 }
 
 # Variational input
-variational_input = {
+variational_input: Dict[str, Any] = {
     "filename": "channel",  # basename
     "bound": [
         5,
@@ -618,8 +670,16 @@ variational_input = {
     # "Y_exp": 0,  # Experimental yaw
 }
 
+# Normalization factors
+norm_factors: Dict[str, float] = {
+    "pressure": norm_press,  # original norm_press value for backwards compatibility
+    "velox": 10.0,  # example value, replace with actual value
+    "veloy": 10.0,  # example value, replace with actual value
+    "veloz": 10.0,  # example value, replace with actual value
+}
+
 # Optimization
-optimization_params = {
+optimization_params: Dict[str, Any] = {
     "num_steps_in_pressure_history": 1,
     "min_value_jet_MFR": -1,
     "max_value_jet_MFR": 1,
@@ -634,7 +694,16 @@ optimization_params = {
     "random_start": False,
 }
 
-inspection_params = {
+history_parameters: Dict[str, List[Union[float, int]]] = {
+    "drag": [],
+    "lift": [],
+    "drag_GLOBAL": [],
+    "lift_GLOBAL": [],
+    "time": [],
+    "episode_number": [],
+}
+
+inspection_params: Dict[str, Any] = {
     "plot": False,  # TODO: inspection_params is never used
     "step": 50,
     "dump": 100,

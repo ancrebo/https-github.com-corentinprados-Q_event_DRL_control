@@ -8,7 +8,7 @@
 # 07/07/2022
 from __future__ import print_function, division
 
-from typing import Tuple, TextIO, Dict, Union
+from typing import Tuple, TextIO, Dict, Union, List, Any
 
 import os, numpy as np
 from cr import cr_start, cr_stop
@@ -68,8 +68,11 @@ def readWitnessInstant(file: TextIO, nwit: int) -> Tuple[int, float, np.ndarray]
     return it, time, data
 
 
-def witnessReadNByFront(filename: str, n: int) -> Tuple[np.ndarray, np.ndarray, Dict[str, np.ndarray]]:  # TODO: this function is not used
+def witnessReadNByFront(
+    filename: str, n: int
+) -> Tuple[np.ndarray, np.ndarray, Dict[str, np.ndarray]]:
     """
+    # TODO: this function is not used
     Reads N instants starting from the top of the witness file.
     """
     # Open file for reading
@@ -98,7 +101,9 @@ def witnessReadNByFront(filename: str, n: int) -> Tuple[np.ndarray, np.ndarray, 
     return iter, time, data
 
 
-def witnessReadNByBehind(filename: str, n: int) -> Tuple[np.ndarray, np.ndarray, Dict[str, np.ndarray]]:
+def witnessReadNByBehind(
+    filename: str, n: int
+) -> Tuple[np.ndarray, np.ndarray, Dict[str, np.ndarray]]:
     """
     Reads N instants starting from the bottom of the witness file.
     """
@@ -143,7 +148,9 @@ def witnessReadNByBehind(filename: str, n: int) -> Tuple[np.ndarray, np.ndarray,
     return iter, time, data
 
 
-def read_last_wit(filename: str, probe_type: str, norm: float, n_to_read: int = 1) -> np.ndarray:
+def read_last_wit(
+    filename: str, probe_type: str, norm: Dict[str, float], n_to_read: int = 1
+) -> Dict[str, np.ndarray]:
     """
     function that skips all the data from the entire time domain and gives the last value from nsi.wit
     expected increase the IO time extracting probes to send, restart are so much quicker
@@ -155,21 +162,158 @@ def read_last_wit(filename: str, probe_type: str, norm: float, n_to_read: int = 
     # Read witness file
     itw, timew, data = witnessReadNByBehind(filename, n_to_read)
 
-    # Select which variable to work with
-    var = None
-    if probe_type == "pressure":
-        var = "PRESS"
-    if probe_type == "velocity":
-        var = "VELOX"   # TODO: check if this needs to include all the components @pietero
+    # Initialize result dictionary
+    result_data = {}
 
-    if var is None:
-        raise ValueError("Invalid probe_type: must be 'pressure' or 'velocity'")
-        # raise ValueError("Crash very hard!")  # TODO: Do crash very hard
+    # Select which variable to work with
+    if probe_type == "pressure":
+        result_data["pressure"] = data["PRESSURE"]
+    if probe_type == "velocity":
+        vel_components = ["VELOX", "VELOY", "VELOZ"]
+        for comp in vel_components:
+            result_data[comp.lower()] = data[comp]
+    else:
+        raise ValueError(
+            "Witness.py: read_last_wit: Invalid `probe_type`: must be 'pressure' or 'velocity'"
+        )
 
     # If we have more than one instant, average them
     if n_to_read > 1:
-        data[var] = 1.0 / (timew[-1] - timew[0]) * np.trapz(data[var], timew, axis=0)
+        for key in result_data.keys():
+            result_data[key] = (
+                1.0 / (timew[-1] - timew[0]) * np.trapz(result_data[key], timew, axis=0)
+            )
 
-    # We ensure that data has shape of (1,nprobes)
-    cr_stop("WIT.read_last_wit", 0)
-    return data[var][0, :] / norm
+    # Normalize the data using the provided norm dictionary
+    for key in result_data.keys():
+        if key in norm:
+            result_data[key] = result_data[key] / norm[key]
+        else:
+            raise ValueError(
+                f"Witness.py: read_last_wit: Normalization value for {key} not found in norm dictionary"
+            )
+
+    # if var is None:
+    #     raise ValueError("Invalid probe_type: must be 'pressure' or 'velocity'")
+    #     # raise ValueError("Crash very hard!")  # TODO: Do crash very hard
+    #
+    # # If we have more than one instant, average them
+    # if n_to_read > 1:
+    #     data[var] = 1.0 / (timew[-1] - timew[0]) * np.trapz(data[var], timew, axis=0)
+
+    # Ensure that data has the correct shape
+    for key in result_data.keys():
+        result_data[key] = result_data[key][0, :]  # (nprobes,)
+
+    return result_data
+
+
+def calculate_channel_witness_coordinates(
+    n: int,  # nx_Qs
+    m: int,  # nz_Qs
+    Lx: float,
+    Ly: float,
+    Lz: float,
+    y_value_density: int,
+    pattern: str = "X",
+    y_skipping: bool = False,
+    y_skipping_value: int = 3,
+) -> Dict[str, Any]:
+    """
+    Calculate witness coordinates and indices for a channel pattern.
+
+    Parameters:
+        n (int): Number of sections in the x direction.
+        m (int): Number of sections in the z direction.
+        Lx (float): Length in the x direction.
+        Ly (float): Length in the y direction.
+        Lz (float): Length in the z direction.
+        y_value_density (int): Density of y values.
+        pattern (str): Pattern type ('X' or '+'). Default is 'X'.
+        y_skipping (bool): Whether to skip y values. Default is False.
+        y_skipping_value (int): Interval for skipping y values if y_skipping is True. Default is 3.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing 'locations' (probe coordinates),
+                        'indices2D' (2D indices of probes), 'indices1D' (1D indices of probes),
+                        and 'tag_probs' (tag ranges).
+    """
+    # Create list of y values to place pattern - Exclude the first term (0)
+    y_values: List[float] = np.linspace(0, Ly, y_value_density + 1).tolist()[1:]
+
+    coordinates: List[Tuple[float, float, float]] = []
+    indices2D: List[Tuple[int, int]] = []
+    indices1D: List[int] = []
+
+    step_x: float = Lx / n
+    step_z: float = Lz / m
+
+    for i in range(n):
+        for j in range(m):
+            center_x: float = (i + 0.5) * step_x
+            center_z: float = (j + 0.5) * step_z
+
+            if pattern == "X":
+                end_points: List[Tuple[float, float]] = [
+                    (center_x - 0.25 * step_x, center_z - 0.25 * step_z),
+                    (center_x + 0.25 * step_x, center_z - 0.25 * step_z),
+                    (center_x - 0.25 * step_x, center_z + 0.25 * step_z),
+                    (center_x + 0.25 * step_x, center_z + 0.25 * step_z),
+                ]
+            elif pattern == "+":
+                end_points: List[Tuple[float, float]] = [
+                    (center_x - 0.25 * step_x, center_z),
+                    (center_x + 0.25 * step_x, center_z),
+                    (center_x, center_z - 0.25 * step_z),
+                    (center_x, center_z + 0.25 * step_z),
+                ]
+
+            center_point: Tuple[float, float] = (center_x, center_z)
+
+            for index, y in enumerate(y_values):
+                if 0 <= y <= Ly:  # Ensure y-values are within the global y limit
+                    if y_skipping and (index % y_skipping_value != 0):
+                        coordinates.append(
+                            (center_point[0] / Lx, y / Ly, center_point[1] / Lz)
+                        )
+                        indices2D.append((i, j))
+                    else:
+                        for x, z in end_points:
+                            coordinates.append((x / Lx, y / Ly, z / Lz))
+                            indices2D.append((i, j))
+                        coordinates.append(
+                            (center_point[0] / Lx, y / Ly, center_point[1] / Lz)
+                        )
+                        indices2D.append((i, j))
+                else:
+                    raise ValueError(
+                        f"calculate_channel_witness_coordinates: Invalid y-value: {y}"
+                    )
+
+    # Create 1D index from 2D index using row-major format
+    for index2D in indices2D:
+        indices1D.append(index2D[0] * m + index2D[1])
+
+    # Convert lists to numpy arrays
+    coordinates_array: np.ndarray = np.array(coordinates)
+    indices2D_array: np.ndarray = np.array(indices2D)
+    indices1D_array: np.ndarray = np.array(indices1D)
+
+    # Define tag ranges similar to the first script
+    len_left_positions_probes = 0
+    len_pattern_positions_probes = len(coordinates)
+    pattern_range_min = len_left_positions_probes + 1
+    pattern_range_max = len_left_positions_probes + len_pattern_positions_probes
+
+    tag_probs: Dict[str, List[int]] = {
+        "pattern": [pattern_range_min, pattern_range_max]
+    }
+
+    probe_dict = {
+        "locations": coordinates,
+        "indices2D": indices2D,
+        "indices1D": indices1D,
+        "tag_probs": tag_probs,
+    }
+
+    return probe_dict
