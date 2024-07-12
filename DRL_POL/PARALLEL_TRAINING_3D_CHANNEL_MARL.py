@@ -75,6 +75,7 @@ nodelist = read_node_list()
 
 # IMPORTANT: this environment base is needed to do the baseline, the main one
 environment_base = Environment(simu_name=simu_name, node=nodelist[0])  # Baseline
+print(f"\nDEBUG: Environment Base ENV_ID: {environment_base.ENV_ID}\n")
 
 if run_baseline:
     run_subprocess("alya_files", "rm -rf", "baseline")  # Ensure deleting old parameters
@@ -129,7 +130,7 @@ def split(environment, np):  # called 1 time in PARALLEL_TRAINING.py
     # nb_inv_envs:= total number of 'pseudo-parallel' invariant environments. e.g. 10
     """input: one of the parallel environments (np); output: a list of nb_inv_envs invariant environments identical to np. Their ID card: (np, ni)"""
     list_inv_envs = []
-    for j in range(nz_Qs):
+    for j in range(nz_Qs):  # TODO: change to `nTotal_Qs` ? @pietero
         env = cp.copy(environment)
         env.ENV_ID = [
             np,

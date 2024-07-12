@@ -12,9 +12,10 @@ AUTHORS ->  POL
 ## IMPORT PYTHON LIBRARIES
 import os, csv, numpy as np
 import sys
+import inspect
 import shutil
 import time
-from typing import List, Tuple, Union, Any, Dict
+from typing import List, Tuple, Union, Any, Dict, Optional
 
 # IMPORT TENSORFLOW
 from tensorforce.environments import Environment
@@ -43,8 +44,10 @@ from parameters import (
     num_nodes_srun,
     reward_function,
     jets,
+    norm_factors,  # added for normalization of multiple components
     optimization_params,
     output_params,
+    history_parameters,
     nb_proc,
     nb_actuations,
     nb_actuations_deterministic,
@@ -83,18 +86,21 @@ class Environment(Environment):
         number_steps_execution: int = 1,
         continue_training: bool = False,
         deterministic: bool = False,
-        ENV_ID: List[int] = [-1, -1],
+        ENV_ID: Optional[List[int]] = None,
         host: str = "",
         node: Union[str, None] = None,
         check_id: bool = False,
     ):
+
+        if ENV_ID is None:
+            ENV_ID = [-1, -1]
 
         cr_start("ENV.init", 0)
 
         self.simu_name: str = simu_name
         self.case: str = case
         self.ENV_ID: List[int] = ENV_ID
-        self.host: str = "enviroment%d" % self.ENV_ID[0]
+        self.host: str = f"enviroment{self.ENV_ID[0]}"
         self.nodelist: Union[str, None] = node
         # self.nodelist     = [n for n in node.split(',')]
         self.do_baseline: bool = (
@@ -107,6 +113,7 @@ class Environment(Environment):
         self.number_steps_execution: int = number_steps_execution
         self.reward_function: str = reward_function
         self.output_params: Dict[str, Any] = output_params
+        self.norm_factors: Dict[str, float] = norm_factors
         self.optimization_params: Dict[str, Union[int, float]] = optimization_params
         self.Jets: Dict[str, Any] = jets
         self.n_jets: int = len(jets)
@@ -139,14 +146,7 @@ class Environment(Environment):
         self.action: np.ndarray = np.zeros(self.actions_per_inv * 2)
 
         # postprocess values
-        self.history_parameters: Dict[str, List[Union[float, int]]] = {
-            "drag": [],
-            "lift": [],
-            "drag_GLOBAL": [],
-            "lift_GLOBAL": [],
-            "time": [],
-            "episode_number": [],
-        }
+        self.history_parameters: Dict[str, Any] = history_parameters
 
         name: str = "output.csv"
         # if we start from other episode already done
@@ -201,38 +201,52 @@ class Environment(Environment):
 
         if self.case == "cylinder":
             if self.continue_training:
-                average_drag: float = 0.0
-                average_lift: float = 0.0
-                average_drag_GLOBAL: float = 0.0
-                average_lift_GLOBAL: float = 0.0
+                averages: Dict[str, float] = {
+                    "drag": 0.0,
+                    "lift": 0.0,
+                    "drag_GLOBAL": 0.0,
+                    "lift_GLOBAL": 0.0,
+                }
             else:
                 # Compute average drag and lift
-                # average_drag, average_lift = compute_avg_lift_drag(self.episode_number, cpuid=temp_id)
-                average_drag, average_lift = compute_avg_lift_drag(
+                averages: Dict[str, float] = {}
+
+                averages["drag"], averages["lift"] = compute_avg_lift_drag(
                     self.episode_number, cpuid=temp_id, nb_inv=self.ENV_ID[1]
                 )  # NOTE: add invariant code! not the same BC
-                average_drag_GLOBAL, average_lift_GLOBAL = compute_avg_lift_drag(
-                    self.episode_number,
-                    cpuid=temp_id,
-                    nb_inv=self.nb_inv_per_CFD,
-                    global_rew=True,
+
+                averages["drag_GLOBAL"], averages["lift_GLOBAL"] = (
+                    compute_avg_lift_drag(
+                        self.episode_number,
+                        cpuid=temp_id,
+                        nb_inv=self.nb_inv_per_CFD,
+                        global_rew=True,
+                    )
                 )  # NOTE: add invariant code! not the same BC
 
-            # Update history parameters
-            self.history_parameters["drag"].extend([average_drag])
-            self.history_parameters["lift"].extend([average_lift])
-            self.history_parameters["drag_GLOBAL"].extend([average_drag_GLOBAL])
-            self.history_parameters["lift_GLOBAL"].extend([average_lift_GLOBAL])
-            self.history_parameters["time"].extend([self.last_time])
-            self.history_parameters["episode_number"].extend([self.episode_number])
-            # Save history parameters
-            self.save_history_parameters(nb_actuations)
-            # Print results
-            print(
-                "Results : \n\tAverage drag : {}\n\tAverage lift : {}".format(
-                    average_drag, average_lift
-                )
+            # Update history parameters dynamically
+            for key in self.history_parameters.keys():
+                if key not in ["time", "episode_number"]:
+                    self.history_parameters[key].append(averages.get(key, None))
+
+            self.history_parameters["time"].append(self.last_time)
+            self.history_parameters["episode_number"].append(self.episode_number)
+
+            # Save history parameters using the new method
+            self.save_history_parameters_all(nb_actuations)
+
+            # Print results dynamically
+            results = "\n".join(
+                f"\tAverage {key}: {value}" for key, value in averages.items()
             )
+            print(f"Results : \n{results}")
+
+        elif self.case == "channel":
+            if self.continue_training:
+                # TODO: @pietero update with appropriate values! - Pieter
+                pass
+            else:
+                pass
 
         # Initialize action
         self.action = np.zeros(self.actions_per_inv * 2)  #
@@ -478,6 +492,92 @@ class Environment(Environment):
 
     # -----------------------------------------------------------------------------------------------------
     # -----------------------------------------------------------------------------------------------------
+
+    def save_history_parameters_all(
+        self, nb_actuations: int, name: str = "output.csv"
+    ) -> None:
+
+        cr_start("ENV.save_history_parameters", 0)
+
+        # Save at the end of every episode
+        # all `history_parameters` except `time` and `episode_number`
+        for key, value in self.history_parameters.items():
+            if key not in ["time", "episode_number"]:
+                setattr(
+                    self,
+                    f"episode_{key}",
+                    np.append(getattr(self, f"episode_{key}"), value),
+                )
+
+        # Check if it is the end of the episode
+        if self.action_count == nb_actuations or self.episode_number == 0:
+            file = os.path.join("saved_models", name)
+
+            print(f"Action : saving history parameters in {file}")
+            self.last_episode_number = self.episode_number
+
+            # Calculate averages
+            averages = {}
+            for key, value in self.history_parameters.items():
+                if key not in ["time", "episode_number"]:
+                    averages[key] = np.mean(value[-1:])
+
+            # Prepare the directory and file
+            os.makedirs("saved_models", exist_ok=True)
+            if not os.path.exists(file):
+                with open(file, "w") as csv_file:
+                    spam_writer = csv.writer(
+                        csv_file, delimiter=";", lineterminator="\n"
+                    )
+                    spam_writer.writerow(
+                        ["Episode"]
+                        + [f"Avg{key.capitalize()}" for key in averages.keys()]
+                    )
+                    spam_writer.writerow(
+                        [self.last_episode_number]
+                        + [averages[key] for key in averages.keys()]
+                    )
+            else:
+                with open(file, "a") as csv_file:  # Append to the file
+                    spam_writer = csv.writer(
+                        csv_file, delimiter=";", lineterminator="\n"
+                    )
+                    spam_writer.writerow(
+                        [self.last_episode_number]
+                        + [averages[key] for key in averages.keys()]
+                    )
+
+            # Reset the episode parameters
+            for key in self.history_parameters.keys():
+                if key not in ["time", "episode_number"]:
+                    setattr(self, f"episode_{key}", np.array([]))
+
+            # Writes all the parameters in .csv
+            if os.path.exists(file):
+                run_subprocess("./", "cp -r", "saved_models best_model")
+            else:
+                if os.path.exists("saved_models/output.csv"):
+                    if not os.path.exists("best_model"):
+                        shutil.copytree("saved_models", "best_model")
+                    else:
+                        best_file = os.path.join("best_model", name)
+                        last_iter = np.genfromtxt(file, skip_header=1, delimiter=";")[
+                            -1, 1
+                        ]
+                        best_iter = np.genfromtxt(
+                            best_file, skip_header=1, delimiter=";"
+                        )[-1, 1]
+                        if float(best_iter) < float(last_iter):
+                            print("best_model updated")
+                            run_subprocess("./", "rm -rf", "best_model")
+                            run_subprocess("./", "cp -r", "saved_models best_model")
+
+            # TODO: update what channel parameters are being saved? - Pieter @pietero
+            printDebug(
+                f"\n \n Saving parameters, [INSERT CHANNEL PARAMETERS HERE], which are the input of the neural network! \n(Env3D_MARL_channel-->execute-->save_history_parameters_all)\n \n"
+            )
+            print("Done.")
+        cr_stop("ENV.save_history_parameters", 0)
 
     def save_history_parameters(
         self, nb_actuations: int, name: str = "output.csv"
@@ -759,13 +859,17 @@ class Environment(Environment):
 
         # lowcost mode --> CLEAN everytime olderfiles
 
-        # TODO --> check the rm if we need to restart from the last episode!
-        # TODO --> bool_restart_prevEP HAS TO BE 80-20 but not in parameters
+        # TODO --> check the rm if we need to restart from the last episode! - Pol
+        # TODO --> bool_restart_prevEP HAS TO BE 80-20 but not in parameters - Pol
 
         if not DEBUG and self.episode_number > 0:
             if not self.bool_restart_prevEP:
                 runbin = "rm -rf"
-                runargs = os.path.join(f"{self.host}", f"{self.ENV_ID[1]}", "EP_*")
+                runargs = os.path.join(
+                    f"{self.host}",
+                    f"{self.ENV_ID[1]}",
+                    f"EP_{self.episode_number}",  # was "EP_*"
+                )
                 # avoid checks in deterministic
                 if not self.deterministic:
                     run_subprocess(runpath, runbin, runargs)
@@ -808,7 +912,9 @@ class Environment(Environment):
         runpath2 = f"alya_files/{self.host}"
         run_subprocess(runpath, runbin, runargs)
 
-        for inv_i in range(1, self.nz_Qs + 1):
+        for inv_i in range(
+            1, self.nz_Qs + 1
+        ):  # TODO: replace `nz_Qs` with `nb_inv_per_CFD` or `nTotal_Qs` ? @pietero
             runargs2 = f"{inv_i}"
             run_subprocess(runpath2, runbin, runargs2)
 
@@ -840,6 +946,34 @@ class Environment(Environment):
     # -----------------------------------------------------------------------------------------------------
     # -----------------------------------------------------------------------------------------------------
     ## Default function required for the DRL
+
+    def list_observation_updated(self) -> np.ndarray:
+        if not self.neightbor_state:
+            # Determine the structure of probes_values_global
+            is_1d = len(self.probes_values_global.shape) == 1
+
+            batch_size_probes = int(
+                len(self.probes_values_global) / self.nb_inv_per_CFD
+            )
+
+            if is_1d:
+                # If it's 1D, proceed with existing logic
+                probes_values_2 = self.probes_values_global[
+                    ((self.ENV_ID[1] - 1) * batch_size_probes) : (
+                        self.ENV_ID[1] * batch_size_probes
+                    )
+                ]
+            else:
+                # if it's 2D, adjust the logic to slice the rows
+                row_start = (self.ENV_ID[1] - 1) * batch_size_probes
+                row_end = self.ENV_ID[1] * batch_size_probes
+                probes_values_2 = self.probes_values_global[row_start:row_end, :]
+        else:
+            raise NotImplementedError(
+                "Env3D_MARL_channel: list_obervation_update: Neighbor state not implemented yet"
+            )
+
+        return probes_values_2
 
     def list_observation(self) -> np.ndarray:
 
@@ -901,7 +1035,7 @@ class Environment(Environment):
         return probes_values_2
 
     def states(self) -> Dict[str, Any]:
-
+        # TODO: @pietero adjust state size based on number of components in the probes? - Pieter
         if not self.neighbor_state:
             state_size = int(len(self.output_params["locations"]) / self.nb_inv_per_CFD)
         else:
@@ -938,7 +1072,7 @@ class Environment(Environment):
 
         """Reset state"""
         print(
-            "\n \n Reset to initalize each episode (copy baseline, clean action count...)! (Env2D-->reset)\n \n"
+            "\n \n Reset to initalize each episode (copy baseline, clean action count...)! (Env3D_MARL_channel-->reset)\n \n"
         )
         # Create a folder for each environment
         print("POOOOL --> CHECK_ID = ", self.check_id)
@@ -962,28 +1096,34 @@ class Environment(Environment):
         # Apply new time frame
         # TODO --> fix time interval detected in the time_interval.dat file
         #     it has to read and detect self.simulation_timeframe[1] auto
-        self.simulation_timeframe = simulation_params["simulation_timeframe"]
-        t1 = self.simulation_timeframe[0]
+        self.simulation_timeframe: List[float] = simulation_params[
+            "simulation_timeframe"
+        ]
+        t1: float = self.simulation_timeframe[0]
         if self.bool_restart_prevEP and self.episode_number > 1:
-            t2 = detect_last_timeinterval(
-                os.path.join(
-                    "alya_files", f"{self.host}", "1", "EP_*", "time_interval.dat"
-                )
-            )
-            print(
-                "POOOOOOOL PATH:",
+            t2: float = detect_last_timeinterval(
                 os.path.join(
                     "alya_files",
                     f"{self.host}",
                     "1",
-                    f"EP_{self.episode_number}",
+                    f"EP_{self.episode_number}",  # was "EP_*"
                     "time_interval.dat",
-                ),
+                )
             )
+            # print(
+            #     "POOOOOOOL PATH:",
+            #     os.path.join(
+            #         "alya_files",
+            #         f"{self.host}",
+            #         "1",
+            #         f"EP_{self.episode_number}",
+            #         "time_interval.dat",
+            #     ),
+            # )
         else:
-            t2 = self.simulation_timeframe[1]
+            t2: float = self.simulation_timeframe[1]
         self.simulation_timeframe = [t1, t2]
-        print(f"The actual timeframe is between {t1} and {t2}: ")
+        print(f"EnvID: {self.ENV_ID} - The actual timeframe is between {t1} and {t2}: ")
 
         # Copy the baseline in the environment directory
 
@@ -1008,6 +1148,7 @@ class Environment(Environment):
 
         # TODO: READ THE WITNESS OF EACH PSEUDOENV!
         # cp witness.dat to avoid IO problems in disk?
+        # cp only final time step in witness.dat to env 1? - Pieter
         # filename     = os.path.join('alya_files','%s'%self.host,'%s'%self.ENV_ID[1],'EP_%d'%self.episode_number,'%s.nsi.wit'%self.case)
         filename = os.path.join(
             "alya_files",
@@ -1045,12 +1186,15 @@ class Environment(Environment):
         )
 
         # read witness file and extract the entire array list
-        self.probes_values_global = read_last_wit(
+        probes_values_global_dict = read_last_wit(
             filename,
             output_params["probe_type"],
-            self.optimization_params["norm_press"],
+            self.norm_factors,
             NWIT_TO_READ,
         )
+
+        # manipulate the probes dictionary # TODO: @pietero Implement the dict to array conversion - Pieter
+        # self.probes_values_global = something something probes_values_global_dict
 
         # filter probes per jet (corresponding to the ENV.ID[])
         probes_values_2 = self.list_observation()
@@ -1235,7 +1379,7 @@ class Environment(Environment):
             self.history_parameters["lift"].extend([average_lift])
             self.history_parameters["time"].extend([self.last_time])
             self.history_parameters["episode_number"].extend([self.episode_number])
-            self.save_history_parameters(nb_actuations)
+            self.save_history_parameters_all(nb_actuations)
 
             # Get the new avg drag and lift --> GLOBAL
             average_drag_GLOBAL, average_lift_GLOBAL = compute_avg_lift_drag(
@@ -1251,7 +1395,7 @@ class Environment(Environment):
             # TODO: implement history parameters for channel if needed
             # Raise a not implemented error
             raise NotImplementedError(
-                "Channel case not implemented yet in `execute` method, line 1236"
+                f"Saving history parameters for Channel case not implemented yet in `execute` method, line {inspect.currentframe().f_lineno}"
             )
 
         # Compute the reward
@@ -1295,14 +1439,17 @@ class Environment(Environment):
 
         if (
             self.case == "cylinder"
-        ):  # TODO: check if only cylinder or can be channel too
+        ):  # TODO: @pietero check if only cylinder or can be channel too - Pieter
             # read witness file and extract the entire array list
-            self.probes_values_global = read_last_wit(
+            probes_values_global_dict = read_last_wit(
                 filename,
                 output_params["probe_type"],
-                self.optimization_params["norm_press"],
+                self.norm_factors,
                 NWIT_TO_READ,
             )
+
+            # manipulate the probes dictionary # TODO: @pietero implement dict to array conversion - Pieter
+            # self.probes_values_global = something something probes_values_global_dict
 
         # filter probes per jet (corresponding to the ENV.ID[])
         probes_values_2 = self.list_observation()
