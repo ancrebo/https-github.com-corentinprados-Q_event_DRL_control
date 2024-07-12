@@ -18,7 +18,7 @@ import time
 from tensorforce.agents import Agent
 from tensorforce.execution import Runner
 
-from env_utils import run_subprocess, generate_node_list, read_node_list
+from env_utils import run_subprocess, generate_node_list, read_node_list, detect_system
 from configuration import ALYA_ULTCL
 
 # Run the cleaner
@@ -41,19 +41,41 @@ run_subprocess(
 run_subprocess("alya_files", "cp -r", f"case_{training_case} case", preprocess=True)
 
 from Env3D_MARL_channel import Environment
+
+# Import universal parameters
 from parameters import (
     nb_inv_per_CFD,
     sync_episodes,
     batch_size,
     nb_actuations,
     num_episodes,
-    num_servers,
-    nb_proc,
     simu_name,
     run_baseline,
-    nz_Qs,
-    # TODO: add nx_Qs?
 )
+
+# Import system-specific parameters
+if detect_system() == "LOCAL":
+    from parameters import (
+        num_servers_ws as num_servers,
+        nb_proc_ws as nb_proc,
+    )
+else:
+    from parameters import (
+        num_servers,
+        nb_proc,
+    )
+
+# Import case-specific parameters
+if training_case == "cylinder_3D_WS_test":
+    from parameters import (
+        nz_Qs,
+    )
+elif training_case == "channel_3D_MARL_coco":
+    from parameters import (
+        nz_Qs,
+        nx_Qs,
+        nTotal_Qs,  # TODO: necessary or just nb_inv_per_CFD?
+    )
 
 from cr import cr_reset, cr_info, cr_report
 import time
