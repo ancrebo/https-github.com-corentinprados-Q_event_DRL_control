@@ -14,11 +14,19 @@ from __future__ import print_function, division
 import os, sys
 import copy as cp
 import time
+from typing import List
 
 from tensorforce.agents import Agent
 from tensorforce.execution import Runner
 
-from env_utils import run_subprocess, generate_node_list, read_node_list, detect_system
+from env_utils import (
+    run_subprocess,
+    generate_node_list,
+    read_node_list,
+    detect_system,
+    agent_index_1d_to_2d,
+    agent_index_2d_to_1d,
+)
 from configuration import ALYA_ULTCL
 
 # Run the cleaner
@@ -145,24 +153,51 @@ agent = Agent.create(
 )
 
 
-def split(environment, np):  # called 1 time in PARALLEL_TRAINING.py
-    # np:= number of the parallel environment. e.g. between [1,4] for 4 parallel CFDenvironments
-    # (ni, nj):= env_ID[1]:= 'position'/'ID-card' of the 'pseudo-parallel' invariant environment (a tuple in 3d, in which we have a grid of actuators. A scalar in 2D, in which we have a line of actuators)
-    # nb_inv_envs:= total number of 'pseudo-parallel' invariant environments. e.g. 10
-    """input: one of the parallel environments (np); output: a list of nb_inv_envs invariant environments identical to np. Their ID card: (np, ni)"""
+def split(
+    environment: Environment, np: int, nz_Qs: int, nx_Qs: int = 1
+) -> List[Environment]:
+    """
+    Creates individual (local) agent environments for parallel training, per node.
+
+    Parameters:
+        environment (Environment): The base environment to be copied. From `Env3D_MARL_channel.py`.
+        np (int): The number of the parallel environment (node).
+        nz_Qs (int): The number of sections in the z direction.
+        nx_Qs (int, optional): The number of sections in the x direction. Defaults to 1.
+
+    Returns:
+        List[Environment]: A list of local environments in a single node with updated ENV_IDs for parallel training.
+    """
     list_inv_envs = []
-    for j in range(nz_Qs):
-        env = cp.copy(environment)
-        env.ENV_ID = [
-            np,
-            (j + 1),
-        ]  # Adjust for two dimensions? or translate two to one dimension (n, m) -> (j)
-        env.host = f"environment{np}"
-        list_inv_envs.append(env)
+    for i in range(nx_Qs):
+        for j in range(nz_Qs):
+            env = cp.copy(environment)
+            env.ENV_ID = [
+                np,
+                agent_index_2d_to_1d(i, j, nz_Qs),  # Convert 2D agent index to 1D
+            ]
+            env.host = f"environment{np}"
+            list_inv_envs.append(env)
     return list_inv_envs
 
 
-### Here the array of environments is defined, will be n-1 host (the 1st one is MASTER) #TODO: assign more nodes to an environment:
+# def split_old(environment, np):  # called 1 time in PARALLEL_TRAINING.py
+#     # np:= number of the parallel environment. e.g. between [1,4] for 4 parallel CFDenvironments
+#     # (ni, nj):= env_ID[1]:= 'position'/'ID-card' of the 'pseudo-parallel' invariant environment (a tuple in 3d, in which we have a grid of actuators. A scalar in 2D, in which we have a line of actuators)
+#     # nb_inv_envs:= total number of 'pseudo-parallel' invariant environments. e.g. 10
+#     """input: one of the parallel environments (np); output: a list of nb_inv_envs invariant environments identical to np. Their ID card: (np, ni)"""
+#     list_inv_envs = []
+#     for j in range(nz_Qs):
+#         env = cp.copy(environment)
+#         env.ENV_ID = [
+#             np,
+#             (j + 1),
+#         ]  # Adjust for two dimensions? or translate two to one dimension (n, m) -> (j)
+#         env.host = f"environment{np}"
+#         list_inv_envs.append(env)
+#     return list_inv_envs
+
+
 print("Here is the nodelist: ", nodelist)
 
 # here the array of environments is defined, will be n-1 host (the 1st one is MASTER) #TODO: assign more nodes to an environment
@@ -176,14 +211,20 @@ parallel_environments = [
     for i in range(num_servers)
 ]
 
+if not nx_Qs:
+    nx_Qs = 1
+
 environments = [
-    split(parallel_environments[i], i + 1)[j]
+    split(parallel_environments[i], i + 1, nx_Qs, nz_Qs)[j]
     for i in range(num_servers)
-    for j in range(nz_Qs)
+    for j in range(nx_Qs * nz_Qs)  # Adjusted for 2D grid
 ]
 
 for env in environments:
-    print("Verif : ID ", env.ENV_ID, env.host)
+    env_id_2d = agent_index_1d_to_2d(env.ENV_ID[1], nz_Qs)
+    print(
+        f"Verif : Host: {env.host:<20} ID: {str(env.ENV_ID):<10} Agent 1D Index: {env.ENV_ID[1]:<5} 2D Index: {str(env_id_2d):<10}"
+    )
 
 time.sleep(1.0)
 
