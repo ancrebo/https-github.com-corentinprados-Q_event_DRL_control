@@ -219,6 +219,27 @@ def read_node_list(file: str = NODELIST) -> List[str]:
     return nodelist
 
 
+def agent_index_2d_to_1d(i: int, j: int, nz_Qs: int) -> int:
+    """
+    Convert 2D index to 1D index (for agents/jets/pseudo-parallel environments)
+    Row-major order
+    1D starts from 1 to align with `ENV_ID[1]` usage
+    """
+    return i * nz_Qs + j + 1
+
+
+def agent_index_1d_to_2d(index: int, nz_Qs: int) -> List[int]:
+    """
+    Convert 1D index to 2D index (for agents/jets/pseudo-parallel environments)
+    Row-major order
+    1D starts from 1 to align with `ENV_ID[1]` usage
+    """
+    index -= 1
+    i = index // nz_Qs
+    j = index % nz_Qs
+    return [i, j]
+
+
 def printDebug(*args) -> None:
     """
     ...

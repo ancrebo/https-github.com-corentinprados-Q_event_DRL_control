@@ -20,15 +20,14 @@ import math
 import os
 
 from jets import build_jets, JetChannel
+from env_utils import index_2d_to_1d, index 1d_to_2d
 
 ### CASE NAME ************************************************
 
 case = "channel"
 simu_name = "3DChan"
 dimension = 3
-reward_function = (
-    "q-event-ratio"  # TODO: add q-event-ratio reward function @pietero
-)
+reward_function = "q-event-ratio"  # TODO: add q-event-ratio reward function @pietero
 
 Re_case = 6
 slices_probes_per_jet = 1
@@ -52,25 +51,10 @@ run_baseline = True
 ### DOMAIN BOX ***********************************************
 # TODO: Update for channel parameters!! @canordq
 
-# radius = 0.5  # cylinder_radius
-# D = 2 * radius
-# length = 30 * D
-# width = 15 * D
-# if Re_case != 5:
-#     Lz = 4 * D
-# else:
-#     Lz = np.pi * D
-#
-# cylinder_coordinates = [width * 0.5, width * 0.5, 0.0]
-# xkarman = 3 * int(2 * cylinder_coordinates[0])
-#
-# Parabolic_max_velocity = 1.5
-
 h = 2.0
-Lx = 2.67*h
+Lx = 2.67 * h
 Ly = h
-Lz = 0.8*h
-
+Lz = 0.8 * h
 
 
 ### **********************************************************
@@ -211,13 +195,21 @@ norm_Q = 0.176  # (0.088/2)/5 asa said in papers, limited Q for no momentum or d
 # location jet over the cylinder 0 is top centre
 jet_angle = 0
 
-nz_Qs: int = 2  # number of agents along z direction # TODO: is this really where we want to define agents along x and z??? @pietero
+nz_Qs: int = (
+    2  # number of agents along z direction # TODO: is this really where we want to define agents along x and z??? @pietero
+)
 nx_Qs: int = 2  # number of agents along x direction
 
-## it will place many slices of witness as Qs locations we have
+nTotal_Qs: int = nz_Qs * nx_Qs  # total number of agents
 
+# Create a grid of agents (2D indices)
+index2d_Qs: List[Tuple[int, int]] = [(i, j) for i in range(nx_Qs) for j in range(nz_Qs)]
 
+# Convert the list of tuples to a NumPy array
+index2d_Qs: np.ndarray = np.array(index2d_Qs)
 
+# Create the 1D index array from the 2D index array
+index1d_Qs: np.ndarray = np.array([index_2d_to_1d(i, j, nz_Qs) for i, j in index2d_Qs])
 
 delta_Q_z: float = Lz / nz_Qs
 delta_Q_x: float = Lx / nx_Qs
@@ -225,7 +217,9 @@ delta_Q_x: float = Lx / nx_Qs
 Qs_position_z: np.ndarray = np.linspace(delta_Q_z / 2, Lz - delta_Q_z / 2, nz_Qs)
 Qs_position_x: np.ndarray = np.linspace(delta_Q_x / 2, Lx - delta_Q_x / 2, nx_Qs)
 
-jet_coordinates: np.ndarray = np.array([(x, z) for x in Qs_position_x for z in Qs_position_z]).reshape(nx_Qs, nz_Qs, 2)
+jet_coordinates: np.ndarray = np.array(
+    [(x, z) for x in Qs_position_x for z in Qs_position_z]
+).reshape(nx_Qs, nz_Qs, 2)
 
 print("Jets are placed in the following X, Z coordinates with their indices:\n")
 for i in range(nx_Qs):
@@ -257,7 +251,7 @@ jets_definition = {
 }
 
 # Build the jets
-jets = build_jets(JetCylinder, jets_definition, delta_t_smooth)
+jets = build_jets(JetChannel, jets_definition, delta_t_smooth)
 n_jets = len(jets)
 
 geometry_params = (
