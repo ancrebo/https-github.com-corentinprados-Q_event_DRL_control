@@ -155,7 +155,7 @@ baseline_time_start = 0.0
 delta_t_smooth = 0.25  # ACTION DURATION smooth law duration
 delta_t_converge = 0.0  # Total time that the DRL waits before executing a new action
 smooth_func = (
-    "EXPONENTIAL"  # 'LINEAR', 'EXPONENTIAL', 'CUBIC' # TODO: cubic is still not coded
+    "EXPONENTIAL"  # 'LINEAR', 'EXPONENTIAL', 'CUBIC' # TODO: cubic is still not coded - Pol
 )
 short_spacetime_func = False  # override smooth func --> TODO: need to fix string size --> FIXED in def_kintyp_functions.f90 (waiting for merging)
 
@@ -168,7 +168,7 @@ rho = 1.0
 
 ### *****************************************************
 ### POSTPROCESS OPTIONS *********************************
-# TODO: Update for channel parameters!! @pietero
+# TODO: @pietero Update for channel parameters!! - Pieter
 
 norm_reward = 5  # like PRESS, try to be between -1,1
 penal_cl = 0.6  # avoid asymmetrical strategies
@@ -178,7 +178,7 @@ if Re_case != 4:
     time_avg = 5.00
 else:
     time_avg = 5.65  # 5.65 #corresponds to the last Tk (avg Cd Cl, not witness)
-post_process_steps = 50  # TODO: put this into a include
+post_process_steps = 50  # TODO: put this into a include - Pol
 offset_reward_list = [
     1.381,
     1.374,
@@ -191,14 +191,14 @@ offset_reward = offset_reward_list[Re_case]
 
 ### *****************************************************
 ### JET SETUP *******************************************
-# TODO: Update for channel parameters!! @canordq
+# TODO: @canordq Update for channel parameters!! - Pieter
 norm_Q = 0.176  # (0.088/2)/5 asa said in papers, limited Q for no momentum or discontinuities in the CFD solver
 
 # location jet over the cylinder 0 is top centre
 jet_angle = 0
 
 nz_Qs: int = (
-    2  # number of agents along z direction # TODO: is this really where we want to define agents along x and z??? @pietero
+    2  # number of agents along z direction # TODO: @pietero is this really where we want to define agents along x and z??? - Pieter
 )
 nx_Qs: int = 2  # number of agents along x direction
 
@@ -233,7 +233,7 @@ for i in range(nx_Qs):
         print(f"Agent ({i}, {j}): X: {x:.2f}, Z: {z:.2f}")
 
 
-# TODO: Update for channel parameters!! @canordq
+# TODO: @canordq Update for channel parameters!! - Pieter
 jets_definition = {
     "JET_TOP": {
         "width": 10,
@@ -285,7 +285,7 @@ assert (
 ### BL option? ****************************************************
 
 # boundary_layer = (
-#     False  # TODO: For what is this used? It is imported in geo_file_maker.py
+#     False  # TODO: For what is this used? It is imported in geo_file_maker.py - Pol
 # )
 # dp_left = 0
 # if boundary_layer:
@@ -296,7 +296,7 @@ assert (
 
 ### ****************************************************
 ### STATE OBSERVATION -- WITNESS MAP ******************
-# TODO: pyalya_wit2field can be used? How much code below is useful? @pietero
+# TODO: pyalya_wit2field can be used? How much code below is useful? - Pieter
 
 ## HERE WE HAVE 3 CHOICES TO LOCATE PROBES:
 ## 1-- S85 ETMM14 //
@@ -304,7 +304,7 @@ assert (
 ## 4-- 5 probes experiment from jean //
 ## 3-- working on it with re3900 (at the same time witness to postprocess: fft, wake profiles, pressure distribution, etc)
 ## 5-- 3D channel
-## TODO: explain criteria of ordering history points, to "call" them quickly
+## TODO: explain criteria of ordering history points, to "call" them quickly - Pol
 
 # new setup observation state for it>30 --> f(slices_probes_per_jet)
 ## 3 slices of probes per jet
@@ -650,7 +650,7 @@ variational_input: Dict[str, Any] = {
         14,
     ],  # Boundaries to postprocess. Comma separated
     "porous": False,  # Variational boundaries to postprocess. Comma separated
-    "density": rho,  # Fluid density #TODO: repeated parameter
+    "density": rho,  # Fluid density #TODO: repeated parameter - Pol
     "veloc": 1,  # average velocity of a parabolic inflow
     # "scale_area": frontal_area,  # Projected frontal area. Scale if it is need it
     "d": 0,  # Distance for momentum calculation
@@ -704,7 +704,7 @@ history_parameters: Dict[str, List[Union[float, int]]] = {
 }
 
 inspection_params: Dict[str, Any] = {
-    "plot": False,  # TODO: inspection_params is never used
+    "plot": False,  # TODO: inspection_params is never used - Pol
     "step": 50,
     "dump": 100,
     "range_pressure_plot": [-2.0, 1],
