@@ -9,8 +9,8 @@
 #
 # Pol Suarez, Fran Alcantara, Arnau Miro
 
-# TODO: IN GENERAL - Update for channel parameters!! @pietero
-# TODO: clean up commented cylinder code @pietero
+# TODO: IN GENERAL - @pietero, @canordq Update for channel parameters!! - Pieter
+# TODO: @pietero clean up commented cylinder code - Pieter
 
 from __future__ import print_function, division
 from typing import List, Tuple, Dict, Any, Union
@@ -18,9 +18,10 @@ from typing import List, Tuple, Dict, Any, Union
 import numpy as np
 import math
 import os
+import shutil
 
 from jets import build_jets, JetChannel
-from env_utils import index_2d_to_1d, index 1d_to_2d
+from env_utils import agent_index_2d_to_1d, agent_index_1d_to_2d
 from witness import calculate_channel_witness_coordinates
 from alya import write_witness_file
 
@@ -29,7 +30,9 @@ from alya import write_witness_file
 case = "channel"
 simu_name = "3DChan"
 dimension = 3
-reward_function = "q-event-ratio"  # TODO: add q-event-ratio reward function @pietero
+reward_function = (
+    "q-event-ratio"  # TODO: @pietero add q-event-ratio reward function - Pieter
+)
 
 Re_case = 6
 slices_probes_per_jet = 1
@@ -51,7 +54,7 @@ run_baseline = True
 
 ### **********************************************************
 ### DOMAIN BOX ***********************************************
-# TODO: Update for channel parameters!! @canordq
+# TODO: @canordq Update for channel parameters!! - Pieter
 
 h = 2.0
 Lx = 2.67 * h
@@ -73,7 +76,7 @@ else:
 nb_actuations_deterministic = nb_actuations * 10
 
 
-# TODO: define the workstation setup vs slurm setup @pietero
+# TODO: @pietero define the workstation setup vs slurm setup - Pieter
 ### **********************************************************
 ### SLURM SPECIFIC SETUP *************************************
 
@@ -104,7 +107,7 @@ mem_per_srun = mem_per_node
 
 ### **********************************************************
 ### WORKSTATION SPECIFIC SETUP *******************************
-# TODO: get specific values for workstation setup @pietero
+# TODO: @pietero get specific values for workstation setup - Pieter
 
 nb_proc_ws = 6  # Number of calculation processors
 num_servers_ws = 2  # number of environment in parallel
@@ -154,9 +157,7 @@ baseline_time_start = 0.0
 
 delta_t_smooth = 0.25  # ACTION DURATION smooth law duration
 delta_t_converge = 0.0  # Total time that the DRL waits before executing a new action
-smooth_func = (
-    "EXPONENTIAL"  # 'LINEAR', 'EXPONENTIAL', 'CUBIC' # TODO: cubic is still not coded - Pol
-)
+smooth_func = "EXPONENTIAL"  # 'LINEAR', 'EXPONENTIAL', 'CUBIC' # TODO: cubic is still not coded - Pol
 short_spacetime_func = False  # override smooth func --> TODO: need to fix string size --> FIXED in def_kintyp_functions.f90 (waiting for merging)
 
 ### *****************************************************
@@ -211,7 +212,9 @@ index2d_Qs: List[Tuple[int, int]] = [(i, j) for i in range(nx_Qs) for j in range
 index2d_Qs: np.ndarray = np.array(index2d_Qs)
 
 # Create the 1D index array from the 2D index array
-index1d_Qs: np.ndarray = np.array([index_2d_to_1d(i, j, nz_Qs) for i, j in index2d_Qs])
+index1d_Qs: np.ndarray = np.array(
+    [agent_index_2d_to_1d(i, j, nz_Qs) for i, j in index2d_Qs]
+)
 
 delta_Q_z: float = Lz / nz_Qs
 delta_Q_x: float = Lx / nx_Qs
@@ -357,13 +360,44 @@ if probes_location == 5:
         "probe_indices1D": probe_indices1D,
     }
 
-    need_witness_file: bool = False
+# CREATION OF WITNESS FILE
+need_witness_file_override: bool = (
+    False  # Whether to overwrite the witness file if exists
+)
 
-    if need_witness_file:
-        write_witness_file(
-            f"alya_files/case_{case}",
-            output_params["locations"],
+case_folder = f"alya_files/case_{case}"
+witness_file_path = os.path.join(case_folder, "witness.dat")
+
+if os.path.exists(witness_file_path):
+    if need_witness_file_override:
+        # Create a backup of the existing witness.dat file
+        backup_file_path = witness_file_path + ".backup"
+        shutil.copyfile(witness_file_path, backup_file_path)
+        print(
+            f"CREATING NEW WITNESS FILE:\nBackup of old witness.dat created at {backup_file_path}"
         )
+
+        # Write the new witness.dat file
+        with open(witness_file_path, "w") as f:
+            for location in output_params["locations"]:
+                f.write(f"{location}\n")
+        need_witness_file_override = False
+        print(
+            f"CREATING NEW WITNESS FILE:\nwitness.dat has been overridden and written in {case_folder}."
+        )
+        print("\nOverride parameter set to False.")
+    else:
+        print(
+            f"CREATING NEW WITNESS FILE:\nwitness.dat already exists in {case_folder}. No override needed."
+        )
+else:
+    # Create and write the witness.dat file if it does not exist
+    with open(witness_file_path, "w") as f:
+        for location in output_params["locations"]:
+            f.write(f"{location}\n")
+    print(
+        f"CREATING NEW WITNESS FILE: No existing witness.dat found in {case_folder}.\nNew file created!"
+    )
 
 ############################################################################################
 ####    These are the probe positions for S85   ####
