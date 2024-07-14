@@ -339,7 +339,7 @@ class Environment(Environment):
                     run_subprocess(
                         casepath,
                         ALYA_SETS,
-                        "%s-boundary.nsi.set 3" % self.case,
+                        f"{self.case}-boundary.nsi.set 3",
                         log=logssets,
                     )  # TODO: Boundary hardcoded!!
                 if self.dimension == 3:
@@ -349,7 +349,7 @@ class Environment(Environment):
                     run_subprocess(
                         casepath,
                         ALYA_BIN,
-                        "%s" % self.case,
+                        f"{self.case}",
                         nprocs=nb_proc,
                         mem_per_srun=mem_per_srun,
                         num_nodes_srun=num_nodes_srun,
@@ -359,7 +359,7 @@ class Environment(Environment):
                     run_subprocess(
                         casepath,
                         ALYA_SETS,
-                        "%s-boundary.nsi.set 3" % self.case,
+                        f"{self.case}-boundary.nsi.set 3",
                         log=logssets,
                         preprocess=True,
                     )
@@ -1392,5 +1392,6 @@ class Environment(Environment):
             )
 
         elif self.reward_function == "q_event_volume":
-            # TODO: implement q-event volume reward function @pietero
+            # TODO: @pietero implement q-event volume reward function - Pieter
+
             pass
