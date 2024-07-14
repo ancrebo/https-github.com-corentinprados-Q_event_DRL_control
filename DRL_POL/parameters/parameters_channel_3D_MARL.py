@@ -104,8 +104,8 @@ mem_per_srun = mem_per_node
 ### WORKSTATION SPECIFIC SETUP *******************************
 # TODO: get specific values for workstation setup @pietero
 
-nb_proc_ws = 6  # Number of calculation processors
-num_servers_ws = 2  # number of environment in parallel
+nb_proc_ws = 18  # Number of calculation processors
+num_servers_ws = 1  # number of environment in parallel
 
 proc_per_node_ws = 1
 # proc_per_node_ws = int(os.getenv('SLURM_NTASKS_PER_NODE'))*int(os.getenv('SLURM_CPUS_PER_TASK'))
