@@ -191,7 +191,7 @@ def write_ker_file(
     # Write file
     file = open(os.path.join(filepath, f"{casename}.ker.dat"), "w")
     file.write(
-        """$------------------------------------------------------------
+        f"""$------------------------------------------------------------
 PHYSICAL_PROBLEM
   PROPERTIES
     INCLUDE       physical_properties.dat
@@ -213,19 +213,18 @@ NUMERICAL_TREATMENT
 
   SPACE_&_TIME_FUNCTIONS
     INCLUDE inflow.dat
-%s
+{jet_includes}
   END_SPACE_&_TIME_FUNCTIONS
 END_NUMERICAL_TREATMENT  
 $------------------------------------------------------------
 OUTPUT_&_POST_PROCESS 
   $ Variable postprocess 
-  STEPS=%d
-%s
+  STEPS={steps}
+{var_includes}
   $ Witness points
   INCLUDE witness.dat
 END_OUTPUT_&_POST_PROCESS  
 $------------------------------------------------------------"""
-        % (jet_includes, steps, var_includes)
     )
     file.close()
 
