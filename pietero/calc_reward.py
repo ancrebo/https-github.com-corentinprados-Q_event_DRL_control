@@ -133,7 +133,7 @@ def process_velocity_data(
     Parameters:
     - data (list of tuples): Each tuple contains a timestep and a DataFrame with spatial coordinates (x, y, z)
       and velocity components (U, V, W).
-    - averaged_data (DataFrame): Pre-calculated averaged data containing velocities ($\overline{U}(y)$, $\overline{V}(y)$, $\overline{W}(y)$)
+    - averaged_data (DataFrame): Pre-calculated averaged data containing velocities ($\\overline{U}(y)$, $\\overline{V}(y)$, $\\overline{W}(y)$)
       and rms of velocity fluctuations ($u'(y)$, $v'(y)$, $w'(y)$) as columns, indexed by the y-coordinate.
 
     Returns:
