@@ -109,6 +109,19 @@ def load_averaged_data(file_path: str) -> pd.DataFrame:
     return pd.read_parquet(file_path)
 
 
+def load_averaged_data_csv(file_path: str) -> pd.DataFrame:
+    """
+    Load the averaged data from a CSV file.
+
+    Parameters:
+    - file_path (str): The path to the CSV file.
+
+    Returns:
+    - pd.DataFrame: The loaded averaged data.
+    """
+    return pd.read_csv(file_path)
+
+
 def process_velocity_data(
     data: List[Tuple[float, pd.DataFrame]], averaged_data: pd.DataFrame
 ) -> List[Tuple[float, pd.DataFrame]]:
@@ -131,14 +144,16 @@ def process_velocity_data(
 
     # Process each individual dataset for detailed fluctuation analysis
     for timestep, df in data:
-        y_means = averaged_data.loc[df["y"]]
+        # Merge the data frame with the averaged data on the 'y' column
+        df_merged = pd.merge(df, averaged_data, on="y", how="left")
+
         df_processed = df.copy()
         df_processed["U"] = df["U"]
         df_processed["V"] = df["V"]
         df_processed["W"] = df["W"]
-        df_processed["u"] = df["U"] - y_means["U_bar"].values
-        df_processed["v"] = df["V"] - y_means["V_bar"].values
-        df_processed["w"] = df["W"] - y_means["W_bar"].values
+        df_processed["u"] = df["U"] - df_merged["U_bar"]
+        df_processed["v"] = df["V"] - df_merged["V_bar"]
+        df_processed["w"] = df["W"] - df_merged["W_bar"]
 
         # Ensure no 'timestep' column remains in the output data
         df_processed.drop(columns="timestep", inplace=True, errors="ignore")
@@ -270,17 +285,19 @@ def calculate_reward_full(
     - H (float): Sensitivity threshold for identifying Q events.
     - n (int): Number of sections in the x direction.
     - m (int): Number of sections in the z direction.
-    - averaged_data_path (str): Path to the Parquet file with averaged data.
-    - output_file (str): Path to the output Parquet file for rewards.
+    - averaged_data_path (str): Path to the CSV file with averaged data.
+    - output_file (str): Path to the output CSV file for rewards.
     """
     data = load_data_and_convert_to_dataframe(directory)
+    print(f"Shape of loaded data - first timestep: {data[0][1].shape}")
     data_normalized = [
         (timestep, normalize_data_frame(df, Lx, Ly, Lz)) for timestep, df in data
     ]
-    averaged_data = load_averaged_data(averaged_data_path)
-
+    print(f"Shape of normalized data - first timestep: {data_normalized[0][1].shape}")
+    averaged_data = load_averaged_data_csv(averaged_data_path)
+    print(f"Shape of loaded averaged data - first timestep: {averaged_data.shape}")
     processed_data = process_velocity_data(data_normalized, averaged_data)
-
+    print(f"Shape of processed data - first timestep: {processed_data[0][1].shape}")
     Q_event_frames = detect_Q_events(processed_data, averaged_data, H)
 
     all_results = []
@@ -299,8 +316,10 @@ def calculate_reward_full(
             rewards.append({"x_index": i, "z_index": j, "reward": reward})
 
     reward_df = pd.DataFrame(rewards)
-    reward_df.to_parquet(output_file, index=False)
-    print(f"Rewards saved to {output_file}")
+    # reward_df.to_parquet(output_file, index=False)
+    # reward_df.to_csv(output_file.replace(".parquet", ".csv"), index=False)
+    reward_df.to_csv(output_file, index=False)
+    print(f"Rewards saved to {output_file}!")
 
     # Clean up
     del (
@@ -318,7 +337,7 @@ def calculate_reward_full(
 
 # Example usage:
 """
-python step2_calculate_rewards.py --directory path/to/data --Lx 1.0 --Ly 1.0 --Lz 1.0 --H 3.0 --n 4 --m 3 --averaged_data_path averaged_data.parquet --output_file rewards.csv
+python calc_reward.py --directory path/to/data --Lx 1.0 --Ly 1.0 --Lz 1.0 --H 3.0 --n 4 --m 3 --averaged_data_path averaged_data.csv --output_file rewards.csv
 """
 
 
@@ -328,7 +347,7 @@ if __name__ == "__main__":
         "--directory",
         type=str,
         required=True,
-        help="Directory containing the PVD and PVTU files.",
+        help="Directory containing the PVD and PVTU files. MUST INCLUDE channel.pvd!!!",
     )
     parser.add_argument(
         "--Lx", type=float, required=True, help="Length in the x direction."
@@ -355,7 +374,7 @@ if __name__ == "__main__":
         "--averaged_data_path",
         type=str,
         required=True,
-        help="Path to the Parquet file with averaged data.",
+        help="Path to the CSV file with averaged data.",
     )
     parser.add_argument(
         "--output_file",

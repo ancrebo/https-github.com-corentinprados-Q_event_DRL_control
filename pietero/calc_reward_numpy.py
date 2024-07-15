@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import pyvista as pv
+import pyarrow.parquet as pq
 import xml.etree.ElementTree as ET
 import gc
 from typing import List, Tuple
@@ -81,17 +82,17 @@ def normalize_data_array(
     return data_copy
 
 
-def load_averaged_data(file_path: str) -> np.ndarray:
+def load_averaged_data_csv(file_path: str) -> np.ndarray:
     """
-    Load the averaged data from a Parquet file.
+    Load the averaged data from a CSV file.
 
     Parameters:
-    - file_path (str): The path to the Parquet file.
+    - file_path (str): The path to the CSV file.
 
     Returns:
     - np.ndarray: The loaded averaged data.
     """
-    return pd.read_parquet(file_path).to_numpy()
+    return np.loadtxt(file_path, delimiter=",", skiprows=1)  # Do I want to skip rows???
 
 
 def process_velocity_data(
@@ -114,13 +115,24 @@ def process_velocity_data(
     """
     processed_data = []
 
-    # Process each individual dataset for detailed fluctuation analysis
+    y_values = averaged_data[:, 0]
+    U_bar = averaged_data[:, 1]
+    V_bar = averaged_data[:, 3]
+    W_bar = averaged_data[:, 5]
+
     for timestep, data_array in data:
-        y_means = averaged_data[np.isin(averaged_data[:, 0], data_array[:, 1])]
-        data_processed = data_array.copy()
-        data_processed[:, 6] = data_array[:, 3] - y_means[:, 1]
-        data_processed[:, 7] = data_array[:, 4] - y_means[:, 2]
-        data_processed[:, 8] = data_array[:, 5] - y_means[:, 3]
+        y_data = data_array[:, 1]
+
+        U_interp = np.interp(y_data, y_values, U_bar)
+        V_interp = np.interp(y_data, y_values, V_bar)
+        W_interp = np.interp(y_data, y_values, W_bar)
+
+        data_processed = np.zeros((data_array.shape[0], data_array.shape[1] + 3))
+        data_processed[:, :6] = data_array
+
+        data_processed[:, 6] = data_array[:, 3] - U_interp
+        data_processed[:, 7] = data_array[:, 4] - V_interp
+        data_processed[:, 8] = data_array[:, 5] - W_interp
 
         processed_data.append((timestep, data_processed))
 
@@ -149,10 +161,18 @@ def detect_Q_events(
     """
     q_event_data = []
 
+    y_values = averaged_data[:, 0]
+    u_prime = averaged_data[:, 2]
+    v_prime = averaged_data[:, 4]
+
     for timestep, data_array in processed_data:
-        rms_values = averaged_data[np.isin(averaged_data[:, 0], data_array[:, 1])]
+        y_data = data_array[:, 1]
+
+        u_prime_interp = np.interp(y_data, y_values, u_prime)
+        v_prime_interp = np.interp(y_data, y_values, v_prime)
+
         uv_product = np.abs(data_array[:, 6] * data_array[:, 7])
-        threshold = H * rms_values[:, 4] * rms_values[:, 5]
+        threshold = H * u_prime_interp * v_prime_interp
         q_events = uv_product > threshold
         q_array = np.column_stack((data_array[:, :3], q_events))
         q_event_data.append((timestep, q_array))
@@ -248,7 +268,7 @@ def calculate_reward_full(
         (timestep, normalize_data_array(data_array, Lx, Ly, Lz))
         for timestep, data_array in data
     ]
-    averaged_data = load_averaged_data(averaged_data_path)
+    averaged_data = load_averaged_data_csv(averaged_data_path)
 
     processed_data = process_velocity_data(data_normalized, averaged_data)
 
