@@ -650,12 +650,12 @@ class JetChannel(Jet):
             string_h = Q_smooth_exp(time_start, T_smoo)
 
             # create the new Q string
-            string_heav = heav_func(Qs_position_x[0], delta_Q_x, Qs_position_z[0], delta_Q_z)
+            string_heav = heav_func_channel(Qs_position_x[0], delta_Q_x, Qs_position_z[0], delta_Q_z)
             string_all_Q_pre = f"{string_heav}*({Q_pre[0]:.4f})"
             string_all_Q_new = f"{string_heav}*({Q_new[0]:.4f})"
 
             for i in range(1, self.nb_inv_per_CFD):
-                string_heav = heav_func(Qs_position_x[0], delta_Q_x, Qs_position_z[0], delta_Q_z)
+                string_heav = heav_func_channel(Qs_position_x[0], delta_Q_x, Qs_position_z[0], delta_Q_z)
                 string_all_Q_pre += f"+ {string_heav}*({Q_pre[i]:.4f})"
                 string_all_Q_new += f"+ {string_heav}*({Q_new[i]:.4f})"
             string_Q = f"(({string_all_Q_pre}) + ({string_h})*(({string_all_Q_new})-({string_all_Q_pre})))"
