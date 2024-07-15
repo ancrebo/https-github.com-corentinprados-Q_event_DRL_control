@@ -18,14 +18,16 @@ def load_data_and_convert_to_dataframe(
     Each DataFrame is stored along with its respective timestep, facilitating time-series analysis.
 
     Parameters:
-    - directory (str): The path to the directory containing the PVD and PVTU files.
+    - directory (str): The path to the directory containing the PVD and PVTU files - including channel.pvd.
 
     Returns:
     - data_frames (list of tuples): A list where each element is a tuple containing:
       * A timestep (float)
       * A DataFrame with columns for spatial coordinates (x, y, z) and velocity components (U, V, W)
     """
-    pvd_path = os.path.join(directory, "channel.pvd")
+    pvd_path = os.path.join(
+        directory, "channel.pvd"
+    )  # TODO: @pietero is the channel.pvd necessary if we are not dealing with multiple timesteps? - Pieter
     tree = ET.parse(pvd_path)
     root = tree.getroot()
     timestep_file_map = {
