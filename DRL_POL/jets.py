@@ -87,12 +87,11 @@ def heav_func(position_z: float, delta_z: float) -> str:
     """
     return f"heav((z-{position_z - delta_z * 0.5:.3f})*({position_z + delta_z * 0.5:.3f}-z))"
 
-def heav_func_channel(position: float, delta: float) -> str:
-    """
+def heav_func_channel(position_x: float, delta_x: float, position_z: float, delta_z: float) -> str:
     Define the heaviside function xz-grid to change the Q in diferent locations
     takes the x and z positions and activates the Q inside range [x-delta,x+delta],[z-delta,z+delta] -Chriss
     """
-    return f"heav((z-{position_z - delta_z * 0.5:.3f})*({position_z + delta_z * 0.5:.3f}-z)) * heav((x-{position_x - delta * 0.5:.3f})*({position_x + delta * 0.5:.3f}-x))"
+    return f"heav((x-{position_x - delta_x * 0.5:.3f})*({position_x + delta_x * 0.5:.3f}-x)) * heav((z-{position_z - delta_z * 0.5:.3f})*({position_z + delta_z * 0.5:.3f}-z))"
 
 
 class Jet(ABC):
@@ -648,14 +647,12 @@ class JetChannel(Jet):
             string_h = Q_smooth_exp(time_start, T_smoo)
 
             # create the new Q string
-            # ??? string_Q_new format: heav(z1)*heav(x1)*Q1,1 + heav(z1)*heav(x2)*Q1,2 + ... + heav(z2)*heav(x1)*Q2,1 + ...
-            # need to iterate over every existing agent pair
-            string_heav = heav_func(Qs_position_z[0], delta_Q_z)
+            string_heav = heav_func(Qs_position_x[0], delta_Q_x, Qs_position_z[0], delta_Q_z)
             string_all_Q_pre = f"{string_heav}*({Q_pre[0]:.4f})"
             string_all_Q_new = f"{string_heav}*({Q_new[0]:.4f})"
 
             for i in range(1, self.nb_inv_per_CFD):
-                string_heav = heav_func(Qs_position_z[i], delta_Q_z)
+                string_heav = heav_func(Qs_position_x[0], delta_Q_x, Qs_position_z[0], delta_Q_z)
                 string_all_Q_pre += f"+ {string_heav}*({Q_pre[i]:.4f})"
                 string_all_Q_new += f"+ {string_heav}*({Q_new[i]:.4f})"
             string_Q = f"(({string_all_Q_pre}) + ({string_h})*(({string_all_Q_new})-({string_all_Q_pre})))"
