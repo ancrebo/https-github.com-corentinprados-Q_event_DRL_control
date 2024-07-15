@@ -12,7 +12,7 @@ from typing import List, Type, Any, Dict, Optional
 
 from alya import write_jet_file
 
-
+# Use vim to edit
 # Function to build and return the jets
 # See `jets_definition` in `parameters.py` for the use of this function
 def build_jets(
