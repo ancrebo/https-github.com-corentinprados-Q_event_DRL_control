@@ -16,7 +16,7 @@ $------------------------------------------------------------
   ELEMENT_LENGTH:           Minimum
   STABILIZATION:            OFF
   TIME_INTEGRATION:         RUNGE, ORDER:2
-  SAFETY_FACTOR:            1.0
+  SAFETY_FACTOR:            0.2
   STEADY_STATE_TOLER        -1e-10
   MAXIMUM_NUMBER_OF_IT:     1
   CONVERGENCE_TOLERANCE:    1e-3
@@ -59,7 +59,7 @@ $------------------------------------------------------------
 OUTPUT_&_POST_PROCESS  
   START_POSTPROCES_AT       STEP  = 0
   POSTPROCESS VELOCITY      STEPS = 1
-  POSTPROCESS PRESSURE      STEPS = 1
+  POSTPROCESS AVVEL         STEPS = 1
 END_OUTPUT_&_POST_PROCESS  
 $------------------------------------------------------------
 BOUNDARY_CONDITIONS
