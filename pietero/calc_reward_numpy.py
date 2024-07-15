@@ -35,6 +35,12 @@ def load_data_and_convert_to_numpy(
         path = os.path.join(directory, file)
         mesh = pv.read(path)
         points = mesh.points
+
+        # Print available data arrays
+        print(f"Available data arrays in {file}: {mesh.array_names}")
+
+        if "VELOC" not in mesh.array_names:
+            raise KeyError(f"Data array 'VELOC' not found in {file}.")
         U, V, W = mesh["VELOC"].T
 
         data_array = np.column_stack((points, U, V, W))
