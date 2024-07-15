@@ -149,7 +149,9 @@ class Jet(ABC):
         # Call specialized method to set up the jet geometry
         self.set_geometry(params)
         # Update to this current timestep
+        # self.Qs_position_x: float = self.Qs_position_x
         # self.Qs_position_z: float = self.Qs_position_z
+        # self.delta_Q_x: float = self.delta_Q_x
         # self.delta_Q_z: float = self.delta_Q_z
         self.time_start = time_start
         self.short_spacetime_func: bool = short_spacetime_func
