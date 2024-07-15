@@ -1,7 +1,6 @@
 import os
 import numpy as np
 import pyvista as pv
-import pyarrow.parquet as pq
 import xml.etree.ElementTree as ET
 import gc
 from typing import List, Tuple
