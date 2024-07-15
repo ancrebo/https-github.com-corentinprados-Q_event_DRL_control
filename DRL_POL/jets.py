@@ -88,8 +88,8 @@ def heav_func(position_z: float, delta_z: float) -> str:
     return f"heav((z-{position_z - delta_z * 0.5:.3f})*({position_z + delta_z * 0.5:.3f}-z))"
 
 def heav_func_channel(position_x: float, delta_x: float, position_z: float, delta_z: float) -> str:
-    Define the heaviside function xz-grid to change the Q in diferent locations
-    takes the x and z positions and activates the Q inside range [x-delta,x+delta],[z-delta,z+delta] -Chriss
+    '''Define the heaviside function xz-grid to change the Q in diferent locations
+    takes the x and z positions and activates the Q inside range [x-delta,x+delta],[z-delta,z+delta] -Chriss'''
     """
     return f"heav((x-{position_x - delta_x * 0.5:.3f})*({position_x + delta_x * 0.5:.3f}-x)) * heav((z-{position_z - delta_z * 0.5:.3f})*({position_z + delta_z * 0.5:.3f}-z))"""
 
