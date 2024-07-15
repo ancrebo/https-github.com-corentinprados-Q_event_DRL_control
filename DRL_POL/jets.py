@@ -551,20 +551,20 @@ class JetChannel(Jet):
             name, params, Q_pre, Q_new, time_start, dimension, T_smoo, smooth_func
         )
 
-        self.Qs_position_z: List[float] = params["Qs_position_z"]
-        self.delta_Q_z: float = params["delta_Q_z"]
         self.Qs_position_x: List[float] = params["Qs_position_x"]
         self.delta_Q_x: float = params["delta_Q_x"]
+        self.Qs_position_z: List[float] = params["Qs_position_z"]
+        self.delta_Q_z: float = params["delta_Q_z"]
 
         self.update(
             self.Q_pre,
             self.Q_new,
             self.time_start,
             self.smooth_func,
-            Qs_position_z=self.Qs_position_z,
-            delta_Q_z=self.delta_Q_z,
             Qs_position_x=self.Qs_position_x,
             delta_Q_x=self.delta_Q_x,
+            Qs_position_z=self.Qs_position_z,
+            delta_Q_z=self.delta_Q_z,
         )
 
     def update(
@@ -584,14 +584,14 @@ class JetChannel(Jet):
     # TODO: Update this function for channel
     def set_geometry(self, params: Dict[str, Any]) -> None:
         """
-        Specialized method that sets up the geometry of the jet, including importing Qs_position_z and delta_Q_z
+        Specialized method that sets up the geometry of the jet, including importing Qs_position_x, Qs_position_z, delta_Q_z and delta_Q_z
         """
         from parameters import (
             cylinder_coordinates,  # Remove?? Necessary??
-            Qs_position_z,
-            delta_Q_z,
             Qs_position_x,
             delta_Q_x,
+            Qs_position_z,
+            delta_Q_z,
         )
 
         # Sanity check
@@ -608,10 +608,11 @@ class JetChannel(Jet):
         self.width: float = params["width"]
         self.theta0: float = self.normalize_angle(np.deg2rad(params["positions_angle"]))
         self.theta: str = self.get_theta(cylinder_coordinates)
-        self.Qs_position_z: List[float] = Qs_position_z
-        self.delta_Q_z: float = delta_Q_z
         self.Qs_position_x: List[float] = Qs_position_x
         self.delta_Q_x: float = delta_Q_x
+        self.Qs_position_z: List[float] = Qs_position_z
+        self.delta_Q_z: float = delta_Q_z
+
 
     # TODO: adjust this function for 2D channel
     def create_smooth_funcs(
@@ -627,10 +628,10 @@ class JetChannel(Jet):
         Specialized method that creates the smooth functions in 2D
         """
 
-        Qs_position_z: List[float] = kwargs.get("Qs_position_z")
-        delta_Q_z: float = kwargs.get("delta_Q_z")
         Qs_position_x: List[float] = kwargs.get("Qs_position_x")
         delta_Q_x: float = kwargs.get("delta_Q_x")
+        Qs_position_z: List[float] = kwargs.get("Qs_position_z")
+        delta_Q_z: float = kwargs.get("delta_Q_z")
 
         # scale = ? for channel
         w = 1.0  # TODO: fix this with correct width for channel
