@@ -12,6 +12,7 @@ from typing import List, Type, Any, Dict, Optional
 
 from alya import write_jet_file
 
+
 # Use vim to edit
 # Function to build and return the jets
 # See `jets_definition` in `parameters.py` for the use of this function
@@ -80,18 +81,22 @@ def Q_smooth_exp(ts: float, Tsmooth: float) -> str:
     return h
 
 
-def heav_func(position_z: float, delta_z: float) -> str:
+def heav_func(position: float, delta: float) -> str:
     """
-    Define the heaviside function in spanwise to change the Q in diferent locations at z axis
-    takes de z position and activates the Q inside range [z-delta,z+delta]
+    Define the heaviside function in spanwise to change the Q in diferent locations at an axis
+    takes de position and activates the Q inside range [position-delta,position+delta]
     """
-    return f"heav((z-{position_z - delta_z * 0.5:.3f})*({position_z + delta_z * 0.5:.3f}-z))"
+    return f"heav((z-{position - delta * 0.5:.3f})*({position + delta * 0.5:.3f}-z))"
 
-def heav_func_channel(position_x: float, delta_x: float, position_z: float, delta_z: float) -> str:
-    '''Define the heaviside function xz-grid to change the Q in diferent locations
-    takes the x and z positions and activates the Q inside range [x-delta,x+delta],[z-delta,z+delta] -Chriss'''
+
+def heav_func_channel(
+    position_x: float, delta_x: float, position_z: float, delta_z: float
+) -> str:
     """
-    return f"heav((x-{position_x - delta_x * 0.5:.3f})*({position_x + delta_x * 0.5:.3f}-x)) * heav((z-{position_z - delta_z * 0.5:.3f})*({position_z + delta_z * 0.5:.3f}-z))"""
+    Define the heaviside function xz-grid to change the Q in diferent locations
+    takes the x and z positions and activates the Q inside range [x-delta,x+delta],[z-delta,z+delta] -Chriss
+    """
+    return f"heav((x-{position_x - delta_x * 0.5:.3f})*({position_x + delta_x * 0.5:.3f}-x)) * heav((z-{position_z - delta_z * 0.5:.3f})*({position_z + delta_z * 0.5:.3f}-z))"
 
 
 class Jet(ABC):
@@ -613,7 +618,6 @@ class JetChannel(Jet):
         self.Qs_position_z: List[float] = Qs_position_z
         self.delta_Q_z: float = delta_Q_z
 
-
     # TODO: adjust this function for 2D channel
     def create_smooth_funcs(
         self,
@@ -650,12 +654,16 @@ class JetChannel(Jet):
             string_h = Q_smooth_exp(time_start, T_smoo)
 
             # create the new Q string
-            string_heav = heav_func_channel(Qs_position_x[0], delta_Q_x, Qs_position_z[0], delta_Q_z)
+            string_heav = heav_func_channel(
+                Qs_position_x[0], delta_Q_x, Qs_position_z[0], delta_Q_z
+            )
             string_all_Q_pre = f"{string_heav}*({Q_pre[0]:.4f})"
             string_all_Q_new = f"{string_heav}*({Q_new[0]:.4f})"
 
             for i in range(1, self.nb_inv_per_CFD):
-                string_heav = heav_func_channel(Qs_position_x[0], delta_Q_x, Qs_position_z[0], delta_Q_z)
+                string_heav = heav_func_channel(
+                    Qs_position_x[0], delta_Q_x, Qs_position_z[0], delta_Q_z
+                )
                 string_all_Q_pre += f"+ {string_heav}*({Q_pre[i]:.4f})"
                 string_all_Q_new += f"+ {string_heav}*({Q_new[i]:.4f})"
             string_Q = f"(({string_all_Q_pre}) + ({string_h})*(({string_all_Q_new})-({string_all_Q_pre})))"
