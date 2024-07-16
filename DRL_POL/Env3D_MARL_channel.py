@@ -41,7 +41,7 @@ from parameters import (
     case,
     simulation_params,
     num_nodes_srun,
-    reward_function,
+    reward_params,
     jets,
     optimization_params,
     output_params,
@@ -94,7 +94,7 @@ class Environment(Environment):
         self.simu_name: str = simu_name
         self.case: str = case
         self.ENV_ID: List[int] = ENV_ID
-        self.host: str = "enviroment%d" % self.ENV_ID[0]
+        self.host: str = f"enviroment{self.ENV_ID[0]}"
         self.nodelist: Union[str, None] = node
         # self.nodelist     = [n for n in node.split(',')]
         self.do_baseline: bool = (
@@ -105,7 +105,8 @@ class Environment(Environment):
         self.dimension: int = dimension
 
         self.number_steps_execution: int = number_steps_execution
-        self.reward_function: str = reward_function
+        self.reward_function: str = reward_params["reward_function"]
+        self.reward_params: Dict[str, str] = reward_params
         self.output_params: Dict[str, Any] = output_params
         self.optimization_params: Dict[str, Union[int, float]] = optimization_params
         self.Jets: Dict[str, Any] = jets
@@ -330,7 +331,7 @@ class Environment(Environment):
                     run_subprocess(
                         casepath,
                         ALYA_BIN,
-                        "%s" % self.case,
+                        f"{case}",
                         nprocs=nb_proc,
                         oversubscribe=OVERSUBSCRIBE,
                         nodelist=self.nodelist,
@@ -339,7 +340,7 @@ class Environment(Environment):
                     run_subprocess(
                         casepath,
                         ALYA_SETS,
-                        "%s-boundary.nsi.set 3" % self.case,
+                        f"{self.case}-boundary.nsi.set 3",
                         log=logssets,
                     )  # TODO: Boundary hardcoded!!
                 if self.dimension == 3:
@@ -349,7 +350,7 @@ class Environment(Environment):
                     run_subprocess(
                         casepath,
                         ALYA_BIN,
-                        "%s" % self.case,
+                        f"{self.case}",
                         nprocs=nb_proc,
                         mem_per_srun=mem_per_srun,
                         num_nodes_srun=num_nodes_srun,
@@ -359,7 +360,7 @@ class Environment(Environment):
                     run_subprocess(
                         casepath,
                         ALYA_SETS,
-                        "%s-boundary.nsi.set 3" % self.case,
+                        f"{self.case}-boundary.nsi.set 3",
                         log=logssets,
                         preprocess=True,
                     )
@@ -1218,6 +1219,50 @@ class Environment(Environment):
                         delta_Q_x=self.delta_Q_x,
                     )  # TODO: make sure this works for channel @pietero
 
+            # TODO: @pietero Add reward processing step here so only `ENV_ID[1] == 1` does the processing and saves the reward.csv? - Pieter
+            directory = os.path.join(
+                "alya_files",
+                f"{self.host}",
+                f"{self.ENV_ID[1]}",
+                f"EP_{self.episode_number}",
+                "vtk",
+            )
+            averaged_data_path = os.path.join(
+                "alya_files",
+                f"{self.host}",
+                f"{self.ENV_ID[1]}",
+                f"EP_{self.episode_number}",
+                "averaged_data.csv",
+            )
+            # TODO: @pietero Need to make sure directories exist or are created - Pieter
+            output_file_path = os.path.join(
+                "alya_files",
+                f"{self.host}",
+                f"{self.ENV_ID[1]}",
+                f"EP_{self.episode_number}",
+                "rewards",
+                f"rewards_{self.host}_EP_{self.episode_number}.csv",
+            )
+
+            runpath = "./"
+            runbin = "run_reward_in_new_env.sh"  # shell script that runs `calc_reward.py` in a different conda environment
+            runargs = (
+                f"--directory {directory} "
+                f"--Lx {reward_params['Lx']} "
+                f"--Ly {reward_params['Ly']} "
+                f"--Lz {reward_params['Lz']} "
+                f"--H {reward_params['H']} "
+                f"--n {reward_params['nx_Qs']} "
+                f"--m {reward_params['nz_Qs']} "
+                f"--averaged_data_path {averaged_data_path} "
+                f"--output_file {output_file_path}"
+            )
+            run_subprocess(
+                runpath,
+                runbin,
+                runargs,
+                use_new_env=True,
+            )
             cr_stop("ENV.actions_MASTER_thread1", 0)
 
         # Start an alya run
@@ -1392,5 +1437,25 @@ class Environment(Environment):
             )
 
         elif self.reward_function == "q_event_volume":
-            # TODO: implement q-event volume reward function @pietero
-            pass
+            # TODO: @pietero implement q-event volume reward function - Pieter
+            output_file_path = os.path.join(
+                "alya_files",
+                f"{self.host}",
+                f"{1}",
+                f"EP_{self.episode_number}",
+                "rewards",
+                f"rewards_{self.host}_EP_{self.episode_number}.csv",
+            )
+            data = np.genfromtxt(output_file_path, delimiter=",", names=True)
+
+            # Find the row where ENV_ID matches self.ENV_ID[1]
+            matching_row = data[data["ENV_ID"] == self.ENV_ID[1]]
+
+            if matching_row.size == 0:
+                raise ValueError(
+                    f"No matching row found for ENV_ID {self.ENV_ID[1]} in reward file at {output_file_path}"
+                )
+
+            reward_value: float = float(matching_row["reward"][0])
+
+            return reward_value

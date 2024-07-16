@@ -13,7 +13,7 @@
 # TODO: clean up commented cylinder code @pietero
 
 from __future__ import print_function, division
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 import numpy as np
 import math
@@ -27,11 +27,12 @@ from env_utils import index_2d_to_1d, index 1d_to_2d
 case = "channel"
 simu_name = "3DChan"
 dimension = 3
-reward_function = "q-event-ratio"  # TODO: add q-event-ratio reward function @pietero
+reward_function = "q_event_volume"  # TODO: add q-event-ratio reward function @pietero
 
 Re_case = 6
 slices_probes_per_jet = 1
 neighbor_state = False
+h_qevent_sensitivity: float = 3.0 # Used to identify the Q events, sensitivity to the Q events
 
 #### Reynolds cases
 #### 0 --> Re = 100
@@ -50,8 +51,9 @@ run_baseline = True
 ### **********************************************************
 ### DOMAIN BOX ***********************************************
 # TODO: Update for channel parameters!! @canordq
-
-h = 2.0
+# These parameters need to match the case mesh
+# The parameters below are based on the `minimal channel - Jimenez` paper
+h = 1.0
 Lx = 2.67 * h
 Ly = h
 Lz = 0.8 * h
@@ -63,10 +65,8 @@ Lz = 0.8 * h
 num_episodes = 2000  # Total number of episodes
 if Re_case != 5:
     nb_actuations = 120  # Number of actuation of the neural network for each episode
-    num_nodes_srun = 3
 else:
     nb_actuations = 200
-    num_nodes_srun = 3
 
 nb_actuations_deterministic = nb_actuations * 10
 
@@ -90,44 +90,28 @@ mem_per_cpu = mem_per_node // proc_per_node
 # mem_per_srun  = int(nb_proc*mem_per_cpu) # partition in memory allocation
 mem_per_srun = mem_per_node
 
-# num_episodes = 2000  # Total number of episodes
-# if Re_case != 5:
-#     nb_actuations = 120  # Number of actuation of the neural network for each episode
-#     num_nodes_srun = 3
-# else:
-#     nb_actuations = 200
-#     num_nodes_srun = 3
-#
-# nb_actuations_deterministic = nb_actuations * 10
+if Re_case != 5:
+    num_nodes_srun = 3
+else:
+    num_nodes_srun = 3
+
 
 ### **********************************************************
 ### WORKSTATION SPECIFIC SETUP *******************************
 # TODO: get specific values for workstation setup @pietero
 
-nb_proc_ws = 18  # Number of calculation processors
-num_servers_ws = 1  # number of environment in parallel
+
+nb_proc_ws = 6  # Number of calculation processors
+1  # number of environment in parallel
 
 proc_per_node_ws = 1
-# proc_per_node_ws = int(os.getenv('SLURM_NTASKS_PER_NODE'))*int(os.getenv('SLURM_CPUS_PER_TASK'))
 
-mem_per_node_ws = 200000  # MB RAM in each node
-# mem_per_node   = int(os.getenv('SLURM_MEM_PER_NODE'))
-
-mem_per_cpu_ws = mem_per_node_ws // proc_per_node_ws
-# mem_per_cpu   = int(os.getenv('SLURM_MEM_PER_CPU'))
-
-# mem_per_srun  = int(nb_proc*mem_per_cpu) # partition in memory allocation
-mem_per_srun_ws = mem_per_node
-
-# num_episodes = 2000  # Total number of episodes
-# if Re_case != 5:
-#     nb_actuations = 120  # Number of actuation of the neural network for each episode
-#     num_nodes_srun = 3
-# else:
-#     nb_actuations = 200
-#     num_nodes_srun = 3
+# mem_per_node_ws = 200000  # MB RAM in each node
 #
-# nb_actuations_deterministic = nb_actuations * 10
+# mem_per_cpu_ws = mem_per_node_ws // proc_per_node_ws
+#
+# mem_per_srun_ws = mem_per_node
+
 
 ### *****************************************************
 ### RUN BASELINE ****************************************
@@ -645,4 +629,15 @@ inspection_params = {
     "line_lift": 0,
     "show_all_at_reset": True,
     "single_run": False,
+}
+
+reward_params: Dict[str, str] = {
+    "reward_function": reward_function,
+    "neighbor_state": str(neighbor_state),
+    "Lx": str(Lx),
+    "Ly": str(Ly),
+    "Lz": str(Lz),
+    "H": str(h_qevent_sensitivity),
+    "nx_Qs": str(nx_Qs),
+    "nz_Qs": str(nz_Qs),
 }
