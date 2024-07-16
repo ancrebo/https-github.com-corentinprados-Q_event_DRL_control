@@ -96,6 +96,20 @@ nb_actuations_deterministic: int = nb_actuations * 10
 ### **********************************************************
 ### MULTI-ENVIRONMENT SETUP FOR WORKSTATIONS **********************************
 
+nb_proc_ws = 18  # Number of calculation processors
+num_servers_ws = 1  # number of environment in parallel
+
+proc_per_node_ws = 1
+# proc_per_node_ws = int(os.getenv('SLURM_NTASKS_PER_NODE'))*int(os.getenv('SLURM_CPUS_PER_TASK'))
+
+mem_per_node_ws = 200000  # MB RAM in each node
+# mem_per_node   = int(os.getenv('SLURM_MEM_PER_NODE'))
+
+mem_per_cpu_ws = mem_per_node_ws // proc_per_node_ws
+# mem_per_cpu   = int(os.getenv('SLURM_MEM_PER_CPU'))
+
+# mem_per_srun  = int(nb_proc*mem_per_cpu) # partition in memory allocation
+mem_per_srun_ws = mem_per_node
 
 ### *****************************************************
 ### RUN BASELINE ****************************************

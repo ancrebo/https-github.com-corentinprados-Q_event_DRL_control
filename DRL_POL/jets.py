@@ -517,9 +517,9 @@ class JetAirfoil(Jet):
         return atan2_str(X, Y)
 
 
-# TODO: finish updating JetChannel for new base class code and channel-specific stuff @pietero
+# TODO: @pietero finish updating JetChannel for new base class code and channel-specific stuff - Pieter
 class JetChannel(Jet):
-    # TODO: implement this class for channel
+    # TODO: implement this class for channel - Pieter
 
     """
     Specialized jet class to deal with jets in a channel.

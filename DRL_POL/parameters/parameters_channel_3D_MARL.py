@@ -100,8 +100,9 @@ else:
 ### WORKSTATION SPECIFIC SETUP *******************************
 # TODO: get specific values for workstation setup @pietero
 
+
 nb_proc_ws = 6  # Number of calculation processors
-num_servers_ws = 1  # number of environment in parallel
+1  # number of environment in parallel
 
 proc_per_node_ws = 1
 
