@@ -4,6 +4,7 @@ import pyvista as pv
 import xml.etree.ElementTree as ET  # TODO: check if this is causing issue or pyvista in Pol conda environment
 import gc
 from typing import List, Tuple
+from env_utils import agent_index_2d_to_1d
 
 
 def load_data_and_convert_to_numpy(
@@ -292,14 +293,17 @@ def calculate_reward_full(
     for i in range(n):
         for j in range(m):
             reward = calculate_reward(final_result_array, i, j)
-            rewards.append([i, j, reward])
+            env_id = agent_index_2d_to_1d(
+                i, j, m
+            )  # Convert 2D index to 1D (same as `ENV_ID[1]`)
+            rewards.append([env_id, reward])
 
     reward_array = np.array(rewards)
     np.savetxt(
         output_file,
         reward_array,
         delimiter=",",
-        header="x_index,z_index,reward",
+        header="ENV_ID,reward",
         comments="",
     )
     print(f"Rewards saved to {output_file}")

@@ -27,7 +27,7 @@ from env_utils import index_2d_to_1d, index 1d_to_2d
 case = "channel"
 simu_name = "3DChan"
 dimension = 3
-reward_function = "q-event-ratio"  # TODO: add q-event-ratio reward function @pietero
+reward_function = "q_event_volume"  # TODO: add q-event-ratio reward function @pietero
 
 Re_case = 6
 slices_probes_per_jet = 1

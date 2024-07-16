@@ -1438,5 +1438,24 @@ class Environment(Environment):
 
         elif self.reward_function == "q_event_volume":
             # TODO: @pietero implement q-event volume reward function - Pieter
+            output_file_path = os.path.join(
+                "alya_files",
+                f"{self.host}",
+                f"{1}",
+                f"EP_{self.episode_number}",
+                "rewards",
+                f"rewards_{self.host}_EP_{self.episode_number}.csv",
+            )
+            data = np.genfromtxt(output_file_path, delimiter=",", names=True)
 
-            pass
+            # Find the row where ENV_ID matches self.ENV_ID[1]
+            matching_row = data[data["ENV_ID"] == self.ENV_ID[1]]
+
+            if matching_row.size == 0:
+                raise ValueError(
+                    f"No matching row found for ENV_ID {self.ENV_ID[1]} in reward file at {output_file_path}"
+                )
+
+            reward_value: float = float(matching_row["reward"][0])
+
+            return reward_value
