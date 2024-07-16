@@ -30,9 +30,7 @@ from alya import write_witness_file
 case = "channel"
 simu_name = "3DChan"
 dimension = 3
-reward_function = (
-    "q-event-ratio"  # TODO: @pietero add q-event-ratio reward function - Pieter
-)
+reward_function = "q_event_volume"  # TODO: add q-event-ratio reward function @pietero
 
 Re_case = 6
 slices_probes_per_jet = 1
