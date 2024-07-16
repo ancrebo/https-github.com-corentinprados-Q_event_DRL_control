@@ -42,7 +42,7 @@ from parameters import (
     case,
     simulation_params,
     num_nodes_srun,
-    reward_function,
+    reward_params,
     jets,
     norm_factors,  # added for normalization of multiple components
     optimization_params,
@@ -111,7 +111,8 @@ class Environment(Environment):
         self.dimension: int = dimension
 
         self.number_steps_execution: int = number_steps_execution
-        self.reward_function: str = reward_function
+        self.reward_function: str = reward_params["reward_function"]
+        self.reward_params: Dict[str, str] = reward_params
         self.output_params: Dict[str, Any] = output_params
         self.norm_factors: Dict[str, float] = norm_factors
         self.optimization_params: Dict[str, Union[int, float]] = optimization_params
@@ -344,7 +345,7 @@ class Environment(Environment):
                     run_subprocess(
                         casepath,
                         ALYA_BIN,
-                        "%s" % self.case,
+                        f"{case}",
                         nprocs=nb_proc,
                         oversubscribe=OVERSUBSCRIBE,
                         nodelist=self.nodelist,
@@ -1362,6 +1363,50 @@ class Environment(Environment):
                         delta_Q_x=self.delta_Q_x,
                     )  # TODO: make sure this works for channel @pietero
 
+            # TODO: @pietero Add reward processing step here so only `ENV_ID[1] == 1` does the processing and saves the reward.csv? - Pieter
+            directory = os.path.join(
+                "alya_files",
+                f"{self.host}",
+                f"{self.ENV_ID[1]}",
+                f"EP_{self.episode_number}",
+                "vtk",
+            )
+            averaged_data_path = os.path.join(
+                "alya_files",
+                f"{self.host}",
+                f"{self.ENV_ID[1]}",
+                f"EP_{self.episode_number}",
+                "averaged_data.csv",
+            )
+            # TODO: @pietero Need to make sure directories exist or are created - Pieter
+            output_file_path = os.path.join(
+                "alya_files",
+                f"{self.host}",
+                f"{self.ENV_ID[1]}",
+                f"EP_{self.episode_number}",
+                "rewards",
+                f"rewards_{self.host}_EP_{self.episode_number}.csv",
+            )
+
+            runpath = "./"
+            runbin = "run_reward_in_new_env.sh"  # shell script that runs `calc_reward.py` in a different conda environment
+            runargs = (
+                f"--directory {directory} "
+                f"--Lx {reward_params['Lx']} "
+                f"--Ly {reward_params['Ly']} "
+                f"--Lz {reward_params['Lz']} "
+                f"--H {reward_params['H']} "
+                f"--n {reward_params['nx_Qs']} "
+                f"--m {reward_params['nz_Qs']} "
+                f"--averaged_data_path {averaged_data_path} "
+                f"--output_file {output_file_path}"
+            )
+            run_subprocess(
+                runpath,
+                runbin,
+                runargs,
+                use_new_env=True,
+            )
             cr_stop("ENV.actions_MASTER_thread1", 0)
 
         # Start an alya run

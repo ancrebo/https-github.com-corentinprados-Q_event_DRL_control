@@ -37,6 +37,7 @@ reward_function = (
 Re_case = 6
 slices_probes_per_jet = 1
 neighbor_state = False
+h_qevent_sensitivity: float = 3.0 # Used to identify the Q events, sensitivity to the Q events
 
 #### Reynolds cases
 #### 0 --> Re = 100
@@ -748,4 +749,15 @@ inspection_params: Dict[str, Any] = {
     "line_lift": 0,
     "show_all_at_reset": True,
     "single_run": False,
+}
+
+reward_params: Dict[str, str] = {
+    "reward_function": reward_function,
+    "neighbor_state": str(neighbor_state),
+    "Lx": str(Lx),
+    "Ly": str(Ly),
+    "Lz": str(Lz),
+    "H": str(h_qevent_sensitivity),
+    "nx_Qs": str(nx_Qs),
+    "nz_Qs": str(nz_Qs),
 }
