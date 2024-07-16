@@ -155,8 +155,8 @@ def read_last_wit(
     function that skips all the data from the entire time domain and gives the last value from nsi.wit
     expected increase the IO time extracting probes to send, restart are so much quicker
     """
-    # TODO: case name cannot be hardcoded as cylinder and should be passed as input
-    # TODO: implement crashes
+    # TODO: case name cannot be hardcoded as cylinder and should be passed as input - Pol
+    # TODO: implement crashes - Pol
     cr_start("WIT.read_last_wit", 0)
 
     # Read witness file

@@ -30,7 +30,7 @@ from alya import write_witness_file
 case = "channel"
 simu_name = "3DChan"
 dimension = 3
-reward_function = "q_event_volume"  # TODO: add q-event-ratio reward function @pietero
+reward_function = "q_event_volume"
 
 Re_case = 6
 slices_probes_per_jet = 1
@@ -38,6 +38,9 @@ neighbor_state = False
 h_qevent_sensitivity: float = (
     3.0  # Used to identify the Q events, sensitivity to the Q events
 )
+
+n_agents_x: int = 2  # Number of agents along x direction
+n_agents_z: int = 2  # Number of agents along z direction
 
 #### Reynolds cases
 #### 0 --> Re = 100
@@ -51,17 +54,16 @@ h_qevent_sensitivity: float = (
 ### *****************************************************
 ### RUN BASELINE ****************************************
 
-run_baseline: bool = (
-    False  # Whether to run the baseline simulation, False if baseline already exists
-)
-bool_restart: bool = (
-    False  # Whether to restart the episode from the end of the last checkpoint or baseline, False if baseline
-)
+# Whether to run the baseline simulation, False if baseline already exists
+run_baseline: bool = False
+
+# Whether to restart the episode from the end of the last checkpoint or baseline, False if baseline
+bool_restart: bool = False
 
 ### **********************************************************
 ### DOMAIN BOX ***********************************************
 # TODO: Update for channel parameters!! @canordq
-# These parameters need to match the case mesh
+# These parameters need to match the specific case mesh
 # The parameters below are based on the `minimal channel - Jimenez` paper
 h = 1.0
 Lx = 2.67 * h
@@ -74,7 +76,7 @@ Lz = 0.8 * h
 
 num_episodes = 2000  # Total number of episodes
 if Re_case != 5:
-    nb_actuations = 120  # Number of actuation of the neural network for each episode
+    nb_actuations = 120  # Number of actuation of the neural network for each episode (ACTIONS/EPISODE)
 else:
     nb_actuations = 200
 
@@ -110,23 +112,19 @@ else:
 ### WORKSTATION SPECIFIC SETUP *******************************
 # TODO: @pietero get specific values for workstation setup - Pieter
 
-nb_proc_ws = 6  # Number of calculation processors
-num_servers_ws = 1  # number of environment in parallel
+# Number of calculation processors (for local, number of threads on workstation)
+nb_proc_ws = 6
 
-proc_per_node_ws = 1
+# Number of environment in parallel (number of SEPARATE CFD environments) (default 1 for workstation)
+num_servers_ws = 1
 
-# mem_per_node_ws = 200000  # MB RAM in each node
-#
-# mem_per_cpu_ws = mem_per_node_ws // proc_per_node_ws
-#
-# mem_per_srun_ws = mem_per_node
-
+proc_per_node_ws = 1  # TODO: @pietero Unused for workstation? - Pieter
 
 ### *****************************************************
 ### RUN BASELINE ****************************************
 use_MARL = True
 
-nb_inv_per_CFD = 10  # same as nz_Qs¿¿¿
+nb_inv_per_CFD = 10  # same as nz_Qs¿¿¿ # TODO: @pietero is this necessary with nTotal_Qs defined later? - Pieter
 actions_per_inv = 1  # how many actions to control per pseudoenvironment
 batch_size = nb_inv_per_CFD * num_servers
 # frontal_area = Lz / nb_inv_per_CFD
@@ -146,7 +144,7 @@ baseline_time_start = 0.0
 delta_t_smooth = 0.25  # ACTION DURATION smooth law duration
 delta_t_converge = 0.0  # Total time that the DRL waits before executing a new action
 smooth_func = "EXPONENTIAL"  # 'LINEAR', 'EXPONENTIAL', 'CUBIC' # TODO: cubic is still not coded - Pol
-short_spacetime_func = False  # override smooth func --> TODO: need to fix string size --> FIXED in def_kintyp_functions.f90 (waiting for merging)
+short_spacetime_func = False  # override smooth func --> TODO: need to fix string size --> FIXED in def_kintyp_functions.f90 (waiting for merging) - Pol
 
 ### *****************************************************
 ### FLUID PROPERTIES ************************************
@@ -157,8 +155,8 @@ rho = 1.0
 
 ### *****************************************************
 ### POSTPROCESS OPTIONS *********************************
-# TODO: @pietero Update for channel parameters!! - Pieter
 
+# TODO: @pietero Update ALL?? for channel parameters!! - Pieter
 norm_reward = 5  # like PRESS, try to be between -1,1
 penal_cl = 0.6  # avoid asymmetrical strategies
 alpha_rew = 0.80  # balance between global and local reward
@@ -180,16 +178,16 @@ offset_reward = offset_reward_list[Re_case]
 
 ### *****************************************************
 ### JET SETUP *******************************************
+
 # TODO: @canordq Update for channel parameters!! - Pieter
 norm_Q = 0.176  # (0.088/2)/5 asa said in papers, limited Q for no momentum or discontinuities in the CFD solver
 
 # location jet over the cylinder 0 is top centre
 jet_angle = 0
 
-nz_Qs: int = (
-    2  # number of agents along z direction # TODO: @pietero is this really where we want to define agents along x and z??? - Pieter
-)
-nx_Qs: int = 2  # number of agents along x direction
+# Re-naming number of agents for backwards compatibility - Pieter
+nz_Qs: int = n_agents_z
+nx_Qs: int = n_agents_x
 
 nTotal_Qs: int = nz_Qs * nx_Qs  # total number of agents
 
@@ -250,6 +248,7 @@ jets_definition = {
 jets = build_jets(JetChannel, jets_definition, delta_t_smooth)
 n_jets = len(jets)
 
+# TODO: @canordq Update for channel parameters!! (or comment out??) - Pieter
 geometry_params = (
     {  # Kept for legacy purposes but to be deleted when reworking the mesh script
         "output": ".".join(["cylinder", "geo"]),
@@ -287,7 +286,6 @@ assert (
 
 ### ****************************************************
 ### STATE OBSERVATION -- WITNESS MAP ******************
-# TODO: pyalya_wit2field can be used? How much code below is useful? - Pieter
 
 ## HERE WE HAVE 3 CHOICES TO LOCATE PROBES:
 ## 1-- S85 ETMM14 //
@@ -692,7 +690,7 @@ variational_input: Dict[str, Any] = {
     # "Y_exp": 0,  # Experimental yaw
 }
 
-# Normalization factors
+# Normalization factors # TODO: @pietero @canordq Get actual values for these!!! - Pieter
 norm_factors: Dict[str, float] = {
     "pressure": norm_press,  # original norm_press value for backwards compatibility
     "velox": 10.0,  # example value, replace with actual value
@@ -716,6 +714,7 @@ optimization_params: Dict[str, Any] = {
     "random_start": False,
 }
 
+# TODO: @pietero @canordq Update for channel parameters!! (if necessary??) - Pieter
 history_parameters: Dict[str, List[Union[float, int]]] = {
     "drag": [],
     "lift": [],

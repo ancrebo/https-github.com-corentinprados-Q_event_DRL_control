@@ -968,10 +968,13 @@ class Environment(Environment):
                 # if it's 2D, adjust the logic to slice the rows
                 row_start = (self.ENV_ID[1] - 1) * batch_size_probes
                 row_end = self.ENV_ID[1] * batch_size_probes
-                probes_values_2 = self.probes_values_global[row_start:row_end, :]
+                # slice the rows and flatten the array in column-major order
+                probes_values_2 = self.probes_values_global[
+                    row_start:row_end, :
+                ].flatten(order="F")
         else:
             raise NotImplementedError(
-                "Env3D_MARL_channel: list_obervation_update: Neighbor state not implemented yet"
+                "Env3D_MARL_channel: list_obervation_update: Neighbor state True not implemented yet"
             )
 
         return probes_values_2
@@ -1038,7 +1041,16 @@ class Environment(Environment):
     def states(self) -> Dict[str, Any]:
         # TODO: @pietero adjust state size based on number of components in the probes? - Pieter
         if not self.neighbor_state:
-            state_size = int(len(self.output_params["locations"]) / self.nb_inv_per_CFD)
+            if self.output_params["probe_type"] == "velocity":
+                # Calculate the state size for velocity probes (3 columns flattened to 1)
+                state_size = (
+                    int(len(self.output_params["locations"]) / self.nb_inv_per_CFD) * 3
+                )
+            else:
+                # Default state size calculation for other probe types (only 1 column of witness data)
+                state_size = int(
+                    len(self.output_params["locations"]) / self.nb_inv_per_CFD
+                )
         else:
             # TODO: introduce neighbours in parameters!
             # NOW IS JUST 1 EACH SIDE 85*3
@@ -1191,6 +1203,7 @@ class Environment(Environment):
         )
 
         # read witness file and extract the entire array list
+        # This now outputs a dictionary of probe values for all probe types - Pieter
         probes_values_global_dict = read_last_wit(
             filename,
             output_params["probe_type"],
@@ -1202,7 +1215,7 @@ class Environment(Environment):
         # self.probes_values_global = something something probes_values_global_dict
 
         # filter probes per jet (corresponding to the ENV.ID[])
-        probes_values_2 = self.list_observation()
+        probes_values_2 = self.list_observation_updated()
 
         return probes_values_2
 
@@ -1449,7 +1462,9 @@ class Environment(Environment):
 
         # Compute the reward
         reward: float = self.compute_reward()
-        self.save_reward(reward)
+        self.save_reward(
+            reward
+        )  # TODO: @pietero Is this still needed? All rewards are saved by `calc_reward.py`- Pieter
         print(f"reward: {reward}")
 
         print(f"The actual action is {self.action_count} of {nb_actuations}")
@@ -1501,7 +1516,7 @@ class Environment(Environment):
             # self.probes_values_global = something something probes_values_global_dict
 
         # filter probes per jet (corresponding to the ENV.ID[])
-        probes_values_2 = self.list_observation()
+        probes_values_2 = self.list_observation_updated()
 
         return probes_values_2, terminal, reward
 
