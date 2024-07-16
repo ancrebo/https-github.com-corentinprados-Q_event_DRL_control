@@ -87,3 +87,4 @@ fabric.properties
 /latex/*
 /Doxyfile_test
 /pietero/baseline-coco-100TU/*
+jet_top_example.dat
