@@ -1067,7 +1067,11 @@ class Environment(Environment):
     # -----------------------------------------------------------------------------------------------------
 
     def reset(self) -> np.ndarray:
-
+        """
+        Reset the environment to the initial state. This method is used ONLY at the beginning of each episode,
+        and precedes the TensorForce agent calling the `execute` method.
+        Returns: the initial actions based on the baseline (or previous episode if `.
+        """
         if self.ENV_ID[1] != 1:
             time.sleep(4)
 

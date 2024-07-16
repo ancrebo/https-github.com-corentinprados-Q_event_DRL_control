@@ -35,7 +35,9 @@ reward_function = "q_event_volume"  # TODO: add q-event-ratio reward function @p
 Re_case = 6
 slices_probes_per_jet = 1
 neighbor_state = False
-h_qevent_sensitivity: float = 3.0 # Used to identify the Q events, sensitivity to the Q events
+h_qevent_sensitivity: float = (
+    3.0  # Used to identify the Q events, sensitivity to the Q events
+)
 
 #### Reynolds cases
 #### 0 --> Re = 100
@@ -49,7 +51,12 @@ h_qevent_sensitivity: float = 3.0 # Used to identify the Q events, sensitivity t
 ### *****************************************************
 ### RUN BASELINE ****************************************
 
-run_baseline = True
+run_baseline: bool = (
+    False  # Whether to run the baseline simulation, False if baseline already exists
+)
+bool_restart: bool = (
+    False  # Whether to restart the episode from the end of the last checkpoint or baseline, False if baseline
+)
 
 ### **********************************************************
 ### DOMAIN BOX ***********************************************
