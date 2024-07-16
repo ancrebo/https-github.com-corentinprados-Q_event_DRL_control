@@ -19,6 +19,7 @@ def run_subprocess(
     log: Optional[str] = None,
     check_return: bool = True,
     host: Optional[str] = None,
+    use_new_env: bool = False,  # new parameter to activate separate conda envirnoment for process
     **kwargs,
 ) -> int:
     """
@@ -75,6 +76,8 @@ def run_subprocess(
     arg_log = f"> {log} 2>&1" if log is not None else ""
 
     # Build command to run
+    if use_new_env:
+        runbin = "run_reward_in_new_env.sh " + runbin  # Prepend the shell script
     cmd_bin = (
         _cmd_parallel(f"{runbin} {runargs}", **kwargs)
         if parallel
