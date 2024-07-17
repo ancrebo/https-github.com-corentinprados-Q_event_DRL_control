@@ -370,7 +370,15 @@ if os.path.exists(witness_file_path):
             for location in output_params["locations"]:
                 f.write(f"{location}\n")
         need_witness_file_override = False
-        print(f"\nNew witness.dat has been created in {case_folder}")
+        print(f"\nNew witness.dat has been created in {case_folder}\n")
+        print(f"witness.dat creation parameters:"
+              f"probe_type: {output_params['probe_type']}"
+              f"pattern: {pattern}"
+              f"y_value_density: {y_value_density}"
+              f"y_skipping: {y_skipping}"
+              f"y_skip_values: {y_skip_values}"
+              f"nx_Qs: {nx_Qs}"
+              f"nz_Qs: {nz_Qs}")
         print("\nWitness creation override parameter set to False.\n")
     else:
         print(
