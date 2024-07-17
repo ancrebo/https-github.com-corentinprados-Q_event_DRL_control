@@ -174,6 +174,7 @@ offset_reward_list = [
     1.267,
     1.079,
     1.20,
+    1.2,  # TODO: @pietero @canordq temporary placeholder value for Re=180 - Pieter
 ]  # for re3900, still working on it
 offset_reward = offset_reward_list[Re_case]
 
