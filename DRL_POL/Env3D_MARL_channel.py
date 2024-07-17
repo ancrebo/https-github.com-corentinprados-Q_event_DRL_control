@@ -403,7 +403,7 @@ class Environment(Environment):
                 "flags_MARL",
             )
             action_end_flag_path = os.path.join(
-                filepath_flag_sync, "action_end_flag_%d" % self.action_count
+                filepath_flag_sync, f"action_end_flag_{self.action_count}"
             )
             time.sleep(0.1)
 
@@ -604,7 +604,7 @@ class Environment(Environment):
         if self.action_count == nb_actuations or self.episode_number == 0:
             file = os.path.join("saved_models", name)
 
-            print("Action : saving history parameters in %s" % file)
+            print(f"Task : saving history parameters in {file}")
             self.last_episode_number = self.episode_number
 
             avg_drag = np.mean(self.history_parameters["drag"][-1:])
@@ -1358,7 +1358,7 @@ class Environment(Environment):
                 os.path.join(
                     "alya_files",
                     f"{self.host}",
-                    f"{self.ENV_ID[1]}",
+                    f"{self.ENV_ID[1]}",  # This is always 1
                     f"EP_{self.episode_number}",
                 ),
                 t1,
@@ -1368,11 +1368,10 @@ class Environment(Environment):
             simu_path = os.path.join(
                 "alya_files",
                 f"{self.host}",
-                f"{self.ENV_ID[1]}",
+                f"{self.ENV_ID[1]}",  # This is always 1
                 f"EP_{self.episode_number}",
             )
 
-            # TODO: Do we need to separate these now that JetCylinder/Airfoil/Channel have their own `update` method?
             if self.case == "cylinder":
 
                 for ijet, jet in enumerate(
@@ -1421,35 +1420,48 @@ class Environment(Environment):
                         delta_Q_z=self.delta_Q_z,
                         Qs_position_x=self.Qs_position_x,
                         delta_Q_x=self.delta_Q_x,
-                    )  # TODO: make sure this works for channel @pietero
+                    )  # TODO: @pietero make sure this works for channel - Pieter
 
-            # TODO: @pietero Add reward processing step here so only `ENV_ID[1] == 1` does the processing and saves the reward.csv? - Pieter
+            ## Setting up for computing the rewards and save as .csv file
             directory = os.path.join(
                 "alya_files",
                 f"{self.host}",
-                f"{self.ENV_ID[1]}",
+                f"{self.ENV_ID[1]}",  # this is always 1
                 f"EP_{self.episode_number}",
                 "vtk",
             )
             averaged_data_path = os.path.join(
                 "alya_files",
                 f"{self.host}",
-                f"{self.ENV_ID[1]}",
+                f"{self.ENV_ID[1]}",  # this is always 1
                 f"EP_{self.episode_number}",
                 "averaged_data.csv",
             )
-            # TODO: @pietero Need to make sure directories exist or are created - Pieter
-            output_file_path = os.path.join(
+            output_folder_path = os.path.join(
                 "alya_files",
                 f"{self.host}",
                 f"{self.ENV_ID[1]}",
                 f"EP_{self.episode_number}",
                 "rewards",
-                f"rewards_{self.host}_EP_{self.episode_number}.csv",
             )
+            output_file_name = f"rewards_{self.host}_EP_{self.episode_number}.csv"
+            output_file_path = os.path.join(output_folder_path, output_file_name)
 
+            if not os.path.exists(directory):
+                raise ValueError(
+                    f"{self.ENV_ID}: execute: Directory {directory} does not exist for action vtk files!!!"
+                )
+            if not os.path.exists(averaged_data_path):
+                raise ValueError(
+                    f"{self.ENV_ID}: execute: File {averaged_data_path} does not exist for pre-calculated data!!!"
+                )
+            if not os.path.exists(output_folder_path):
+                os.makedirs(output_folder_path)
+
+            # Launches a subprocess to calculate the reward
+            # Must use a separate conda environment for compatibility
             runpath = "./"
-            runbin = "run_reward_in_new_env.sh"  # shell script that runs `calc_reward.py` in a different conda environment
+            runbin = "python3 calc_reward.py"
             runargs = (
                 f"--directory {directory} "
                 f"--Lx {reward_params['Lx']} "
@@ -1497,7 +1509,7 @@ class Environment(Environment):
             self.history_parameters["lift_GLOBAL"].extend([average_lift_GLOBAL])
 
         elif self.case == "channel":
-            # TODO: implement history parameters for channel if needed
+            # TODO: @pietero implement history parameters for channel if needed - Pieter
             # Raise a not implemented error
             raise NotImplementedError(
                 f"Saving history parameters for Channel case not implemented yet in `execute` method, line {inspect.currentframe().f_lineno}"
@@ -1528,11 +1540,9 @@ class Environment(Environment):
             self.save_final_reward(reward)
 
             print(f"Actual episode: {self.episode_number} is finished and saved")
-            print(
-                f"Results : \n\tAverage drag : {average_drag}\n\tAverage lift : {average_lift}"
-            )
+            # print(f"Results : \n\tAverage drag : {average_drag}\n\tAverage lift : {average_lift})
 
-        print("\n\nAction : extract the probes")
+        print("\n\nTask : extract the probes")
 
         # Read witness file from behind, last instant (FROM THE INVARIANT [*,1])
         NWIT_TO_READ = 1

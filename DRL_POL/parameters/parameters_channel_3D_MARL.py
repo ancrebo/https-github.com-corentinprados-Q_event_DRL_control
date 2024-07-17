@@ -33,7 +33,7 @@ dimension = 3
 reward_function = "q_event_volume"
 
 Re_case: int = 6
-slices_probes_per_jet: int = 1
+slices_probes_per_jet: int = 1  # Unused for channel case - Pieter
 neighbor_state: bool = False
 h_qevent_sensitivity: float = (
     3.0  # Used to identify the Q events, sensitivity to the Q events
@@ -54,20 +54,22 @@ n_agents_z: int = 2  # Number of agents along z direction
 ### *****************************************************
 ### RUN BASELINE ****************************************
 
-# Whether to run the baseline simulation, False if baseline already exists
+# Whether to run the baseline simulation
+# False if baseline already exists
 run_baseline: bool = False
 
-# Whether to restart the episode from the end of the last checkpoint or baseline, False if baseline
+# Whether to restart the episode from the end of the last checkpoint or baseline
+# False if always restarting from baseline
 bool_restart: bool = False
 
 ### **********************************************************
 ### DOMAIN BOX ***********************************************
-# TODO: Update for channel parameters!! @canordq
+# TODO: @canordq Update for channel parameters!! - Pieter
 # These parameters need to match the specific case mesh
 # The parameters below are based on the `minimal channel - Jimenez` paper
 h = 1.0
 Lx = 2.67 * h
-Ly = h
+Ly = 2 * h
 Lz = 0.8 * h
 
 
@@ -83,7 +85,6 @@ else:
 nb_actuations_deterministic = nb_actuations * 10
 
 
-# TODO: @pietero define the workstation setup vs slurm setup - Pieter
 ### **********************************************************
 ### SLURM SPECIFIC SETUP *************************************
 
@@ -110,15 +111,13 @@ else:
 
 ### **********************************************************
 ### WORKSTATION SPECIFIC SETUP *******************************
-# TODO: @pietero get specific values for workstation setup - Pieter
 
 # Number of calculation processors (for local, number of threads on workstation)
-nb_proc_ws = 6
+nb_proc_ws = 18
 
 # Number of environment in parallel (number of SEPARATE CFD environments) (default 1 for workstation)
 num_servers_ws = 1
 
-proc_per_node_ws = 1  # TODO: @pietero Unused for workstation? - Pieter
 
 ### *****************************************************
 ### RUN BASELINE ****************************************
@@ -158,6 +157,8 @@ rho = 1.0
 ### POSTPROCESS OPTIONS *********************************
 
 # TODO: @pietero Update ALL?? for channel parameters!! - Pieter
+
+## Not needed for channel currently! - Pieter
 norm_reward = 5  # like PRESS, try to be between -1,1
 penal_cl = 0.6  # avoid asymmetrical strategies
 alpha_rew = 0.80  # balance between global and local reward
@@ -167,6 +168,8 @@ if Re_case != 4:
 else:
     time_avg = 5.65  # 5.65 #corresponds to the last Tk (avg Cd Cl, not witness)
 post_process_steps = 50  # TODO: put this into a include - Pol
+
+# Could be needed, is determined by baseline and test training runs - Pieter
 offset_reward_list = [
     1.381,
     1.374,
@@ -182,10 +185,11 @@ offset_reward = offset_reward_list[Re_case]
 ### JET SETUP *******************************************
 
 # TODO: @canordq Update for channel parameters!! - Pieter
+# This should be adjusted based on training run data
 norm_Q = 0.176  # (0.088/2)/5 asa said in papers, limited Q for no momentum or discontinuities in the CFD solver
 
 # location jet over the cylinder 0 is top centre
-jet_angle = 0
+jet_angle = 0  # Unused for channel case - Pieter
 
 # Re-naming number of agents for backwards compatibility - Pieter
 nz_Qs: int = n_agents_z
@@ -224,53 +228,53 @@ for i in range(nx_Qs):
         print(f"Agent ({i}, {j}): X: {x:.2f}, Z: {z:.2f}")
 
 
-# # TODO: @canordq Update for channel parameters!! - Pieter
-# jets_definition = {
-#     "JET_TOP": {
-#         "width": 10,
-#         "radius": radius,
-#         "angle": jet_angle,
-#         "positions_angle": 90
-#         + jet_angle,  # make sure the width doesn't not coincide with 0,90,180 or 270
-#         "positions": [cylinder_coordinates[0], cylinder_coordinates[1] + radius],
-#         "remesh": False,
-#     },
-#     "JET_BOTTOM": {
-#         "width": 10,
-#         "radius": radius,
-#         "angle": jet_angle,
-#         "positions_angle": 270
-#         - jet_angle,  # make sure the width doesn't not coincide with 0,90,180 or 270
-#         "positions": [cylinder_coordinates[0], cylinder_coordinates[1] - radius],
-#         "remesh": False,
-#     },
-# }
-#
-# # Build the jets
-# jets = build_jets(JetChannel, jets_definition, delta_t_smooth)
-# n_jets = len(jets)
-#
-# # TODO: @canordq Update for channel parameters!! (or comment out??) - Pieter
-# geometry_params = (
-#     {  # Kept for legacy purposes but to be deleted when reworking the mesh script
-#         "output": ".".join(["cylinder", "geo"]),
-#         "jet_width": 10,
-#         "jet_angle": jet_angle,
-#         "jet_name": ["JET_TOP", "JET_BOTTOM"],
-#         "jet_positions_angle": [
-#             90 + jet_angle,
-#             270 - jet_angle,
-#         ],  # make sure the width doesn't not coincide with 0,90,180 or 270
-#         "jet_positions": [
-#             [cylinder_coordinates[0], cylinder_coordinates[1] + radius],
-#             [cylinder_coordinates[0], cylinder_coordinates[1] - radius],
-#         ],
-#         "remesh": False,
-#     }
-# )
-# assert (
-#     jet_angle != geometry_params["jet_width"] / 2
-# )  # Maybe to check during mesh construction?
+# TODO: @canordq Update for channel parameters!! - Pieter
+jets_definition = {
+    "JET_TOP": {
+        "width": 10,
+        "radius": radius,
+        "angle": jet_angle,
+        "positions_angle": 90
+        + jet_angle,  # make sure the width doesn't not coincide with 0,90,180 or 270
+        "positions": [cylinder_coordinates[0], cylinder_coordinates[1] + radius],
+        "remesh": False,
+    },
+    "JET_BOTTOM": {
+        "width": 10,
+        "radius": radius,
+        "angle": jet_angle,
+        "positions_angle": 270
+        - jet_angle,  # make sure the width doesn't not coincide with 0,90,180 or 270
+        "positions": [cylinder_coordinates[0], cylinder_coordinates[1] - radius],
+        "remesh": False,
+    },
+}
+
+# Build the jets
+jets = build_jets(JetChannel, jets_definition, delta_t_smooth)
+n_jets = len(jets)
+
+# TODO: @canordq Update for channel parameters!! (or comment out??) - Pieter
+geometry_params = (
+    {  # Kept for legacy purposes but to be deleted when reworking the mesh script
+        "output": ".".join(["cylinder", "geo"]),
+        "jet_width": 10,
+        "jet_angle": jet_angle,
+        "jet_name": ["JET_TOP", "JET_BOTTOM"],
+        "jet_positions_angle": [
+            90 + jet_angle,
+            270 - jet_angle,
+        ],  # make sure the width doesn't not coincide with 0,90,180 or 270
+        "jet_positions": [
+            [cylinder_coordinates[0], cylinder_coordinates[1] + radius],
+            [cylinder_coordinates[0], cylinder_coordinates[1] - radius],
+        ],
+        "remesh": False,
+    }
+)
+assert (
+    jet_angle != geometry_params["jet_width"] / 2
+)  # Maybe to check during mesh construction?
 
 
 ### ***************************************************************
@@ -348,9 +352,10 @@ if probes_location == 5:
         "probe_indices1D": probe_indices1D,
     }
 
-# CREATION OF WITNESS FILE
+
+## CREATION OF WITNESS FILE
 need_witness_file_override: bool = (
-    True  # Whether to overwrite the witness file if exists
+    True  # Whether to overwrite the witness file if exists, True overwrites existing file
 )
 
 case_folder = f"alya_files/case_{case}"
@@ -708,7 +713,8 @@ variational_input: Dict[str, Any] = {
     # "Y_exp": 0,  # Experimental yaw
 }
 
-# Normalization factors # TODO: @pietero @canordq Get actual values for these!!! - Pieter
+# Normalization factors
+# TODO: @pietero @canordq Get actual values for these!!! - Pieter
 norm_factors: Dict[str, float] = {
     "pressure": norm_press,  # original norm_press value for backwards compatibility
     "velox": 10.0,  # example value, replace with actual value

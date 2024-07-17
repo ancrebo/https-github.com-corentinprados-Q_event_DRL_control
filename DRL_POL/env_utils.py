@@ -86,15 +86,22 @@ def run_subprocess(
     cmd = f"cd {runpath} && {cmd_bin} {arg_log}"  # TODO: DARDEL DEBUG ONGOING
     # print('POOOOOOOOOOOOOL --> cmd: %s' % cmd)
 
-    # Execute run
-    retval = subprocess.call(cmd, shell=True)
+    # # Execute run
+    # retval = subprocess.call(cmd, shell=True)  # old version
+
+    # Execute run (alternate, updated version introduced in Python 3.5)
+    result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+
+    # Print the stdout and stderr from the shell script
+    print(result.stdout)
+    print(result.stderr)
 
     # Check return
-    if check_return and retval != 0:
-        raise ValueError(f"Error running command <{cmd}>!")
+    if check_return and result.returncode != 0:
+        raise ValueError(f"Error running command <{cmd}>!\n{result.stderr}")
 
     # Return value
-    return retval
+    return result.returncode
 
 
 def detect_system(override: str = None) -> str:
