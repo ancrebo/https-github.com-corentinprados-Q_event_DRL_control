@@ -350,7 +350,7 @@ if probes_location == 5:
 
 # CREATION OF WITNESS FILE
 need_witness_file_override: bool = (
-    False  # Whether to overwrite the witness file if exists
+    True  # Whether to overwrite the witness file if exists
 )
 
 case_folder = f"alya_files/case_{case}"
@@ -362,7 +362,7 @@ if os.path.exists(witness_file_path):
         backup_file_path = witness_file_path + ".backup"
         shutil.copyfile(witness_file_path, backup_file_path)
         print(
-            f"CREATING NEW WITNESS FILE:\nBackup of old witness.dat created at {backup_file_path}"
+            f"CREATING NEW WITNESS FILE:\nBackup of old witness.dat created at {backup_file_path}\n"
         )
 
         # Write the new witness.dat file
@@ -373,10 +373,10 @@ if os.path.exists(witness_file_path):
         print(
             f"CREATING NEW WITNESS FILE:\nwitness.dat has been overridden and written in {case_folder}"
         )
-        print("\nOverride parameter set to False.")
+        print("\nOverride parameter set to False.\n")
     else:
         print(
-            f"CREATING NEW WITNESS FILE:\nwitness.dat already exists in {case_folder} - No override needed."
+            f"CREATING NEW WITNESS FILE:\nwitness.dat already exists in {case_folder} - No override needed.\n"
         )
 else:
     # Create and write the witness.dat file if it does not exist
@@ -384,7 +384,7 @@ else:
         for location in output_params["locations"]:
             f.write(f"{location}\n")
     print(
-        f"CREATING NEW WITNESS FILE: No existing witness.dat found in {case_folder}\nNew file created!"
+        f"CREATING NEW WITNESS FILE: No existing witness.dat found in {case_folder}\nNew file created!\n"
     )
 
 ############################################################################################
