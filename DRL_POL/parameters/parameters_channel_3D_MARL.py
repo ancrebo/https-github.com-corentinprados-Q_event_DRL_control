@@ -371,7 +371,7 @@ if os.path.exists(witness_file_path):
                 f.write(f"{location}\n")
         need_witness_file_override = False
         print(
-            f"CREATING NEW WITNESS FILE:\nNew witness.dat has been created in {case_folder}"
+            f"\nNew witness.dat has been created in {case_folder}"
         )
         print("\nWitness creation override parameter set to False.\n")
     else:
