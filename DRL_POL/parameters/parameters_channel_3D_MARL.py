@@ -330,10 +330,10 @@ if probes_location == 5:
         y_skipping,
         y_skip_values,
     )
-    probes_coordinates: List[Tuple[float, float, float]] = probe_dict[0]
-    probe_indices2D: List[Tuple[float, float]] = probe_dict[1]
-    probe_indices1D: List[float] = probe_dict[2]
-    probe_tags: Dict[str, List[int]] = probe_dict[3]
+    probes_coordinates: List[Tuple[float, float, float]] = probe_dict['coordinates']
+    probe_indices2D: List[Tuple[float, float]] = probe_dict['indices2D']
+    probe_indices1D: List[float] = probe_dict['indices1D']
+    probe_tags: Dict[str, List[int]] = probe_dict['tag_probs']
 
     print(f"\n\n{len(probes_coordinates)} witness points calculated!\n")
     print("2D Witness Indices Saved!")
