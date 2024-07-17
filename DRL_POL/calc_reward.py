@@ -11,6 +11,7 @@ def load_data_and_convert_to_numpy(
     directory: str,
 ) -> List[Tuple[float, np.ndarray]]:
     """
+
     Loads CFD simulation data from PVTU files and converts them into NumPy arrays.
 
     Each array is stored along with its respective timestep, facilitating time-series analysis.
@@ -22,6 +23,7 @@ def load_data_and_convert_to_numpy(
         List[Tuple[float, np.ndarray]]: A list where each element is a tuple containing:
             * A timestep (float)
             * An array with columns for spatial coordinates (x, y, z) and velocity components (U, V, W).
+
     """
     pvd_path = os.path.join(directory, "channel.pvd")
     tree = ET.parse(pvd_path)
@@ -58,6 +60,7 @@ def normalize_data_array(
     data_array: np.ndarray, Lx: float, Ly: float, Lz: float
 ) -> np.ndarray:
     """
+
     Normalizes the spatial coordinates to the range [0, 1] and scales the velocity components.
 
     This function scales the velocity components by the corresponding channel lengths.
@@ -70,6 +73,7 @@ def normalize_data_array(
 
     Returns:
         np.ndarray: Scaled/Normalized array.
+
     """
     data_copy = data_array.copy()
 
@@ -92,6 +96,7 @@ def normalize_data_array(
 
 def load_averaged_data_csv(file_path: str) -> np.ndarray:
     """
+
     Loads the averaged data from a CSV file.
 
     Args:
@@ -99,6 +104,7 @@ def load_averaged_data_csv(file_path: str) -> np.ndarray:
 
     Returns:
         np.ndarray: The loaded averaged data.
+
     """
     return np.loadtxt(file_path, delimiter=",", skiprows=1)  # Do I want to skip rows???
 
@@ -107,6 +113,7 @@ def process_velocity_data(
     data: List[Tuple[float, np.ndarray]], averaged_data: np.ndarray
 ) -> List[Tuple[float, np.ndarray]]:
     """
+
     Processes CFD simulation data to calculate fluctuating components of velocity fields.
 
     This function computes these metrics for the horizontal (U), vertical (V), and lateral (W) velocity components.
@@ -120,6 +127,7 @@ def process_velocity_data(
     Returns:
         List[Tuple[float, np.ndarray]]: Each tuple contains a timestep and an array with original and fluctuating
             velocity components (U, V, W, u, v, w).
+
     """
     processed_data = []
 
@@ -155,6 +163,7 @@ def detect_Q_events(
     """
     Detects Q events in the fluid dynamics data based on the specified condition.
 
+
     Args:
         processed_data (list of tuples): Data processed by `process_velocity_data`, containing:
             * A timestep (float)
@@ -166,6 +175,7 @@ def detect_Q_events(
         List[Tuple[float, np.ndarray]]: Each tuple contains:
             * A timestep (float)
             * An array with columns ['x', 'y', 'z', 'Q'], where 'Q' is a boolean indicating whether a Q event is detected.
+
     """
     q_event_data = []
 
@@ -194,6 +204,7 @@ def calculate_local_Q_ratios(
     """
     Calculate the ratio of Q-events in local volumes for a single timestep.
 
+
     Args:
         data_array (np.ndarray): Input array with columns ['x', 'y', 'z', 'Q'].
         n (int): Number of sections in the x direction.
@@ -203,6 +214,7 @@ def calculate_local_Q_ratios(
 
     Returns:
         np.ndarray: Array with columns ['x_index', 'z_index', 'Q_event_count', 'total_points', 'Q_ratio'].
+
     """
     step_x = Lx / n
     step_z = Lz / m
@@ -235,11 +247,13 @@ def calculate_reward(data_array: np.ndarray, n: int, m: int) -> float:
     """
     Calculate the reward based on the Q ratio in the local volume.
 
+
     Args:
         data_array (np.ndarray): Array with columns ['x_index', 'z_index', 'Q_ratio'].
 
     Returns:
         float: The calculated reward value.
+
     """
     q_ratio = data_array[(data_array[:, 0] == n) & (data_array[:, 1] == m), 4]
     reward = 1 - q_ratio[0] if q_ratio.size > 0 else 1
@@ -258,6 +272,7 @@ def calculate_reward_full(
     output_file: str,
 ) -> None:
     """
+
     Calculate the rewards based on Q events, saving results to a CSV file.
 
     This function calculates the rewards for each local environment based on Q events and
@@ -280,6 +295,7 @@ def calculate_reward_full(
         None
     """
     print(f"\nTask:  Calculating rewards based on Q events in {directory}...")
+
     data = load_data_and_convert_to_numpy(directory)
     data_normalized = [
         (timestep, normalize_data_array(data_array, Lx, Ly, Lz))
@@ -319,7 +335,9 @@ def calculate_reward_full(
     )
     print(f"Rewards saved to {output_file}")
 
+
     # Clean up # TODO: @pietero is this useful? - Pieter
+
     del (
         data,
         data_normalized,

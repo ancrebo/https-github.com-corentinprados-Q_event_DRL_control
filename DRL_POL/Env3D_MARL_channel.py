@@ -1422,27 +1422,32 @@ class Environment(Environment):
                         delta_Q_x=self.delta_Q_x,
                     )  # TODO: @pietero make sure this works for channel - Pieter
 
+
             ## Setting up for computing the rewards and save as .csv file
             directory = os.path.join(
                 "alya_files",
                 f"{self.host}",
                 f"{self.ENV_ID[1]}",  # this is always 1
+
                 f"EP_{self.episode_number}",
                 "vtk",
             )
             averaged_data_path = os.path.join(
                 "alya_files",
                 f"{self.host}",
+
                 f"{self.ENV_ID[1]}",  # this is always 1
                 f"EP_{self.episode_number}",
                 "averaged_data.csv",
             )
             output_folder_path = os.path.join(
+
                 "alya_files",
                 f"{self.host}",
                 f"{self.ENV_ID[1]}",
                 f"EP_{self.episode_number}",
                 "rewards",
+
             )
             output_file_name = f"rewards_{self.host}_EP_{self.episode_number}.csv"
             output_file_path = os.path.join(output_folder_path, output_file_name)
@@ -1462,6 +1467,7 @@ class Environment(Environment):
             # Must use a separate conda environment for compatibility
             runpath = "./"
             runbin = "python3 calc_reward.py"
+
             runargs = (
                 f"--directory {directory} "
                 f"--Lx {reward_params['Lx']} "

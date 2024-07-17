@@ -15,6 +15,7 @@
 from __future__ import print_function, division
 from typing import List, Tuple, Dict, Any, Union
 
+
 import numpy as np
 import math
 import os
@@ -42,6 +43,7 @@ h_qevent_sensitivity: float = (
 n_agents_x: int = 2  # Number of agents along x direction
 n_agents_z: int = 2  # Number of agents along z direction
 
+
 #### Reynolds cases
 #### 0 --> Re = 100
 #### 1 --> Re = 200
@@ -66,6 +68,7 @@ bool_restart: bool = False
 ### DOMAIN BOX ***********************************************
 # TODO: @canordq Update for channel parameters!! - Pieter
 # These parameters need to match the specific case mesh
+
 # The parameters below are based on the `minimal channel - Jimenez` paper
 h = 1.0
 Lx = 2.67 * h
