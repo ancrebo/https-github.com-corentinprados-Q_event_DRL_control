@@ -1,8 +1,8 @@
 $------------------------------------------------------------
 RUN_DATA                                                     
   ALYA                chan180
-$  RUN_TYPE:           nonconti, PRELIMINARY, FREQUENCY=500 
-  RUN_TYPE:           conti, PRELIMINARY, FREQUENCY=100 
+$  RUN_TYPE:           nonconti, PRELIMINARY, FREQUENCY=8000 
+  RUN_TYPE:           conti, PRELIMINARY, FREQUENCY=200 
   LATEX_INFO_FILE:    Yes                                
   LIVE_INFORMATION:   Screen                             
   TIMING              ON                                           
@@ -10,7 +10,7 @@ END_RUN_DATA
 $------------------------------------------------------------
 PROBLEM_DATA                                                 
   TIME_COUPLING         global, fromCritical 
-  TIME_INTERVAL         0.0, 1000                            
+  TIME_INTERVAL         0.0, 6000                            
 $  TIME_STEP_SIZE        1.e-2                               
   NUMBER_OF_STEPS       1000000
   NASTIN_MODULE         ON                                  
