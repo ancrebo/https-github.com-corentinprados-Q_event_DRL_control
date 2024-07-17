@@ -37,6 +37,9 @@ alya_files/**/*.mpio.bin
 
 alya_files/**/*.swp
 
+alya_files/**/*.pvtu
+alya_files/**/vtk*/
+
 alya_files/WS_test-backup/
 
 data/
