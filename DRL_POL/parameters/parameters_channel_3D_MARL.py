@@ -362,7 +362,7 @@ if os.path.exists(witness_file_path):
         backup_file_path = witness_file_path + ".backup"
         shutil.copyfile(witness_file_path, backup_file_path)
         print(
-            f"CREATING NEW WITNESS FILE:\nBackup of old witness.dat created at {backup_file_path}\n"
+            f"CREATING NEW WITNESS FILE:\nBackup of old witness.dat created in {backup_file_path}\n"
         )
 
         # Write the new witness.dat file
@@ -371,9 +371,9 @@ if os.path.exists(witness_file_path):
                 f.write(f"{location}\n")
         need_witness_file_override = False
         print(
-            f"CREATING NEW WITNESS FILE:\nwitness.dat has been overridden and written in {case_folder}"
+            f"CREATING NEW WITNESS FILE:\nNew witness.dat has been created in {case_folder}"
         )
-        print("\nOverride parameter set to False.\n")
+        print("\nWitness creation override parameter set to False.\n")
     else:
         print(
             f"CREATING NEW WITNESS FILE:\nwitness.dat already exists in {case_folder} - No override needed.\n"
@@ -384,7 +384,15 @@ else:
         for location in output_params["locations"]:
             f.write(f"{location}\n")
     print(
-        f"CREATING NEW WITNESS FILE: No existing witness.dat found in {case_folder}\nNew file created!\n"
+        f"CREATING NEW WITNESS FILE: No existing witness.dat found in {case_folder}"
+        f"New witness.dat created with parameters:"
+        f"probe_type: {output_params['probe_type']}"
+        f"pattern: {pattern}"
+        f"y_value_density: {y_value_density}"
+        f"y_skipping: {y_skipping}"
+        f"y_skip_values: {y_skip_values}"
+        f"nx_Qs: {nx_Qs}"
+        f"nz_Qs: {nz_Qs}\n\n"
     )
 
 ############################################################################################
