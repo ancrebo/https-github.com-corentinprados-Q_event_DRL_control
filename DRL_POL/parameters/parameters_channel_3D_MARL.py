@@ -362,7 +362,7 @@ if os.path.exists(witness_file_path):
         backup_file_path = witness_file_path + ".backup"
         shutil.copyfile(witness_file_path, backup_file_path)
         print(
-            f"CREATING NEW WITNESS FILE:\nBackup of old witness.dat created in {backup_file_path}\n"
+            f"CREATING NEW WITNESS FILE:\nBackup of old witness.dat created in {backup_file_path}"
         )
 
         # Write the new witness.dat file
@@ -370,9 +370,7 @@ if os.path.exists(witness_file_path):
             for location in output_params["locations"]:
                 f.write(f"{location}\n")
         need_witness_file_override = False
-        print(
-            f"\nNew witness.dat has been created in {case_folder}"
-        )
+        print(f"\nNew witness.dat has been created in {case_folder}")
         print("\nWitness creation override parameter set to False.\n")
     else:
         print(
