@@ -371,12 +371,12 @@ if os.path.exists(witness_file_path):
                 f.write(f"{location}\n")
         need_witness_file_override = False
         print(
-            f"CREATING NEW WITNESS FILE:\nwitness.dat has been overridden and written in {case_folder}."
+            f"CREATING NEW WITNESS FILE:\nwitness.dat has been overridden and written in {case_folder}"
         )
         print("\nOverride parameter set to False.")
     else:
         print(
-            f"CREATING NEW WITNESS FILE:\nwitness.dat already exists in {case_folder}. No override needed."
+            f"CREATING NEW WITNESS FILE:\nwitness.dat already exists in {case_folder} - No override needed."
         )
 else:
     # Create and write the witness.dat file if it does not exist
@@ -384,7 +384,7 @@ else:
         for location in output_params["locations"]:
             f.write(f"{location}\n")
     print(
-        f"CREATING NEW WITNESS FILE: No existing witness.dat found in {case_folder}.\nNew file created!"
+        f"CREATING NEW WITNESS FILE: No existing witness.dat found in {case_folder}\nNew file created!"
     )
 
 ############################################################################################

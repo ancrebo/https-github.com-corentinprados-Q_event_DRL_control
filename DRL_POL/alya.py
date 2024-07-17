@@ -291,10 +291,10 @@ def write_witness_file(filepath: str, probes_positions: np.ndarray) -> None:
         # Write probes
         if ndim == 2:
             for pos in probes_positions:
-                file.write(f"{pos[0]},{pos[1]}\n")
+                file.write(f"{pos[0]:.4f},{pos[1]:.4f}\n")
         elif ndim == 3:
             for pos in probes_positions:
-                file.write(f"{pos[0]},{pos[1]},{pos[2]}\n")
+                file.write(f"{pos[0]:.4f},{pos[1]:.4f},{pos[2]:.4f}\n")
         else:
             raise ValueError(
                 f"witness: write_witness_file: Unsupported number of dimensions: {ndim}"
