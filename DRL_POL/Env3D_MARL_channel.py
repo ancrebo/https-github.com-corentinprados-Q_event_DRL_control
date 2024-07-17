@@ -133,6 +133,7 @@ class Environment(Environment):
         self.neighbor_state: bool = neighbor_state
 
         self.probes_values_global: np.ndarray = np.ndarray([])
+        self.probes_values_global_dict: Dict[str, np.ndarray] = {}
 
         self.simulation_timeframe: List[float] = simulation_params[
             "simulation_timeframe"
@@ -949,29 +950,56 @@ class Environment(Environment):
     ## Default function required for the DRL
 
     def list_observation_updated(self) -> np.ndarray:
-        if not self.neightbor_state:
-            # Determine the structure of probes_values_global
-            is_1d = len(self.probes_values_global.shape) == 1
+        """
+        Generate a 1D array of probe values for the current environment.
 
+        This method slices the global dictionary of probe values based on the current environment ID.
+        For pressure data, it directly extracts the relevant slice. For velocity data, it concatenates
+        and flattens the slices of VELOX, VELOY, and VELOZ components in column-major order.
+
+        Returns:
+            np.ndarray: A 1D numpy array of probe values for the current (local) environment.
+
+        Raises:
+            NotImplementedError: If the probe type is not supported.
+            NotImplementedError: If the neighbor state is True.
+        """
+        if not self.neightbor_state:
+            probe_type = self.output_params["probe_type"]
             batch_size_probes = int(
-                len(self.probes_values_global) / self.nb_inv_per_CFD
+                len(
+                    self.probes_values_global_dict[
+                        next(iter(self.probes_values_global_dict))
+                    ]
+                )
+                / self.nb_inv_per_CFD
             )
 
-            if is_1d:
-                # If it's 1D, proceed with existing logic
-                probes_values_2 = self.probes_values_global[
+            if probe_type == "pressure":
+                data = self.probes_values_global_dict["PRESSURE"]
+                probes_values_2 = data[
                     ((self.ENV_ID[1] - 1) * batch_size_probes) : (
                         self.ENV_ID[1] * batch_size_probes
                     )
                 ]
+            elif probe_type == "velocity":
+                vel_components = ["VELOX", "VELOY", "VELOZ"]
+                probes_values_2 = []
+                for comp in vel_components:
+                    data = self.probes_values_global_dict[comp]
+                    slice_data = data[
+                        ((self.ENV_ID[1] - 1) * batch_size_probes) : (
+                            self.ENV_ID[1] * batch_size_probes
+                        )
+                    ]
+                    probes_values_2.append(slice_data)
+                # Flatten the array in column-major order
+                probes_values_2 = np.array(probes_values_2).flatten(order="F")
             else:
-                # if it's 2D, adjust the logic to slice the rows
-                row_start = (self.ENV_ID[1] - 1) * batch_size_probes
-                row_end = self.ENV_ID[1] * batch_size_probes
-                # slice the rows and flatten the array in column-major order
-                probes_values_2 = self.probes_values_global[
-                    row_start:row_end, :
-                ].flatten(order="F")
+                raise NotImplementedError(
+                    f"Env3D_MARL_channel: list_obervation_update: Probe type {probe_type} not implemented yet"
+                )
+
         else:
             raise NotImplementedError(
                 "Env3D_MARL_channel: list_obervation_update: Neighbor state True not implemented yet"
@@ -1039,17 +1067,32 @@ class Environment(Environment):
         return probes_values_2
 
     def states(self) -> Dict[str, Any]:
-        # TODO: @pietero adjust state size based on number of components in the probes? - Pieter
+        """
+        Define the state space for the TensorForce agent.
+
+        This method calculates the state size based on the probe type and the number of locations in the global environment.
+        It adjusts for the number of agents in the environment and handles different probe types (velocity and pressure).
+
+        Returns:
+            dict: A dictionary defining the state type and shape for the TensorForce agent.
+
+        Raises:
+            NotImplementedError: If the probe type is not supported.
+        """
         if not self.neighbor_state:
             if self.output_params["probe_type"] == "velocity":
-                # Calculate the state size for velocity probes (3 columns flattened to 1)
+                # 3 columns VELOX VELOY VELOZ flattened to 1
                 state_size = (
                     int(len(self.output_params["locations"]) / self.nb_inv_per_CFD) * 3
                 )
-            else:
-                # Default state size calculation for other probe types (only 1 column of witness data)
+            elif self.output_params["probe_type"] == "pressure":
+                # 1 column of witness data
                 state_size = int(
                     len(self.output_params["locations"]) / self.nb_inv_per_CFD
+                )
+            else:
+                raise NotImplementedError(
+                    f"Env3D_MARL_channel: states: Probe type {self.output_params['probe_type']} not implemented yet, state space cannot be calculated"
                 )
         else:
             # TODO: introduce neighbours in parameters!
@@ -1080,9 +1123,12 @@ class Environment(Environment):
 
     def reset(self) -> np.ndarray:
         """
-        Reset the environment to the initial state. This method is used ONLY at the beginning of each episode,
-        and precedes the TensorForce agent calling the `execute` method.
-        Returns: the initial actions based on the baseline (or previous episode if `.
+        Reset the environment to the initial state.
+
+        This method is used ONLY at the beginning of each episode,
+        and is followed by the TensorForce agent calling the `execute` method.
+
+        Returns: the initial actions based on the baseline (or previous episode if `. TODO: @pietero finish documentation - Pieter
         """
         if self.ENV_ID[1] != 1:
             time.sleep(4)
@@ -1123,7 +1169,7 @@ class Environment(Environment):
                     "alya_files",
                     f"{self.host}",
                     "1",
-                    f"EP_{self.episode_number}",  # was "EP_*"
+                    f"EP_{self.episode_number-1}",  # was "EP_*" # TODO: changed to episode_number-1 from episode_number - Pieter
                     "time_interval.dat",
                 )
             )
@@ -1163,7 +1209,7 @@ class Environment(Environment):
         print("\n\Action: extract the probes")
         NWIT_TO_READ = 1  # Read n timesteps from witness file from behind, last instant
 
-        # TODO: READ THE WITNESS OF EACH PSEUDOENV!
+        # TODO: READ THE WITNESS OF EACH PSEUDOENV! - Pol
         # cp witness.dat to avoid IO problems in disk?
         # cp only final time step in witness.dat to env 1? - Pieter
         # filename     = os.path.join('alya_files','%s'%self.host,'%s'%self.ENV_ID[1],'EP_%d'%self.episode_number,'%s.nsi.wit'%self.case)
@@ -1192,7 +1238,7 @@ class Environment(Environment):
             while not os.path.exists(action_end_flag_cp_path):
                 time.sleep(0.5)
 
-        # Read witness file from behind, last instant (FROM THE INVARIANT running [*,1])
+        # Read witness file from behind, last instant (FROM THE INVARIANT [*,1])
         NWIT_TO_READ = 1
         filename = os.path.join(
             "alya_files",
@@ -1204,15 +1250,12 @@ class Environment(Environment):
 
         # read witness file and extract the entire array list
         # This now outputs a dictionary of probe values for all probe types - Pieter
-        probes_values_global_dict = read_last_wit(
+        self.probes_values_global_dict: Dict[str, np.ndarray] = read_last_wit(
             filename,
             output_params["probe_type"],
             self.norm_factors,
             NWIT_TO_READ,
         )
-
-        # manipulate the probes dictionary # TODO: @pietero Implement the dict to array conversion - Pieter
-        # self.probes_values_global = something something probes_values_global_dict
 
         # filter probes per jet (corresponding to the ENV.ID[])
         probes_values_2 = self.list_observation_updated()
@@ -1491,7 +1534,7 @@ class Environment(Environment):
 
         print("\n\nAction : extract the probes")
 
-        # Read witness file from behind, last instant (FROM THE INVARIANT running [*,1])
+        # Read witness file from behind, last instant (FROM THE INVARIANT [*,1])
         NWIT_TO_READ = 1
         filename = os.path.join(
             "alya_files",
@@ -1501,19 +1544,14 @@ class Environment(Environment):
             f"{self.case}.nsi.wit",
         )
 
-        if (
-            self.case == "cylinder"
-        ):  # TODO: @pietero check if only cylinder or can be channel too - Pieter
-            # read witness file and extract the entire array list
-            probes_values_global_dict = read_last_wit(
-                filename,
-                output_params["probe_type"],
-                self.norm_factors,
-                NWIT_TO_READ,
-            )
-
-            # manipulate the probes dictionary # TODO: @pietero implement dict to array conversion - Pieter
-            # self.probes_values_global = something something probes_values_global_dict
+        # read witness file and extract the entire array list
+        # This now outputs a dictionary of probe values for all probe types - Pieter
+        self.probes_values_global_dict: Dict[str, np.ndarray] = read_last_wit(
+            filename,
+            output_params["probe_type"],
+            self.norm_factors,
+            NWIT_TO_READ,
+        )
 
         # filter probes per jet (corresponding to the ENV.ID[])
         probes_values_2 = self.list_observation_updated()
