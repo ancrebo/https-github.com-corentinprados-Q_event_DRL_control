@@ -56,7 +56,7 @@ $------------------------------------------------------------
   DIRICHLET: MATRIX
 END_NUMERICAL_TREATMENT  
 $------------------------------------------------------------
-OUTPUT_&_POST_PROCESS  
+OUTPUT_&_POST_PROCESS  $ overwritten by channel.ker.dat
   START_POSTPROCES_AT       STEP  = 0
   POSTPROCESS VELOCITY      STEPS = 1
   POSTPROCESS PRESSURE      STEPS = 1

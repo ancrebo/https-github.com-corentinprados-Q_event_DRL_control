@@ -32,9 +32,9 @@ simu_name = "3DChan"
 dimension = 3
 reward_function = "q_event_volume"
 
-Re_case = 6
-slices_probes_per_jet = 1
-neighbor_state = False
+Re_case: int = 6
+slices_probes_per_jet: int = 1
+neighbor_state: bool = False
 h_qevent_sensitivity: float = (
     3.0  # Used to identify the Q events, sensitivity to the Q events
 )
@@ -138,7 +138,7 @@ else:
 ### *****************************************************
 ### TIMESCALES ******************************************
 
-baseline_duration = 25.0  # to converge with velocity max = 1
+baseline_duration = 1404  # to converge with velocity max = 1
 baseline_time_start = 0.0
 
 delta_t_smooth = 0.25  # ACTION DURATION smooth law duration
@@ -149,7 +149,8 @@ short_spacetime_func = False  # override smooth func --> TODO: need to fix strin
 ### *****************************************************
 ### FLUID PROPERTIES ************************************
 
-mu_list = [10e-3, 50e-4, 33e-4, 25e-4, 10e-4, 0.00025641025]
+# TODO: @pietero @canordq Update mu value for channel case! Placeholder now - Pieter
+mu_list = [10e-3, 50e-4, 33e-4, 25e-4, 10e-4, 0.00025641025, 10e-4]
 mu = mu_list[Re_case]
 rho = 1.0
 

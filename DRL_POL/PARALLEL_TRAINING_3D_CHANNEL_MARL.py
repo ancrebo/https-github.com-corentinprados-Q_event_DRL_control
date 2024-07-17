@@ -99,7 +99,7 @@ if training_case == "cylinder_3D_WS_test":
     from parameters import (
         nz_Qs,
     )
-elif training_case == "channel_3D_MARL_coco":
+elif training_case == "channel_3D_MARL":
     from parameters import (
         nz_Qs,
         nx_Qs,
