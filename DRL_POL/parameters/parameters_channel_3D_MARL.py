@@ -27,7 +27,7 @@ from alya import write_witness_file
 
 ### CASE NAME ************************************************
 
-case = "channel"
+case = "channel_3D_MARL"
 simu_name = "3DChan"
 dimension = 3
 reward_function = "q_event_volume"
