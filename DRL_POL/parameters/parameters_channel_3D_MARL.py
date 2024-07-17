@@ -224,53 +224,53 @@ for i in range(nx_Qs):
         print(f"Agent ({i}, {j}): X: {x:.2f}, Z: {z:.2f}")
 
 
-# TODO: @canordq Update for channel parameters!! - Pieter
-jets_definition = {
-    "JET_TOP": {
-        "width": 10,
-        "radius": radius,
-        "angle": jet_angle,
-        "positions_angle": 90
-        + jet_angle,  # make sure the width doesn't not coincide with 0,90,180 or 270
-        "positions": [cylinder_coordinates[0], cylinder_coordinates[1] + radius],
-        "remesh": False,
-    },
-    "JET_BOTTOM": {
-        "width": 10,
-        "radius": radius,
-        "angle": jet_angle,
-        "positions_angle": 270
-        - jet_angle,  # make sure the width doesn't not coincide with 0,90,180 or 270
-        "positions": [cylinder_coordinates[0], cylinder_coordinates[1] - radius],
-        "remesh": False,
-    },
-}
-
-# Build the jets
-jets = build_jets(JetChannel, jets_definition, delta_t_smooth)
-n_jets = len(jets)
-
-# TODO: @canordq Update for channel parameters!! (or comment out??) - Pieter
-geometry_params = (
-    {  # Kept for legacy purposes but to be deleted when reworking the mesh script
-        "output": ".".join(["cylinder", "geo"]),
-        "jet_width": 10,
-        "jet_angle": jet_angle,
-        "jet_name": ["JET_TOP", "JET_BOTTOM"],
-        "jet_positions_angle": [
-            90 + jet_angle,
-            270 - jet_angle,
-        ],  # make sure the width doesn't not coincide with 0,90,180 or 270
-        "jet_positions": [
-            [cylinder_coordinates[0], cylinder_coordinates[1] + radius],
-            [cylinder_coordinates[0], cylinder_coordinates[1] - radius],
-        ],
-        "remesh": False,
-    }
-)
-assert (
-    jet_angle != geometry_params["jet_width"] / 2
-)  # Maybe to check during mesh construction?
+# # TODO: @canordq Update for channel parameters!! - Pieter
+# jets_definition = {
+#     "JET_TOP": {
+#         "width": 10,
+#         "radius": radius,
+#         "angle": jet_angle,
+#         "positions_angle": 90
+#         + jet_angle,  # make sure the width doesn't not coincide with 0,90,180 or 270
+#         "positions": [cylinder_coordinates[0], cylinder_coordinates[1] + radius],
+#         "remesh": False,
+#     },
+#     "JET_BOTTOM": {
+#         "width": 10,
+#         "radius": radius,
+#         "angle": jet_angle,
+#         "positions_angle": 270
+#         - jet_angle,  # make sure the width doesn't not coincide with 0,90,180 or 270
+#         "positions": [cylinder_coordinates[0], cylinder_coordinates[1] - radius],
+#         "remesh": False,
+#     },
+# }
+#
+# # Build the jets
+# jets = build_jets(JetChannel, jets_definition, delta_t_smooth)
+# n_jets = len(jets)
+#
+# # TODO: @canordq Update for channel parameters!! (or comment out??) - Pieter
+# geometry_params = (
+#     {  # Kept for legacy purposes but to be deleted when reworking the mesh script
+#         "output": ".".join(["cylinder", "geo"]),
+#         "jet_width": 10,
+#         "jet_angle": jet_angle,
+#         "jet_name": ["JET_TOP", "JET_BOTTOM"],
+#         "jet_positions_angle": [
+#             90 + jet_angle,
+#             270 - jet_angle,
+#         ],  # make sure the width doesn't not coincide with 0,90,180 or 270
+#         "jet_positions": [
+#             [cylinder_coordinates[0], cylinder_coordinates[1] + radius],
+#             [cylinder_coordinates[0], cylinder_coordinates[1] - radius],
+#         ],
+#         "remesh": False,
+#     }
+# )
+# assert (
+#     jet_angle != geometry_params["jet_width"] / 2
+# )  # Maybe to check during mesh construction?
 
 
 ### ***************************************************************
