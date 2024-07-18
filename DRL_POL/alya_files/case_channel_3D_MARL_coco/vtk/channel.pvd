@@ -1,5 +1,0 @@
-<VTKFile type="Collection" version="0.1" byte_order="LittleEndian">
-	<Collection>
-		<DataSet timestep="1404" file='channel_00080000.pvtu'/>
-	</Collection>
-</VTKFile>
