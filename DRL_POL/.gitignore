@@ -11,6 +11,9 @@ hostlist
 nodelist
 alya_files/baseline*
 alya_files/case
+alya_files/archive_runs/*
+alya_files/backup*
+
 alya_files/case_2D_cylinder/*.mpio.bin
 alya_files/case_2D_cylinder/mesh/*.mpio.bin
 alya_files/case_2D_cylinder/mesh/*.dat
@@ -32,8 +35,13 @@ alya_files/case_channel_3D_MARL/mesh/channel.msh
 alya_files/case_channel_3D_MARL/core
 alya_files/case_channel_3D_MARL/mesh/*.mpio.bin
 
+alya_files/case_channel_3D_MARL_coco/*
+
 alya_files/*.mpio.bin
 alya_files/**/*.mpio.bin
+
+alya_files/**/*.cso
+alya_files/**/*.sol
 
 alya_files/**/*.swp
 
