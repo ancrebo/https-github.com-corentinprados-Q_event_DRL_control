@@ -26,6 +26,7 @@ from configuration import (
     ALYA_GMSH,
     ALYA_SETS,
     ALYA_CLEAN,
+    ALYA_VTK,
     OVERSUBSCRIBE,
     DEBUG,
 )
@@ -52,7 +53,12 @@ from parameters import (
     nb_actuations,
     nb_actuations_deterministic,
 )
-from env_utils import run_subprocess, printDebug
+from env_utils import (
+    run_subprocess,
+    find_highest_timestep_file,
+    copy_mpio2vtk_required_files,
+    printDebug,
+)
 from alya import (
     write_case_file,
     write_witness_file,
@@ -1422,69 +1428,108 @@ class Environment(Environment):
                         delta_Q_x=self.delta_Q_x,
                     )  # TODO: @pietero make sure this works for channel - Pieter
 
-
-            ## Setting up for computing the rewards and save as .csv file
-            directory = os.path.join(
-                "alya_files",
-                f"{self.host}",
-                f"{self.ENV_ID[1]}",  # this is always 1
-
-                f"EP_{self.episode_number}",
-                "vtk",
-            )
-            averaged_data_path = os.path.join(
-                "alya_files",
-                f"{self.host}",
-
-                f"{self.ENV_ID[1]}",  # this is always 1
-                f"EP_{self.episode_number}",
-                "averaged_data.csv",
-            )
-            output_folder_path = os.path.join(
-
-                "alya_files",
-                f"{self.host}",
-                f"{self.ENV_ID[1]}",
-                f"EP_{self.episode_number}",
-                "rewards",
-
-            )
-            output_file_name = f"rewards_{self.host}_EP_{self.episode_number}.csv"
-            output_file_path = os.path.join(output_folder_path, output_file_name)
-
-            if not os.path.exists(directory):
-                raise ValueError(
-                    f"{self.ENV_ID}: execute: Directory {directory} does not exist for action vtk files!!!"
+            if self.reward_function == "q_event_volume":
+                ## Setting up for computing the rewards and save as .csv file
+                # First need to identify and convert ALYA postprocessing files to VTK files
+                directory_post = os.path.join(
+                    "alya_files",
+                    f"{self.host}",
+                    f"{self.ENV_ID[1]}",  # this is always 1
+                    f"EP_{self.episode_number}",
                 )
-            if not os.path.exists(averaged_data_path):
-                raise ValueError(
-                    f"{self.ENV_ID}: execute: File {averaged_data_path} does not exist for pre-calculated data!!!"
+
+                if self.probe_type == "velocity":
+                    post_name = "VELOC"
+                elif self.probe_type == "pressure":
+                    post_name = "PRESS"
+                else:
+                    post_name = None
+                    raise NotImplementedError(
+                        f"{self.ENV_ID}: execute: post.mpio.bin associated with type {self.probe_type} not implemented yet"
+                    )
+
+                # Identify the file with the highest timestep
+                last_post_file = find_highest_timestep_file(
+                    directory_post, f"{self.case}", f"{post_name}"
                 )
-            if not os.path.exists(output_folder_path):
-                os.makedirs(output_folder_path)
 
-            # Launches a subprocess to calculate the reward
-            # Must use a separate conda environment for compatibility
-            runpath = "./"
-            runbin = "python3 calc_reward.py"
+                # Copy the identified file to a specific directory for processing
+                target_directory = os.path.join(directory_post, "final_post_of_action")
 
-            runargs = (
-                f"--directory {directory} "
-                f"--Lx {reward_params['Lx']} "
-                f"--Ly {reward_params['Ly']} "
-                f"--Lz {reward_params['Lz']} "
-                f"--H {reward_params['H']} "
-                f"--n {reward_params['nx_Qs']} "
-                f"--m {reward_params['nz_Qs']} "
-                f"--averaged_data_path {averaged_data_path} "
-                f"--output_file {output_file_path}"
-            )
-            run_subprocess(
-                runpath,
-                runbin,
-                runargs,
-                use_new_env=True,
-            )
+                copy_mpio2vtk_required_files(
+                    self.case, directory_post, target_directory, last_post_file
+                )
+
+                # Convert the copied file to VTK format
+                # Run subprocess that launches mpio2vtk to convert the file to VTK
+                run_subprocess(
+                    target_directory,
+                    ALYA_VTK,
+                    f"{self.case}",
+                    nprocs=nb_proc,
+                    mem_per_srun=mem_per_srun,
+                    num_nodes_srun=num_nodes_srun,
+                    host=self.nodelist,
+                )
+                print(
+                    f"\n{self.ENV_ID}: execute: VTK file created for episode {self.episode_number} action {self.action_count}\n"
+                )
+                # Second we set up for Q event identification and reward calculation
+                directory_vtk = os.path.join(
+                    target_directory,
+                    "vtk",
+                )
+                averaged_data_path = os.path.join(
+                    directory_post,
+                    "averaged_data.csv",
+                )
+                output_folder_path_reward = os.path.join(
+                    directory_post,
+                    "rewards",
+                )
+                output_file_name = f"rewards_{self.host}_EP_{self.episode_number}.csv"
+                output_file_path = os.path.join(
+                    output_folder_path_reward, output_file_name
+                )
+
+                if not os.path.exists(directory_vtk):
+                    raise ValueError(
+                        f"{self.ENV_ID}: execute: Directory {directory_vtk} does not exist for action vtk files!!!"
+                    )
+                if not os.path.exists(averaged_data_path):
+                    raise ValueError(
+                        f"{self.ENV_ID}: execute: File {averaged_data_path} does not exist for pre-calculated data!!!"
+                    )
+                if not os.path.exists(output_folder_path_reward):
+                    os.makedirs(output_folder_path_reward)
+
+                # Launches a subprocess to calculate the reward
+                # Must use a separate conda environment for compatibility
+                runpath_vtk = "./"
+                runbin_vtk = "python3 calc_reward.py"
+
+                runargs_vtk = (
+                    f"--directory {directory_vtk} "
+                    f"--Lx {reward_params['Lx']} "
+                    f"--Ly {reward_params['Ly']} "
+                    f"--Lz {reward_params['Lz']} "
+                    f"--H {reward_params['H']} "
+                    f"--n {reward_params['nx_Qs']} "
+                    f"--m {reward_params['nz_Qs']} "
+                    f"--averaged_data_path {averaged_data_path} "
+                    f"--output_file {output_file_path}"
+                )
+                run_subprocess(
+                    runpath_vtk,
+                    runbin_vtk,
+                    runargs_vtk,
+                    use_new_env=True,
+                )
+                # good spot for logger.info instead of print
+                print(
+                    f"\n{self.ENV_ID}: execute: Reward calculation complete for EP_{self.episode_number} action {self.action_count}\n"
+                )
+
             cr_stop("ENV.actions_MASTER_thread1", 0)
 
         # Start an alya run
@@ -1516,10 +1561,7 @@ class Environment(Environment):
 
         elif self.case == "channel":
             # TODO: @pietero implement history parameters for channel if needed - Pieter
-            # Raise a not implemented error
-            raise NotImplementedError(
-                f"Saving history parameters for Channel case not implemented yet in `execute` method, line {inspect.currentframe().f_lineno}"
-            )
+            pass
 
         # Compute the reward
         reward: float = self.compute_reward()

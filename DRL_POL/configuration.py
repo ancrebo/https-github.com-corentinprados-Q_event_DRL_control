@@ -35,6 +35,7 @@ ALYA_ULTCL = os.path.join(BIN_PATH, "ultra_cleaner.sh")
 ALYA_GMSH = os.path.join(BIN_PATH, "pyalya_gmsh2alya")
 ALYA_PERIO = os.path.join(BIN_PATH, "pyalya_periodic")
 ALYA_INCON = os.path.join(BIN_PATH, "pyalya_initialcondition")
+ALYA_VTK = os.path.join(BIN_PATH, "mpio2vtk")
 
 
 ## OPTIONS
