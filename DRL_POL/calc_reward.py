@@ -11,16 +11,19 @@ def load_data_and_convert_to_numpy(
     directory: str,
 ) -> List[Tuple[float, np.ndarray]]:
     """
-    This function loads CFD simulation data from PVTU files and converts them into NumPy arrays.
+
+    Loads CFD simulation data from PVTU files and converts them into NumPy arrays.
+
     Each array is stored along with its respective timestep, facilitating time-series analysis.
 
-    Parameters:
-    - directory (str): The path to the directory containing the PVD and PVTU files - including channel.pvd.
+    Args:
+        directory (str): The path to the directory containing the PVD and PVTU files, including channel.pvd.
 
     Returns:
-    - data_arrays (list of tuples): A list where each element is a tuple containing:
-      * A timestep (float)
-      * An array with columns for spatial coordinates (x, y, z) and velocity components (U, V, W)
+        List[Tuple[float, np.ndarray]]: A list where each element is a tuple containing:
+            * A timestep (float)
+            * An array with columns for spatial coordinates (x, y, z) and velocity components (U, V, W).
+
     """
     pvd_path = os.path.join(directory, "channel.pvd")
     tree = ET.parse(pvd_path)
@@ -57,17 +60,20 @@ def normalize_data_array(
     data_array: np.ndarray, Lx: float, Ly: float, Lz: float
 ) -> np.ndarray:
     """
-    Normalizes the spatial coordinates to the range [0, 1] based on their maximum values
-    and scales the velocity components by the corresponding channel lengths.
 
-    Parameters:
-    - data_array (np.ndarray): Input array with columns for spatial coordinates (x, y, z) and velocity components (U, V, W).
-    - Lx (float): Length in the x direction.
-    - Ly (float): Length in the y direction.
-    - Lz (float): Length in the z direction.
+    Normalizes the spatial coordinates to the range [0, 1] and scales the velocity components.
+
+    This function scales the velocity components by the corresponding channel lengths.
+
+    Args:
+        data_array (np.ndarray): Input array with columns for spatial coordinates (x, y, z) and velocity components (U, V, W).
+        Lx (float): Length in the x direction.
+        Ly (float): Length in the y direction.
+        Lz (float): Length in the z direction.
 
     Returns:
-    - np.ndarray: Scaled/Normalized array.
+        np.ndarray: Scaled/Normalized array.
+
     """
     data_copy = data_array.copy()
 
@@ -90,13 +96,15 @@ def normalize_data_array(
 
 def load_averaged_data_csv(file_path: str) -> np.ndarray:
     """
-    Load the averaged data from a CSV file.
 
-    Parameters:
-    - file_path (str): The path to the CSV file.
+    Loads the averaged data from a CSV file.
+
+    Args:
+        file_path (str): The path to the CSV file.
 
     Returns:
-    - np.ndarray: The loaded averaged data.
+        np.ndarray: The loaded averaged data.
+
     """
     return np.loadtxt(file_path, delimiter=",", skiprows=1)  # Do I want to skip rows???
 
@@ -105,19 +113,21 @@ def process_velocity_data(
     data: List[Tuple[float, np.ndarray]], averaged_data: np.ndarray
 ) -> List[Tuple[float, np.ndarray]]:
     """
-    Processes a list of tuples containing CFD simulation data using pre-calculated averaged data to calculate
-    fluctuating components of velocity fields. It computes these metrics for the horizontal (U), vertical (V),
-    and lateral (W) velocity components.
 
-    Parameters:
-    - data (list of tuples): Each tuple contains a timestep and a NumPy array with spatial coordinates (x, y, z)
-      and velocity components (U, V, W).
-    - averaged_data (np.ndarray): Pre-calculated averaged data containing velocities ($\overline{U}(y)$, $\overline{V}(y)$, $\overline{W}(y)$)
-      and rms of velocity fluctuations ($u'(y)$, $v'(y)$, $w'(y)$) as columns, indexed by the y-coordinate.
+    Processes CFD simulation data to calculate fluctuating components of velocity fields.
+
+    This function computes these metrics for the horizontal (U), vertical (V), and lateral (W) velocity components.
+
+    Args:
+        data (list of tuples): Each tuple contains a timestep and a NumPy array with spatial coordinates (x, y, z)
+            and instantaneous velocity components (U, V, W).
+        averaged_data (np.ndarray): Pre-calculated averaged data containing velocities ($\overline{U}(y)$, $\overline{V}(y)$, $\overline{W}(y)$)
+            and rms of velocity fluctuations ($u'(y)$, $v'(y)$, $w'(y)$) as columns, indexed by the y-coordinate.
 
     Returns:
-    - processed_data (list of tuples): Each tuple contains a timestep and an array with original and fluctuating
-      velocity components (U, V, W, u, v, w).
+        List[Tuple[float, np.ndarray]]: Each tuple contains a timestep and an array with original and fluctuating
+            velocity components (U, V, W, u, v, w).
+
     """
     processed_data = []
 
@@ -153,17 +163,19 @@ def detect_Q_events(
     """
     Detects Q events in the fluid dynamics data based on the specified condition.
 
-    Parameters:
-    - processed_data (list of tuples): Data processed by `process_velocity_data`, containing:
-      * A timestep (float)
-      * An array with spatial coordinates (x, y, z) and velocity components U, V, W, u, v, w
-    - averaged_data (np.ndarray): Data containing the rms values for velocity components u and v for each y coordinate. **(u' and v')**
-    - H (float): The sensitivity threshold for identifying Q events.
+
+    Args:
+        processed_data (list of tuples): Data processed by `process_velocity_data`, containing:
+            * A timestep (float)
+            * An array with spatial coordinates (x, y, z) and velocity components U, V, W, u, v, w.
+        averaged_data (np.ndarray): Data containing the rms values for velocity components u and v for each y coordinate. **(u' and v')**
+        H (float): The sensitivity threshold for identifying Q events.
 
     Returns:
-    - data_arrays (list of tuples): Each tuple contains:
-      * A timestep (float)
-      * An array with columns ['x', 'y', 'z', 'Q'], where 'Q' is a boolean indicating whether a Q event is detected.
+        List[Tuple[float, np.ndarray]]: Each tuple contains:
+            * A timestep (float)
+            * An array with columns ['x', 'y', 'z', 'Q'], where 'Q' is a boolean indicating whether a Q event is detected.
+
     """
     q_event_data = []
 
@@ -192,15 +204,17 @@ def calculate_local_Q_ratios(
     """
     Calculate the ratio of Q-events in local volumes for a single timestep.
 
-    Parameters:
-    - data_array (np.ndarray): Input array with columns ['x', 'y', 'z', 'Q'].
-    - n (int): Number of sections in the x direction.
-    - m (int): Number of sections in the z direction.
-    - Lx (float): Length in the x direction.
-    - Lz (float): Length in the z direction.
+
+    Args:
+        data_array (np.ndarray): Input array with columns ['x', 'y', 'z', 'Q'].
+        n (int): Number of sections in the x direction.
+        m (int): Number of sections in the z direction.
+        Lx (float): Length in the x direction.
+        Lz (float): Length in the z direction.
 
     Returns:
-    - np.ndarray: Array with columns ['x_index', 'z_index', 'Q_event_count', 'total_points', 'Q_ratio'].
+        np.ndarray: Array with columns ['x_index', 'z_index', 'Q_event_count', 'total_points', 'Q_ratio'].
+
     """
     step_x = Lx / n
     step_z = Lz / m
@@ -233,11 +247,13 @@ def calculate_reward(data_array: np.ndarray, n: int, m: int) -> float:
     """
     Calculate the reward based on the Q ratio in the local volume.
 
-    Parameters:
-    - data_array (np.ndarray): Array with columns ['x_index', 'z_index', 'Q_ratio'].
+
+    Args:
+        data_array (np.ndarray): Array with columns ['x_index', 'z_index', 'Q_ratio'].
 
     Returns:
-    - float: The calculated reward value.
+        float: The calculated reward value.
+
     """
     q_ratio = data_array[(data_array[:, 0] == n) & (data_array[:, 1] == m), 4]
     reward = 1 - q_ratio[0] if q_ratio.size > 0 else 1
@@ -256,19 +272,30 @@ def calculate_reward_full(
     output_file: str,
 ) -> None:
     """
-    Calculate the rewards based on Q events, saving results to a file.
 
-    Parameters:
-    - directory (str): Directory containing the PVD and PVTU files.
-    - Lx (float): Length in the x direction.
-    - Ly (float): Length in the y direction.
-    - Lz (float): Length in the z direction.
-    - H (float): Sensitivity threshold for identifying Q events.
-    - n (int): Number of sections in the x direction.
-    - m (int): Number of sections in the z direction.
-    - averaged_data_path (str): Path to the file with averaged data.
-    - output_file (str): Path to the output file for rewards.
+    Calculate the rewards based on Q events, saving results to a CSV file.
+
+    This function calculates the rewards for each local environment based on Q events and
+    saves the results to a CSV file with the following columns:
+    - ENV_ID: The environment ID (1D index), ignoring the node index.
+    - reward: The calculated reward value for that local environment.
+
+    Args:
+        directory (str): Directory containing the PVD and PVTU files.
+        Lx (float): Length in the x direction.
+        Ly (float): Length in the y direction.
+        Lz (float): Length in the z direction.
+        H (float): Sensitivity threshold for identifying Q events.
+        n (int): Number of sections in the x direction.
+        m (int): Number of sections in the z direction.
+        averaged_data_path (str): Path to the file with averaged data.
+        output_file (str): Path to the output file for rewards.
+
+    Returns:
+        None
     """
+    print(f"\nTask:  Calculating rewards based on Q events in {directory}...")
+
     data = load_data_and_convert_to_numpy(directory)
     data_normalized = [
         (timestep, normalize_data_array(data_array, Lx, Ly, Lz))
@@ -308,7 +335,9 @@ def calculate_reward_full(
     )
     print(f"Rewards saved to {output_file}")
 
-    # Clean up
+
+    # Clean up # TODO: @pietero is this useful? - Pieter
+
     del (
         data,
         data_normalized,

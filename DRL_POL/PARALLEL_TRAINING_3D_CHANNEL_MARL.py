@@ -99,7 +99,7 @@ if training_case == "cylinder_3D_WS_test":
     from parameters import (
         nz_Qs,
     )
-elif training_case == "channel_3D_MARL_coco":
+elif training_case == "channel_3D_MARL":
     from parameters import (
         nz_Qs,
         nx_Qs,
@@ -126,6 +126,7 @@ nodelist = read_node_list()
 
 # IMPORTANT: this environment base is needed to do the baseline, the main one
 environment_base = Environment(simu_name=simu_name, node=nodelist[0])  # Baseline
+print(f"\nDEBUG: Environment Base ENV_ID: {environment_base.ENV_ID}\n")
 
 if run_baseline:
     run_subprocess("alya_files", "rm -rf", "baseline")  # Ensure deleting old parameters
