@@ -163,6 +163,16 @@ class Jet(ABC):
         self.nb_inv_per_CFD: int = nb_inv_per_CFD
         # self.update(Q_pre, Q_new, time_start, smooth_func)
 
+    def update_file(self, filepath: str) -> None:
+        """
+        Replaces the jets path file for a new one, generic.
+        The name of the file must be the same of that of the jet.
+        """
+        functions = (
+            [self.Vx, self.Vy] if self.dimension == 2 else [self.Vx, self.Vy, self.Vz]
+        )
+        write_jet_file(filepath, self.name, functions)
+
     @abstractmethod
     def update(
         self,
@@ -178,18 +188,8 @@ class Jet(ABC):
         To be implemented by child classes
         """
         raise NotImplementedError(
-            "Must specialize the `update` method for each specific jet kind"
+            "Jet.update: Must specialize the `update` method for each specific jet kind"
         )
-
-    def update_file(self, filepath: str) -> None:
-        """
-        Replaces the jets path file for a new one, generic.
-        The name of the file must be the same of that of the jet.
-        """
-        functions = (
-            [self.Vx, self.Vy] if self.dimension == 2 else [self.Vx, self.Vy, self.Vz]
-        )
-        write_jet_file(filepath, self.name, functions)
 
     @abstractmethod
     def set_geometry(self, geometry_params: Dict[str, Any]) -> Any:
@@ -198,7 +198,7 @@ class Jet(ABC):
         per each of the independent cases.
         """
         raise NotImplementedError(
-            "Must specialize the `set_geometry` method for each specific jet kind"
+            "Jet.set_geometry: Must specialize the `set_geometry` method for each specific jet kind"
         )
 
     @abstractmethod
@@ -217,7 +217,7 @@ class Jet(ABC):
         per each of the independent cases.
         """
         raise NotImplementedError(
-            "Must specialize the `create_smooth_funcs` method for each specific jet kind"
+            "Jet.create_smooth_funcs: Must specialize the `create_smooth_funcs` method for each jet class"
         )
 
 
@@ -248,9 +248,6 @@ class JetCylinder(Jet):
             delta_Q_z,
         )
 
-        self.Qs_position_z: List[float] = Qs_position_z
-        self.delta_Q_z: float = delta_Q_z
-
         self.update(
             self.Q_pre,
             self.Q_new,
@@ -259,6 +256,33 @@ class JetCylinder(Jet):
             Qs_position_z=self.Qs_position_z,
             delta_Q_z=self.delta_Q_z,
         )
+
+    def set_geometry(self, params: Dict[str, Any]) -> None:
+        """
+        Specialized method that sets up the geometry of the jet
+        """
+        from parameters import (
+            cylinder_coordinates,
+            Qs_position_z,
+            delta_Q_z,
+        )
+
+        # Sanity check
+        # TODO: asserts are dangerous... we need a function that stops everything!!
+        if params["width"] <= 0.0:
+            raise ValueError(f"Invalid jet width={params['width']}")
+        if params["radius"] <= 0.0:
+            raise ValueError(f"Invalid jet radius={params['radius']}")
+        if params["positions_angle"] <= 0.0:
+            raise ValueError(f"Invalid jet angle={params['positions_angle']}")
+        # Recover parameters from dictionary
+        self.radius: float = params["radius"]
+        self.width: float = params["width"]
+        self.theta0: float = self.normalize_angle(np.deg2rad(params["positions_angle"]))
+        self.theta: str = self.get_theta(cylinder_coordinates)
+
+        self.Qs_position_z = Qs_position_z
+        self.delta_Q_z = delta_Q_z
 
     def update(
         self,
@@ -278,17 +302,25 @@ class JetCylinder(Jet):
         delta_Q_z: float = kwargs.get("delta_Q_z")
 
         if Qs_position_z is None:
-            raise ValueError("Missing required keyword arguments: 'Qs_position_z'")
+            raise ValueError(
+                "JetCylinder.update: Missing required keyword argument: 'Qs_position_z'"
+            )
         if delta_Q_z is None:
-            raise ValueError("Missing required keyword arguments: 'delta_Q_z'")
+            raise ValueError(
+                "JetCylinder.update: Missing required keyword argument: 'delta_Q_z'"
+            )
 
         # Up
         self.Q_pre: List[float] = Q_pre
         self.Q_new: List[float] = Q_new
         self.time_start: float = time_start
         self.smooth_func: str = smooth_func
-        self.Qs_position_z: List[float] = Qs_position_z
-        self.delta_Q_z: float = delta_Q_z
+        self.Qs_position_z: List[float] = (
+            Qs_position_z  # Updating positions just in case (could be removed, already assigned during init) - Pieter
+        )
+        self.delta_Q_z: float = (
+            delta_Q_z  # Updating delta just in case (could be removed, already assigned during init) - Pieter
+        )
 
         # Call the specialized method that creates a smoothing function for the current time
         smooth_fun: str = self.create_smooth_funcs(
@@ -312,26 +344,6 @@ class JetCylinder(Jet):
             self.Vy = f"{smooth_fun}*abs(sin({self.theta}))"  # TODO: temporal fix for component y (not opposite? check update_jet)
             self.Vz = "0"
 
-    def set_geometry(self, params: Dict[str, Any]) -> None:
-        """
-        Specialized method that sets up the geometry of the jet
-        """
-        from parameters import cylinder_coordinates
-
-        # Sanity check
-        # TODO: asserts are dangerous... we need a function that stops everything!!
-        if params["width"] <= 0.0:
-            raise ValueError(f"Invalid jet width={params['width']}")
-        if params["radius"] <= 0.0:
-            raise ValueError(f"Invalid jet radius={params['radius']}")
-        if params["positions_angle"] <= 0.0:
-            raise ValueError(f"Invalid jet angle={params['positions_angle']}")
-        # Recover parameters from dictionary
-        self.radius: float = params["radius"]
-        self.width: float = params["width"]
-        self.theta0: float = self.normalize_angle(np.deg2rad(params["positions_angle"]))
-        self.theta: str = self.get_theta(cylinder_coordinates)
-
     def create_smooth_funcs(
         self,
         Q_new: List[float],
@@ -349,9 +361,13 @@ class JetCylinder(Jet):
         delta_Q_z: float = kwargs.get("delta_Q_z")
 
         if Qs_position_z is None:
-            raise ValueError("Missing required keyword arguments: 'Qs_position_z'")
+            raise ValueError(
+                "JetCylinder.create_smooth_funcs: Missing required keyword argument: 'Qs_position_z'"
+            )
         if delta_Q_z is None:
-            raise ValueError("Missing required keyword arguments: 'delta_Q_z'")
+            raise ValueError(
+                "JetCylinder.create_smooth_funcs: Missing required keyword argument: 'delta_Q_z'"
+            )
 
         w = self.width * (np.pi / 180)  # deg2rad
         scale = np.pi / (2.0 * w * self.radius)  #### FIX: NOT R**2 --> D
@@ -386,7 +402,7 @@ class JetCylinder(Jet):
 
         else:
             raise ValueError(
-                f"`JetCylinder` class: `create_smooth_funcs` method: `smooth_func` arg: Invalid smoothing function: {self.smooth_func}"
+                f"JetCylinder.create_smooth_funcs: `smooth_func` arg: Invalid smoothing function type:{self.smooth_func}"
             )
 
         if self.short_spacetime_func == True:
@@ -443,25 +459,23 @@ class JetAirfoil(Jet):
         super().__init__(
             name, params, Q_pre, Q_new, time_start, dimension, T_smoo, smooth_func
         )
-        from parameters import Qs_position_z, delta_Q_z
 
-        self.Qs_position_z: List[float] = Qs_position_z
-        self.delta_Q_z: float = delta_Q_z
-
+        # NO UPDATE METHOD DEFINED YET - Pieter July 2024
         self.update(
             Q_pre,
             Q_new,
             time_start,
             smooth_func,
-            Qs_position_z=self.Qs_position_z,
-            delta_Q_z=self.delta_Q_z,
         )
 
     def set_geometry(self, params):
         """
         Specialized method that sets up the geometry of the jet
         """
-        from parameters import rotate_airfoil, aoa
+        from parameters import (
+            rotate_airfoil,
+            aoa,
+        )
 
         # Get jet positions
         self.x1 = params["x1"]
@@ -498,16 +512,6 @@ class JetAirfoil(Jet):
         """
         Specialized method that creates the smooth functions
         """
-        Qs_position_z: List[float] = kwargs.get(
-            "Qs_position_z"
-        )  # TODO: Determine type! @pietero
-        delta_Q_z: float = kwargs.get("delta_Q_z")  # Determine type! @pietero
-
-        if Qs_position_z is None or delta_Q_z is None:
-            raise ValueError(
-                "Missing required keyword arguments: 'Qs_position_z' and/or 'delta_Q_z'"
-            )
-
         w = np.sqrt((self.x1 - self.x2) ** 2 + (self.y1 - self.y2) ** 2)
         scale = np.pi / (2 * w)
 
@@ -518,7 +522,7 @@ class JetAirfoil(Jet):
             string_Q = Q_smooth_linear(Q_new[0], Q_pre[0], time_start, T_smoo)
         else:
             raise ValueError(
-                "JetChannel: `create_smooth_funcs` method: `smooth_func` arg: Invalid smoothing function"
+                f"JetAirfoil.create_smooth_funcs: `smooth_func` arg: Invalid smoothing function type {smooth_func}"
             )
 
         # delta_Q  = Q_new - Q_pre
@@ -536,10 +540,7 @@ class JetAirfoil(Jet):
         return atan2_str(X, Y)
 
 
-# TODO: @pietero finish updating JetChannel for new base class code and channel-specific stuff - Pieter
 class JetChannel(Jet):
-    # TODO: implement this class for channel - Pieter
-
     """
     Specialized jet class to deal with jets in a channel.
     """
@@ -561,18 +562,6 @@ class JetChannel(Jet):
         super().__init__(
             name, params, Q_pre, Q_new, time_start, dimension, T_smoo, smooth_func
         )
-
-        from parameters import (
-            Qs_position_x,
-            delta_Q_x,
-            Qs_position_z,
-            delta_Q_x,
-        )
-
-        self.Qs_position_x: List[float] = Qs_position_x
-        self.delta_Q_x: float = delta_Q_x
-        self.Qs_position_z: List[float] = Qs_position_z
-        self.delta_Q_z: float = delta_Q_x
 
         self.update(
             self.Q_pre,
@@ -597,7 +586,62 @@ class JetChannel(Jet):
         """
         TO BE IMPLEMENTED FOR CHANNEL CASE
         """
-        pass
+        Qs_position_x: List[float] = kwargs.get("Qs_position_x")
+        delta_Q_x: float = kwargs.get("delta_Q_x")
+        Qs_position_z: List[float] = kwargs.get("Qs_position_z")
+        delta_Q_z: float = kwargs.get("delta_Q_z")
+
+        if Qs_position_x is None:
+            raise ValueError(
+                "JetChannel.update: Missing required keyword argument: 'Qs_position_x'"
+            )
+        if delta_Q_x is None:
+            raise ValueError(
+                "JetChannel.update: Missing required keyword argument: 'delta_Q_z'"
+            )
+        if Qs_position_z is None:
+            raise ValueError(
+                "JetChannel.update: Missing required keyword argument: 'Qs_position_z'"
+            )
+        if delta_Q_z is None:
+            raise ValueError(
+                "JetChannel.update: Missing required keyword argument: 'delta_Q_z'"
+            )
+
+        # Up
+        self.Q_pre: List[float] = Q_pre
+        self.Q_new: List[float] = Q_new
+        self.time_start: float = time_start
+        self.smooth_func: str = smooth_func
+        self.Qs_position_z: List[float] = (
+            Qs_position_z  # Updating positions just in case (could be removed, already assigned during init) - Pieter
+        )
+        self.delta_Q_z: float = (
+            delta_Q_z  # Updating delta just in case (could be removed, already assigned during init) - Pieter
+        )
+
+        # Call the specialized method that creates a smoothing function for the current time
+        smooth_fun: str = self.create_smooth_funcs(
+            self.Q_new,
+            self.Q_pre,
+            self.time_start,
+            self.T_smoo,
+            self.smooth_func,
+            Qs_position_z=self.Qs_position_z,
+            delta_Q_z=self.delta_Q_z,
+            Qs_position_x=self.Qs_position_x,
+            delta_Q_x=self.delta_Q_x,
+        )
+
+        # Create the velocities (function?) using the smoothing functions,
+        if self.dimension == 2:
+            # For 2D jets set Vx and Vy
+            self.Vx = f"{smooth_fun}"
+            self.Vy = f"{smooth_fun}"
+        else:
+            self.Vx = "0"
+            self.Vy = f"{smooth_fun}"
+            self.Vz = "0"
 
     # TODO: Update this function for channel
     def set_geometry(self, params: Dict[str, Any]) -> None:
@@ -605,31 +649,12 @@ class JetChannel(Jet):
         Specialized method that sets up the geometry of the jet, including importing Qs_position_x, Qs_position_z, delta_Q_z and delta_Q_z
         """
         from parameters import (
-            # TO BE DELETED!!! -Chriss juli 2024
-            #            cylinder_coordinates,  # Remove?? Necessary??
             Qs_position_x,
             delta_Q_x,
             Qs_position_z,
             delta_Q_z,
         )
-
-        # Commented out since these only apply to cylinder case -Chriss
-        # TO BE DELETED!!! -Chriss juli 2024
-        #        # Sanity check
-        #        # TODO: asserts are dangerous... we need a function that stops everything!!
-        #        if params["width"] <= 0.0:
-        #            raise ValueError(f"Invalid jet width=%f" % params["width"])
-        #        if params["radius"] <= 0.0:
-        #            raise ValueError("Invalid jet radius=%f" % params["radius"])
-        #        if params["positions_angle"] <= 0.0:
-        #            raise ValueError("Invalid jet angle=%f" % params["positions_angle"])
-
-        # Recover parameters from dictionary
-        # TO BE DELETED!!! -Chriss juli 2024
-        #        self.radius: float = params["radius"]
-        #        self.width: float = params["width"]
-        #        self.theta0: float = self.normalize_angle(np.deg2rad(params["positions_angle"]))
-        #        self.theta: str = self.get_theta(cylinder_coordinates)
+        
         self.Qs_position_x: List[float] = Qs_position_x
         self.delta_Q_x: float = delta_Q_x
         self.Qs_position_z: List[float] = Qs_position_z
@@ -656,16 +681,14 @@ class JetChannel(Jet):
         # scale = ? for channel
         # w = 1.0  # NOT channel width but width of jet. Leftover from cylinder case
         # w = self.width * (np.pi / 180)  # deg2rad
-        scale = (
-            1.0  # TODO: fix this with correct scaling value. Can be assigned as needed
-        )
-        # scale = np.pi / (2.0 * w * self.radius)  #### FIX: NOT R**2 --> D
+        scale = 1.0  # TODO: fix this with correct scaling value. Can be assigned as needed - Chriss
+
 
         string_all_Q_pre = "0"
         string_all_Q_new = "0"
         string_heav = ""
 
-        # TODO: implement smoothing in space for channel case
+        # TODO: implement smoothing in space for channel case - Chriss
         if smooth_func == "EXPONENTIAL":
 
             ## Q_pre and Q_new --> list! with nz_Qs dimensions
@@ -693,10 +716,10 @@ class JetChannel(Jet):
             string_Q = Q_smooth_linear(Q_new[0], Q_pre[0], time_start, T_smoo)
         else:
             raise ValueError(
-                f"JetChannel: `create_smooth_funcs` method: `smooth_func` arg: Invalid smoothing function: {smooth_func}"
+                f"JetChannel.fcreate_smooth_funcs: `smooth_func` arg: Invalid smoothing function type: {smooth_func}"
             )
 
-        if self.short_spacetime_func == True:
+        if self.short_spacetime_func:
             # just with Qnorm*Qi -- no projection or smoothing in time/space
             return f"({scale:.1f})({string_all_Q_new})"
         else:
