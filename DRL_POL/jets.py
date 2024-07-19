@@ -641,7 +641,7 @@ class JetChannel(Jet):
         delta_Q_z: float = kwargs.get("delta_Q_z")
 
         # scale = ? for channel
-        w = 1.0  # NOT channel width but width of jet. Leftover from cylinder case
+        # w = 1.0  # NOT channel width but width of jet. Leftover from cylinder case
         # w = self.width * (np.pi / 180)  # deg2rad
         scale = 1.0  # TODO: fix this with correct scaling value. Can be assigned as needed
         # scale = np.pi / (2.0 * w * self.radius)  #### FIX: NOT R**2 --> D
