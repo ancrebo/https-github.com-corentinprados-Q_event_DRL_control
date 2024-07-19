@@ -190,6 +190,7 @@ offset_reward = offset_reward_list[Re_case]
 ### *****************************************************
 ### JET SETUP *******************************************
 # TODO: Update for channel parameters!! @canordq
+# Keeping same norm_Q, can be changed at a later date as needed -Chriss
 norm_Q = 0.176  # (0.088/2)/5 asa said in papers, limited Q for no momentum or discontinuities in the CFD solver
 
 # location jet over the cylinder 0 is top centre
@@ -229,51 +230,55 @@ for i in range(nx_Qs):
 
 
 # TODO: Update for channel parameters!! @canordq
+# Commented out all content. Can add inputs as needed later. Combined the two into one JET_TOP_BOTTOM -Chriss
 jets_definition = {
-    "JET_TOP": {
-        "width": 10,
-        "radius": radius,
-        "angle": jet_angle,
-        "positions_angle": 90
-        + jet_angle,  # make sure the width doesn't not coincide with 0,90,180 or 270
-        "positions": [cylinder_coordinates[0], cylinder_coordinates[1] + radius],
-        "remesh": False,
+    "JET_TOP_BOTTOM": {
+#        "width": 10,
+#        "radius": radius,
+#        "angle": jet_angle,
+#        "positions_angle": 90
+#        + jet_angle,  # make sure the width doesn't not coincide with 0,90,180 or 270
+#        "positions": [cylinder_coordinates[0], cylinder_coordinates[1] + radius],
+#        "remesh": False,
     },
-    "JET_BOTTOM": {
-        "width": 10,
-        "radius": radius,
-        "angle": jet_angle,
-        "positions_angle": 270
-        - jet_angle,  # make sure the width doesn't not coincide with 0,90,180 or 270
-        "positions": [cylinder_coordinates[0], cylinder_coordinates[1] - radius],
-        "remesh": False,
-    },
+#    "JET_BOTTOM": {
+#        "width": 10,
+#        "radius": radius,
+#        "angle": jet_angle,
+#        "positions_angle": 270
+#        - jet_angle,  # make sure the width doesn't not coincide with 0,90,180 or 270
+#        "positions": [cylinder_coordinates[0], cylinder_coordinates[1] - radius],
+#        "remesh": False,
+#    },
 }
 
 # Build the jets
-jets = build_jets(JetChannel, jets_definition, delta_t_smooth)
-n_jets = len(jets)
+# Removed jets_definition as it only (currently) applies to cylinder case. Can be used in the future for adding parameters -Chriss
+jets = build_jets(JetChannel, delta_t_smooth)
+#jets = build_jets(JetChannel, jets_definition, delta_t_smooth)
+#n_jets = len(jets)
 
-geometry_params = (
-    {  # Kept for legacy purposes but to be deleted when reworking the mesh script
-        "output": ".".join(["cylinder", "geo"]),
-        "jet_width": 10,
-        "jet_angle": jet_angle,
-        "jet_name": ["JET_TOP", "JET_BOTTOM"],
-        "jet_positions_angle": [
-            90 + jet_angle,
-            270 - jet_angle,
-        ],  # make sure the width doesn't not coincide with 0,90,180 or 270
-        "jet_positions": [
-            [cylinder_coordinates[0], cylinder_coordinates[1] + radius],
-            [cylinder_coordinates[0], cylinder_coordinates[1] - radius],
-        ],
-        "remesh": False,
-    }
-)
-assert (
-    jet_angle != geometry_params["jet_width"] / 2
-)  # Maybe to check during mesh construction?
+# Commented out section as it only applies to cylinder case -Chriss
+#geometry_params = (
+#    {  # Kept for legacy purposes but to be deleted when reworking the mesh script
+#        "output": ".".join(["cylinder", "geo"]),
+#        "jet_width": 10,
+#        "jet_angle": jet_angle,
+#        "jet_name": ["JET_TOP", "JET_BOTTOM"],
+#        "jet_positions_angle": [
+#            90 + jet_angle,
+#            270 - jet_angle,
+#        ],  # make sure the width doesn't not coincide with 0,90,180 or 270
+#        "jet_positions": [
+#            [cylinder_coordinates[0], cylinder_coordinates[1] + radius],
+#            [cylinder_coordinates[0], cylinder_coordinates[1] - radius],
+#        ],
+#        "remesh": False,
+#    }
+#)
+#assert (
+#    jet_angle != geometry_params["jet_width"] / 2
+#)  # Maybe to check during mesh construction?
 
 
 ### ***************************************************************
