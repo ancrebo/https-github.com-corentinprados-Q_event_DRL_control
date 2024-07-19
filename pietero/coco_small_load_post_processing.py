@@ -30,7 +30,7 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
-logging_level = getattr(logging, args.log.upper(), None)
+logging_level = getattr(logging, args.loglvl.upper(), None)
 if not isinstance(logging_level, int):
     raise ValueError("Invalid log level: %s" % args.log)
 logging_level_file = getattr(logging, args.logfilelvl.upper(), None)
