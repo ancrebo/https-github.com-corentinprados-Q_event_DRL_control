@@ -13,7 +13,6 @@ from typing import List, Type, Any, Dict, Optional
 from alya import write_jet_file
 
 
-# Use vim to edit
 # Function to build and return the jets
 # See `jets_definition` in `parameters.py` for the use of this function
 def build_jets(
@@ -244,9 +243,13 @@ class JetCylinder(Jet):
         super().__init__(
             name, params, Q_pre, Q_new, time_start, dimension, T_smoo, smooth_func
         )
+        from parameters import (
+            Qs_position_z,
+            delta_Q_z,
+        )
 
-        self.Qs_position_z: List[float] = params["Qs_position_z"]
-        self.delta_Q_z: float = params["delta_Q_z"]
+        self.Qs_position_z: List[float] = Qs_position_z
+        self.delta_Q_z: float = delta_Q_z
 
         self.update(
             self.Q_pre,
@@ -440,8 +443,10 @@ class JetAirfoil(Jet):
         super().__init__(
             name, params, Q_pre, Q_new, time_start, dimension, T_smoo, smooth_func
         )
-        self.Qs_position_z: List[float] = params["Qs_position_z"]
-        self.delta_Q_z: float = params["delta_Q_z"]
+        from parameters import Qs_position_z, delta_Q_z
+
+        self.Qs_position_z: List[float] = Qs_position_z
+        self.delta_Q_z: float = delta_Q_z
 
         self.update(
             Q_pre,
@@ -557,10 +562,17 @@ class JetChannel(Jet):
             name, params, Q_pre, Q_new, time_start, dimension, T_smoo, smooth_func
         )
 
-        self.Qs_position_x: List[float] = params["Qs_position_x"]
-        self.delta_Q_x: float = params["delta_Q_x"]
-        self.Qs_position_z: List[float] = params["Qs_position_z"]
-        self.delta_Q_z: float = params["delta_Q_z"]
+        from parameters import (
+            Qs_position_x,
+            delta_Q_x,
+            Qs_position_z,
+            delta_Q_x,
+        )
+
+        self.Qs_position_x: List[float] = Qs_position_x
+        self.delta_Q_x: float = delta_Q_x
+        self.Qs_position_z: List[float] = Qs_position_z
+        self.delta_Q_z: float = delta_Q_x
 
         self.update(
             self.Q_pre,
@@ -593,30 +605,31 @@ class JetChannel(Jet):
         Specialized method that sets up the geometry of the jet, including importing Qs_position_x, Qs_position_z, delta_Q_z and delta_Q_z
         """
         from parameters import (
-# TO BE DELETED!!! -Chriss juli 2024
-#            cylinder_coordinates,  # Remove?? Necessary??
+            # TO BE DELETED!!! -Chriss juli 2024
+            #            cylinder_coordinates,  # Remove?? Necessary??
             Qs_position_x,
             delta_Q_x,
             Qs_position_z,
             delta_Q_z,
         )
-# Commented out since these only apply to cylinder case -Chriss
-# TO BE DELETED!!! -Chriss juli 2024
-#        # Sanity check
-#        # TODO: asserts are dangerous... we need a function that stops everything!!
-#        if params["width"] <= 0.0:
-#            raise ValueError(f"Invalid jet width=%f" % params["width"])
-#        if params["radius"] <= 0.0:
-#            raise ValueError("Invalid jet radius=%f" % params["radius"])
-#        if params["positions_angle"] <= 0.0:
-#            raise ValueError("Invalid jet angle=%f" % params["positions_angle"])
+
+        # Commented out since these only apply to cylinder case -Chriss
+        # TO BE DELETED!!! -Chriss juli 2024
+        #        # Sanity check
+        #        # TODO: asserts are dangerous... we need a function that stops everything!!
+        #        if params["width"] <= 0.0:
+        #            raise ValueError(f"Invalid jet width=%f" % params["width"])
+        #        if params["radius"] <= 0.0:
+        #            raise ValueError("Invalid jet radius=%f" % params["radius"])
+        #        if params["positions_angle"] <= 0.0:
+        #            raise ValueError("Invalid jet angle=%f" % params["positions_angle"])
 
         # Recover parameters from dictionary
-# TO BE DELETED!!! -Chriss juli 2024
-#        self.radius: float = params["radius"]
-#        self.width: float = params["width"]
-#        self.theta0: float = self.normalize_angle(np.deg2rad(params["positions_angle"]))
-#        self.theta: str = self.get_theta(cylinder_coordinates)
+        # TO BE DELETED!!! -Chriss juli 2024
+        #        self.radius: float = params["radius"]
+        #        self.width: float = params["width"]
+        #        self.theta0: float = self.normalize_angle(np.deg2rad(params["positions_angle"]))
+        #        self.theta: str = self.get_theta(cylinder_coordinates)
         self.Qs_position_x: List[float] = Qs_position_x
         self.delta_Q_x: float = delta_Q_x
         self.Qs_position_z: List[float] = Qs_position_z
@@ -643,7 +656,9 @@ class JetChannel(Jet):
         # scale = ? for channel
         # w = 1.0  # NOT channel width but width of jet. Leftover from cylinder case
         # w = self.width * (np.pi / 180)  # deg2rad
-        scale = 1.0  # TODO: fix this with correct scaling value. Can be assigned as needed
+        scale = (
+            1.0  # TODO: fix this with correct scaling value. Can be assigned as needed
+        )
         # scale = np.pi / (2.0 * w * self.radius)  #### FIX: NOT R**2 --> D
 
         string_all_Q_pre = "0"
@@ -687,6 +702,6 @@ class JetChannel(Jet):
         else:
             # Here we only had cos to show the projection; comes from how the jets were on the cylinder surface before
             # string_C is smoothing in space. This will be added at a later time -Chriss
-#           string_C = f"cos({np.pi:.3f}/{w:.3f}*({self.theta}-({self.theta0:.3f})))"
-#           return f"({scale:.1f})*({string_Q})*({string_C})"
+            #           string_C = f"cos({np.pi:.3f}/{w:.3f}*({self.theta}-({self.theta0:.3f})))"
+            #           return f"({scale:.1f})*({string_Q})*({string_C})"
             return f"({scale:.1f})*({string_Q}))"
