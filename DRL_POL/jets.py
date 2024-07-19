@@ -592,33 +592,35 @@ class JetChannel(Jet):
         Specialized method that sets up the geometry of the jet, including importing Qs_position_x, Qs_position_z, delta_Q_z and delta_Q_z
         """
         from parameters import (
-            cylinder_coordinates,  # Remove?? Necessary??
+# TO BE DELETED!!!
+#            cylinder_coordinates,  # Remove?? Necessary??
             Qs_position_x,
             delta_Q_x,
             Qs_position_z,
             delta_Q_z,
         )
-
-        # Sanity check
-        # TODO: asserts are dangerous... we need a function that stops everything!!
-        if params["width"] <= 0.0:
-            raise ValueError(f"Invalid jet width=%f" % params["width"])
-        if params["radius"] <= 0.0:
-            raise ValueError("Invalid jet radius=%f" % params["radius"])
-        if params["positions_angle"] <= 0.0:
-            raise ValueError("Invalid jet angle=%f" % params["positions_angle"])
+# Commented out since these only apply to cylinder case -Chriss
+# TO BE DELETED!!!
+#        # Sanity check
+#        # TODO: asserts are dangerous... we need a function that stops everything!!
+#        if params["width"] <= 0.0:
+#            raise ValueError(f"Invalid jet width=%f" % params["width"])
+#        if params["radius"] <= 0.0:
+#            raise ValueError("Invalid jet radius=%f" % params["radius"])
+#        if params["positions_angle"] <= 0.0:
+#            raise ValueError("Invalid jet angle=%f" % params["positions_angle"])
 
         # Recover parameters from dictionary
-        self.radius: float = params["radius"]
-        self.width: float = params["width"]
-        self.theta0: float = self.normalize_angle(np.deg2rad(params["positions_angle"]))
-        self.theta: str = self.get_theta(cylinder_coordinates)
+# TO BE DELETED!!!
+#        self.radius: float = params["radius"]
+#        self.width: float = params["width"]
+#        self.theta0: float = self.normalize_angle(np.deg2rad(params["positions_angle"]))
+#        self.theta: str = self.get_theta(cylinder_coordinates)
         self.Qs_position_x: List[float] = Qs_position_x
         self.delta_Q_x: float = delta_Q_x
         self.Qs_position_z: List[float] = Qs_position_z
         self.delta_Q_z: float = delta_Q_z
 
-    # TODO: adjust this function for 2D channel
     def create_smooth_funcs(
         self,
         Q_new: List[float],
@@ -638,19 +640,20 @@ class JetChannel(Jet):
         delta_Q_z: float = kwargs.get("delta_Q_z")
 
         # scale = ? for channel
-        w = 1.0  # TODO: fix this with correct width for channel
+        w = 1.0  # NOT channel width but width of jet. Leftover from cylinder case
         # w = self.width * (np.pi / 180)  # deg2rad
-        scale = 1.0  # TODO: fix this with correct scaling value
+        scale = 1.0  # TODO: fix this with correct scaling value. Can be assigned as needed
         # scale = np.pi / (2.0 * w * self.radius)  #### FIX: NOT R**2 --> D
 
         string_all_Q_pre = "0"
         string_all_Q_new = "0"
         string_heav = ""
 
-        # TODO: implement smoothing for channel case
+        # TODO: implement smoothing in space for channel case
         if smooth_func == "EXPONENTIAL":
 
             ## Q_pre and Q_new --> list! with nz_Qs dimensions
+            # Exponential smoothing law. Can be applied in time or space
             string_h = Q_smooth_exp(time_start, T_smoo)
 
             # create the new Q string
@@ -681,5 +684,8 @@ class JetChannel(Jet):
             # just with Qnorm*Qi -- no projection or smoothing in time/space
             return f"({scale:.1f})({string_all_Q_new})"
         else:
-            string_C = f"cos({np.pi:.3f}/{w:.3f}*({self.theta}-({self.theta0:.3f})))"
-            return f"({scale:.1f})*({string_Q})*({string_C})"
+            # Here we only had cos to show the projection; comes from how the jets were on the cylinder surface before
+            # string_C is smoothing in space. This will be added at a later time -Chriss
+#           string_C = f"cos({np.pi:.3f}/{w:.3f}*({self.theta}-({self.theta0:.3f})))"
+#           return f"({scale:.1f})*({string_Q})*({string_C})"
+            return f"({scale:.1f})*({string_Q}))"
