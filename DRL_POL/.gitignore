@@ -11,9 +11,13 @@ hostlist
 nodelist
 alya_files/baseline*
 alya_files/case
+alya_files/archive_runs/*
+alya_files/backup*
+
 alya_files/case_2D_cylinder/*.mpio.bin
 alya_files/case_2D_cylinder/mesh/*.mpio.bin
 alya_files/case_2D_cylinder/mesh/*.dat
+
 model-numpy/
 parameters.py
 alya_files/case_J10_re3900_cylinder_3D_MARL/*.mpio.bin
@@ -26,10 +30,23 @@ alya_files/case_cylinder_3D_WS_test/mesh/cylinder.msh
 alya_files/case_cylinder_3D_WS_test/core
 alya_files/case_cylinder_3D_WS_test/mesh/*.mpio.bin
 
+alya_files/case_channel_3D_MARL/*.mpio.bin
+alya_files/case_channel_3D_MARL/mesh/channel.msh
+alya_files/case_channel_3D_MARL/core
+alya_files/case_channel_3D_MARL/mesh/*.mpio.bin
+
+alya_files/case_channel_3D_MARL_coco/*
+
 alya_files/*.mpio.bin
 alya_files/**/*.mpio.bin
 
+alya_files/**/*.cso
+alya_files/**/*.sol
+
 alya_files/**/*.swp
+
+alya_files/**/*.pvtu
+alya_files/**/vtk*/
 
 alya_files/WS_test-backup/
 

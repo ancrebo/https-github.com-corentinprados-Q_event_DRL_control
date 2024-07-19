@@ -191,7 +191,7 @@ def write_ker_file(
     # Write file
     file = open(os.path.join(filepath, f"{casename}.ker.dat"), "w")
     file.write(
-        """$------------------------------------------------------------
+        f"""$------------------------------------------------------------
 PHYSICAL_PROBLEM
   PROPERTIES
     INCLUDE       physical_properties.dat
@@ -213,19 +213,18 @@ NUMERICAL_TREATMENT
 
   SPACE_&_TIME_FUNCTIONS
     INCLUDE inflow.dat
-%s
+{jet_includes}
   END_SPACE_&_TIME_FUNCTIONS
 END_NUMERICAL_TREATMENT  
 $------------------------------------------------------------
 OUTPUT_&_POST_PROCESS 
   $ Variable postprocess 
-  STEPS=%d
-%s
+  STEPS={steps}
+{var_includes}
   $ Witness points
   INCLUDE witness.dat
 END_OUTPUT_&_POST_PROCESS  
 $------------------------------------------------------------"""
-        % (jet_includes, steps, var_includes)
     )
     file.close()
 
@@ -271,24 +270,38 @@ def write_jet_file(filepath: str, name: str, functions: List[str]) -> None:
 
 def write_witness_file(filepath: str, probes_positions: np.ndarray) -> None:
     """
-    Writes the witness file that is included in the .ker.dat
+    UPDATED FUNCTION AS OF JULY 12, 2024 - @pietero
+    Writes the witness file that is included in the .ker.dat file.
+
+    Parameters:
+        filepath (str): The path where the witness.dat file will be written.
+        probes_positions (np.ndarray): An array of probe positions.
     """
+    # Ensure the directory exists
+    os.makedirs(filepath, exist_ok=True)
+
     nprobes = len(probes_positions)
-    ndim = len(probes_positions[0])
+    ndim = probes_positions.shape[1]
+
     # Open file for writing
-    file = open(os.path.join(filepath, "witness.dat"), "w")
-    # Write header
-    file.write(f"WITNESS_POINTS, NUMBER={nprobes}\n")
-    # Write probes
-    if ndim == 2:
-        for pos in probes_positions:
-            file.write(f"{pos[0]},{pos[1]}\n")
-    else:
-        for pos in probes_positions:
-            file.write(f"{pos[0]},{pos[1]},{pos[2]}\n")
-    # Write end
-    file.write("END_WITNESS_POINTS\n")
-    file.close()
+    with open(os.path.join(filepath, "witness.dat"), "w") as file:
+        # Write header
+        file.write(f"WITNESS_POINTS, NUMBER={nprobes}\n")
+
+        # Write probes
+        if ndim == 2:
+            for pos in probes_positions:
+                file.write(f"{pos[0]:.4f},{pos[1]:.4f}\n")
+        elif ndim == 3:
+            for pos in probes_positions:
+                file.write(f"{pos[0]:.4f},{pos[1]:.4f},{pos[2]:.4f}\n")
+        else:
+            raise ValueError(
+                f"witness: write_witness_file: Unsupported number of dimensions: {ndim}"
+            )
+
+        # Write end
+        file.write("END_WITNESS_POINTS\n")
 
 
 def write_nsi_file(

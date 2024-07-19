@@ -6,6 +6,8 @@
 # 01/02/2023
 from __future__ import print_function, division
 from typing import Optional, List
+import re
+import shutil
 
 import os, subprocess
 from configuration import NODELIST, USE_SLURM, DEBUG
@@ -19,6 +21,7 @@ def run_subprocess(
     log: Optional[str] = None,
     check_return: bool = True,
     host: Optional[str] = None,
+    use_new_env: bool = False,  # new parameter to activate separate conda envirnoment for process
     **kwargs,
 ) -> int:
     """
@@ -75,6 +78,8 @@ def run_subprocess(
     arg_log = f"> {log} 2>&1" if log is not None else ""
 
     # Build command to run
+    if use_new_env:
+        runbin = "run_reward_in_new_env.sh " + runbin  # Prepend the shell script
     cmd_bin = (
         _cmd_parallel(f"{runbin} {runargs}", **kwargs)
         if parallel
@@ -83,15 +88,22 @@ def run_subprocess(
     cmd = f"cd {runpath} && {cmd_bin} {arg_log}"  # TODO: DARDEL DEBUG ONGOING
     # print('POOOOOOOOOOOOOL --> cmd: %s' % cmd)
 
-    # Execute run
-    retval = subprocess.call(cmd, shell=True)
+    # # Execute run
+    # retval = subprocess.call(cmd, shell=True)  # old version
+
+    # Execute run (alternate, updated version introduced in Python 3.5)
+    result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+
+    # Print the stdout and stderr from the shell script
+    print(result.stdout)
+    print(result.stderr)
 
     # Check return
-    if check_return and retval != 0:
-        raise ValueError(f"Error running command <{cmd}>!")
+    if check_return and result.returncode != 0:
+        raise ValueError(f"Error running command <{cmd}>!\n{result.stderr}")
 
     # Return value
-    return retval
+    return result.returncode
 
 
 def detect_system(override: str = None) -> str:
@@ -238,6 +250,83 @@ def agent_index_1d_to_2d(index: int, nz_Qs: int) -> List[int]:
     i = index // nz_Qs
     j = index % nz_Qs
     return [i, j]
+
+
+def find_highest_timestep_file(directory, case, parameter):
+    """
+    Find the file with the highest timestep in the specified directory.
+
+    Args:
+        directory (str): The path to the directory containing the files.
+        case (str): The case string in the file name.
+        parameter (str): The parameter string in the file name.
+
+    Returns:
+        str: The path to the file with the highest timestep.
+
+    Raises:
+        FileNotFoundError: If no files matching the pattern are found.
+    """
+    pattern = re.compile(rf"{case}-{parameter}-(\d+)\.post\.mpio\.bin")
+    highest_timestep = -1
+    highest_file = None
+
+    for filename in os.listdir(directory):
+        match = pattern.match(filename)
+        if match:
+            timestep = int(match.group(1))
+            if timestep > highest_timestep:
+                highest_timestep = timestep
+                highest_file = filename
+
+    if highest_file:
+        return os.path.join(directory, highest_file)
+    else:
+        raise FileNotFoundError(
+            f"No files matching pattern {case}-{parameter}-*.post.mpio.bin found in {directory}"
+        )
+
+
+def copy_mpio2vtk_required_files(
+    case, source_directory, target_directory, identified_file
+):
+    """
+    Copy the identified post.mpio.bin file and additional files for mpio2vtk conversion to the target directory.
+
+    Args:
+        case (str): The case prefix for the filenames.
+        source_directory (str): The directory containing the source files.
+        target_directory (str): The directory to copy the files to.
+        identified_file (str): The path to the identified .mpio.bin of last timestep of the action to copy.
+
+    Raises:
+        FileNotFoundError: If any of the required files are not found in the source directory.
+    """
+    if not os.path.exists(target_directory):
+        os.makedirs(target_directory)
+
+    # Copy the identified file
+    shutil.copy(identified_file, target_directory)
+
+    # List of additional required files
+    additional_files = [
+        f"{case}-COORD.post.mpio.bin",
+        f"{case}-LEINV.post.mpio.bin",
+        f"{case}-LNINV.post.mpio.bin",
+        f"{case}-LNODS.post.mpio.bin",
+        f"{case}-LTYPE.post.mpio.bin",
+        f"{case}.post.alyapar",
+    ]
+
+    # Copy each additional required file
+    for filename in additional_files:
+        source_path = os.path.join(source_directory, filename)
+        if os.path.exists(source_path):
+            shutil.copy(source_path, target_directory)
+        else:
+            raise FileNotFoundError(
+                f"Required file {filename} not found in {source_directory}"
+            )
 
 
 def printDebug(*args) -> None:

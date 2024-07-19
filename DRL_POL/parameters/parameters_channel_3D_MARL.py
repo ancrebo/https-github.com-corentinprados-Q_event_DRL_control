@@ -9,29 +9,40 @@
 #
 # Pol Suarez, Fran Alcantara, Arnau Miro
 
-# TODO: IN GENERAL - Update for channel parameters!! @pietero
-# TODO: clean up commented cylinder code @pietero
+# TODO: IN GENERAL - @pietero, @canordq Update for channel parameters!! - Pieter
+# TODO: @pietero clean up commented cylinder code - Pieter
 
 from __future__ import print_function, division
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Any, Union
+
 
 import numpy as np
 import math
 import os
+import shutil
 
 from jets import build_jets, JetChannel
-from env_utils import index_2d_to_1d, index 1d_to_2d
+from env_utils import agent_index_2d_to_1d, agent_index_1d_to_2d
+from witness import calculate_channel_witness_coordinates
+from alya import write_witness_file
 
 ### CASE NAME ************************************************
 
-case = "channel"
+case = "channel_3D_MARL"
 simu_name = "3DChan"
 dimension = 3
-reward_function = "q-event-ratio"  # TODO: add q-event-ratio reward function @pietero
+reward_function = "q_event_volume"
 
-Re_case = 6
-slices_probes_per_jet = 1
-neighbor_state = False
+Re_case: int = 6
+slices_probes_per_jet: int = 1  # Unused for channel case - Pieter
+neighbor_state: bool = False
+h_qevent_sensitivity: float = (
+    3.0  # Used to identify the Q events, sensitivity to the Q events
+)
+
+n_agents_x: int = 2  # Number of agents along x direction
+n_agents_z: int = 2  # Number of agents along z direction
+
 
 #### Reynolds cases
 #### 0 --> Re = 100
@@ -45,14 +56,21 @@ neighbor_state = False
 ### *****************************************************
 ### RUN BASELINE ****************************************
 
-run_baseline = True
+# Whether to run the baseline simulation
+# False if baseline already exists
+run_baseline: bool = False
+
+# Whether to restart the episode from the end of the last checkpoint or baseline
+# False if always restarting from baseline
+bool_restart: bool = False
 
 ### **********************************************************
 ### DOMAIN BOX ***********************************************
-# TODO: Update for channel parameters!! @canordq
-# Changed h (2 -> 1) and Ly (h -> 2*h) as per channel dimensions defined by Coco
+# TODO: @canordq Update for channel parameters!! - Pieter
+# These parameters need to match the specific case mesh
 
-h = 1
+# The parameters below are based on the `minimal channel - Jimenez` paper
+h = 1.0
 Lx = 2.67 * h
 Ly = 2 * h
 Lz = 0.8 * h
@@ -63,16 +81,13 @@ Lz = 0.8 * h
 
 num_episodes = 2000  # Total number of episodes
 if Re_case != 5:
-    nb_actuations = 120  # Number of actuation of the neural network for each episode
-    num_nodes_srun = 3
+    nb_actuations = 120  # Number of actuation of the neural network for each episode (ACTIONS/EPISODE)
 else:
     nb_actuations = 200
-    num_nodes_srun = 3
 
 nb_actuations_deterministic = nb_actuations * 10
 
 
-# TODO: define the workstation setup vs slurm setup @pietero
 ### **********************************************************
 ### SLURM SPECIFIC SETUP *************************************
 
@@ -91,50 +106,27 @@ mem_per_cpu = mem_per_node // proc_per_node
 # mem_per_srun  = int(nb_proc*mem_per_cpu) # partition in memory allocation
 mem_per_srun = mem_per_node
 
-# num_episodes = 2000  # Total number of episodes
-# if Re_case != 5:
-#     nb_actuations = 120  # Number of actuation of the neural network for each episode
-#     num_nodes_srun = 3
-# else:
-#     nb_actuations = 200
-#     num_nodes_srun = 3
-#
-# nb_actuations_deterministic = nb_actuations * 10
+if Re_case != 5:
+    num_nodes_srun = 3
+else:
+    num_nodes_srun = 3
+
 
 ### **********************************************************
 ### WORKSTATION SPECIFIC SETUP *******************************
-# TODO: get specific values for workstation setup @pietero
 
-nb_proc_ws = 18  # Number of calculation processors
-num_servers_ws = 1  # number of environment in parallel
+# Number of calculation processors (for local, number of threads on workstation)
+nb_proc_ws = 18
 
-proc_per_node_ws = 1
-# proc_per_node_ws = int(os.getenv('SLURM_NTASKS_PER_NODE'))*int(os.getenv('SLURM_CPUS_PER_TASK'))
+# Number of environment in parallel (number of SEPARATE CFD environments) (default 1 for workstation)
+num_servers_ws = 1
 
-mem_per_node_ws = 200000  # MB RAM in each node
-# mem_per_node   = int(os.getenv('SLURM_MEM_PER_NODE'))
-
-mem_per_cpu_ws = mem_per_node_ws // proc_per_node_ws
-# mem_per_cpu   = int(os.getenv('SLURM_MEM_PER_CPU'))
-
-# mem_per_srun  = int(nb_proc*mem_per_cpu) # partition in memory allocation
-mem_per_srun_ws = mem_per_node
-
-# num_episodes = 2000  # Total number of episodes
-# if Re_case != 5:
-#     nb_actuations = 120  # Number of actuation of the neural network for each episode
-#     num_nodes_srun = 3
-# else:
-#     nb_actuations = 200
-#     num_nodes_srun = 3
-#
-# nb_actuations_deterministic = nb_actuations * 10
 
 ### *****************************************************
 ### RUN BASELINE ****************************************
 use_MARL = True
 
-nb_inv_per_CFD = 10  # same as nz_Qs¿¿¿
+nb_inv_per_CFD = 10  # same as nz_Qs¿¿¿ # TODO: @pietero is this necessary with nTotal_Qs defined later? - Pieter
 actions_per_inv = 1  # how many actions to control per pseudoenvironment
 batch_size = nb_inv_per_CFD * num_servers
 # frontal_area = Lz / nb_inv_per_CFD
@@ -148,27 +140,28 @@ else:
 ### *****************************************************
 ### TIMESCALES ******************************************
 
-baseline_duration = 25.0  # to converge with velocity max = 1
+baseline_duration = 1404  # to converge with velocity max = 1
 baseline_time_start = 0.0
 
 delta_t_smooth = 0.25  # ACTION DURATION smooth law duration
 delta_t_converge = 0.0  # Total time that the DRL waits before executing a new action
-smooth_func = (
-    "EXPONENTIAL"  # 'LINEAR', 'EXPONENTIAL', 'CUBIC' # TODO: cubic is still not coded
-)
-short_spacetime_func = False  # override smooth func --> TODO: need to fix string size --> FIXED in def_kintyp_functions.f90 (waiting for merging)
+smooth_func = "EXPONENTIAL"  # 'LINEAR', 'EXPONENTIAL', 'CUBIC' # TODO: cubic is still not coded - Pol
+short_spacetime_func = False  # override smooth func --> TODO: need to fix string size --> FIXED in def_kintyp_functions.f90 (waiting for merging) - Pol
 
 ### *****************************************************
 ### FLUID PROPERTIES ************************************
 
-mu_list = [10e-3, 50e-4, 33e-4, 25e-4, 10e-4, 0.00025641025]
+# TODO: @pietero @canordq Update mu value for channel case! Placeholder now - Pieter
+mu_list = [10e-3, 50e-4, 33e-4, 25e-4, 10e-4, 0.00025641025, 10e-4]
 mu = mu_list[Re_case]
 rho = 1.0
 
 ### *****************************************************
 ### POSTPROCESS OPTIONS *********************************
-# TODO: Update for channel parameters!! @pietero
 
+# TODO: @pietero Update ALL?? for channel parameters!! - Pieter
+
+## Not needed for channel currently! - Pieter
 norm_reward = 5  # like PRESS, try to be between -1,1
 penal_cl = 0.6  # avoid asymmetrical strategies
 alpha_rew = 0.80  # balance between global and local reward
@@ -177,7 +170,9 @@ if Re_case != 4:
     time_avg = 5.00
 else:
     time_avg = 5.65  # 5.65 #corresponds to the last Tk (avg Cd Cl, not witness)
-post_process_steps = 50  # TODO: put this into a include
+post_process_steps = 50  # TODO: put this into a include - Pol
+
+# Could be needed, is determined by baseline and test training runs - Pieter
 offset_reward_list = [
     1.381,
     1.374,
@@ -185,22 +180,25 @@ offset_reward_list = [
     1.267,
     1.079,
     1.20,
+    1.2,  # TODO: @pietero @canordq temporary placeholder value for Re=180 - Pieter
 ]  # for re3900, still working on it
 offset_reward = offset_reward_list[Re_case]
 
 ### *****************************************************
 ### JET SETUP *******************************************
+
 # TODO: Update for channel parameters!! @canordq
 # Keeping same norm_Q, can be changed at a later date as needed -Chriss
+# This should be adjusted based on training run data
+
 norm_Q = 0.176  # (0.088/2)/5 asa said in papers, limited Q for no momentum or discontinuities in the CFD solver
 
 # location jet over the cylinder 0 is top centre
-jet_angle = 0
+jet_angle = 0  # Unused for channel case - Pieter
 
-nz_Qs: int = (
-    2  # number of agents along z direction # TODO: is this really where we want to define agents along x and z??? @pietero
-)
-nx_Qs: int = 2  # number of agents along x direction
+# Re-naming number of agents for backwards compatibility - Pieter
+nz_Qs: int = n_agents_z
+nx_Qs: int = n_agents_x
 
 nTotal_Qs: int = nz_Qs * nx_Qs  # total number of agents
 
@@ -211,13 +209,18 @@ index2d_Qs: List[Tuple[int, int]] = [(i, j) for i in range(nx_Qs) for j in range
 index2d_Qs: np.ndarray = np.array(index2d_Qs)
 
 # Create the 1D index array from the 2D index array
-index1d_Qs: np.ndarray = np.array([index_2d_to_1d(i, j, nz_Qs) for i, j in index2d_Qs])
+index1d_Qs: np.ndarray = np.array(
+    [agent_index_2d_to_1d(i, j, nz_Qs) for i, j in index2d_Qs]
+)
 
 delta_Q_z: float = Lz / nz_Qs
 delta_Q_x: float = Lx / nx_Qs
 
-Qs_position_z: np.ndarray = np.linspace(delta_Q_z / 2, Lz - delta_Q_z / 2, nz_Qs)
-Qs_position_x: np.ndarray = np.linspace(delta_Q_x / 2, Lx - delta_Q_x / 2, nx_Qs)
+Qs_position_z_array: np.ndarray = np.linspace(delta_Q_z / 2, Lz - delta_Q_z / 2, nz_Qs)
+Qs_position_x_array: np.ndarray = np.linspace(delta_Q_x / 2, Lx - delta_Q_x / 2, nx_Qs)
+
+Qs_position_z: List[float] = Qs_position_z_array.tolist()
+Qs_position_x: List[float] = Qs_position_x_array.tolist()
 
 jet_coordinates: np.ndarray = np.array(
     [(x, z) for x in Qs_position_x for z in Qs_position_z]
@@ -230,8 +233,9 @@ for i in range(nx_Qs):
         print(f"Agent ({i}, {j}): X: {x:.2f}, Z: {z:.2f}")
 
 
-# TODO: Update for channel parameters!! @canordq
+# TODO: @canordq Update for channel parameters!! - Pieter
 # Commented out all content. Can add inputs as needed later. Combined the two into one JET_TOP_BOTTOM -Chriss
+
 jets_definition = {
     "JET_TOP_BOTTOM": {
 #        "width": 10,
@@ -287,7 +291,7 @@ geometry_params = (
 ### BL option? ****************************************************
 
 # boundary_layer = (
-#     False  # TODO: For what is this used? It is imported in geo_file_maker.py
+#     False  # TODO: For what is this used? It is imported in geo_file_maker.py - Pol
 # )
 # dp_left = 0
 # if boundary_layer:
@@ -298,14 +302,14 @@ geometry_params = (
 
 ### ****************************************************
 ### STATE OBSERVATION -- WITNESS MAP ******************
-# TODO: pyalya_wit2field can be used? How much code below is useful? @pietero
 
 ## HERE WE HAVE 3 CHOICES TO LOCATE PROBES:
 ## 1-- S85 ETMM14 //
 ## 2-- S99 ETMM and NATURE MI //
 ## 4-- 5 probes experiment from jean //
 ## 3-- working on it with re3900 (at the same time witness to postprocess: fft, wake profiles, pressure distribution, etc)
-## TODO: explain criteria of ordering history points, to "call" them quickly
+## 5-- 3D channel
+## TODO: explain criteria of ordering history points, to "call" them quickly - Pol
 
 # new setup observation state for it>30 --> f(slices_probes_per_jet)
 ## 3 slices of probes per jet
@@ -317,8 +321,102 @@ for nq in range(nz_Qs * slices_probes_per_jet):
     )
 print("Probes are placed in Z coordinates: ", positions_probes_for_grid_z)
 
-probes_location = 3
+probes_location = 5
+
 list_position_probes = []
+
+probe_type: str = "velocity"  # Probe type ('pressure' or 'velocity')
+
+pattern: str = "X"  # Pattern type ('X' or '+')
+y_value_density: int = 8  # Number of y values total
+y_skipping: bool = False  # Whether to skip full pattern placement on certain layers
+y_skip_values: int = 3  # Number of layers to skip if y_skipping is True
+
+if probes_location == 5:
+    probe_dict = calculate_channel_witness_coordinates(
+        nx_Qs,
+        nz_Qs,
+        Lx,
+        Ly,
+        Lz,
+        y_value_density,
+        pattern,
+        y_skipping,
+        y_skip_values,
+    )
+    probes_coordinates: List[Tuple[float, float, float]] = probe_dict["locations"]
+    probe_indices2D: List[Tuple[float, float]] = probe_dict["indices2D"]
+    probe_indices1D: List[float] = probe_dict["indices1D"]
+    probe_tags: Dict[str, List[int]] = probe_dict["tag_probs"]
+
+    print(f"\n\n{len(probes_coordinates)} witness points calculated!\n")
+    print("2D Witness Indices Saved!")
+    print("1D Witness Indices Saved!")
+    print(f"Probe Type: {probe_type}\n\n")
+
+    output_params: Dict[str, Any] = {
+        "locations": probes_coordinates,
+        "tag_probes": probe_tags,
+        "probe_type": probe_type,
+        "probe_indices2D": probe_indices2D,
+        "probe_indices1D": probe_indices1D,
+    }
+
+
+## CREATION OF WITNESS FILE
+need_witness_file_override: bool = (
+    True  # Whether to overwrite the witness file if exists, True overwrites existing file
+)
+
+case_folder = f"alya_files/case_{case}"
+witness_file_path = os.path.join(case_folder, "witness.dat")
+
+if os.path.exists(witness_file_path):
+    if need_witness_file_override:
+        # Create a backup of the existing witness.dat file
+        backup_file_path = witness_file_path + ".backup"
+        shutil.copyfile(witness_file_path, backup_file_path)
+        print(
+            f"CREATING NEW WITNESS FILE:\nBackup of old witness.dat created in {backup_file_path}"
+        )
+
+        # Write the new witness.dat file
+        with open(witness_file_path, "w") as f:
+            for location in output_params["locations"]:
+                f.write(f"{location}\n")
+        need_witness_file_override = False
+        print(f"\nNew witness.dat has been created in {case_folder}\n")
+        print(
+            f"\nwitness.dat creation parameters:"
+            f"\nprobe_type: {output_params['probe_type']}"
+            f"\npattern: {pattern}"
+            f"\ny_value_density: {y_value_density}"
+            f"\ny_skipping: {y_skipping}"
+            f"\ny_skip_values: {y_skip_values}"
+            f"\nnx_Qs: {nx_Qs}"
+            f"\nnz_Qs: {nz_Qs}"
+        )
+        print("\nWitness creation override parameter set to False.\n")
+    else:
+        print(
+            f"CREATING NEW WITNESS FILE:\nwitness.dat already exists in {case_folder} - No override needed.\n"
+        )
+else:
+    # Create and write the witness.dat file if it does not exist
+    with open(witness_file_path, "w") as f:
+        for location in output_params["locations"]:
+            f.write(f"{location}\n")
+    print(
+        f"CREATING NEW WITNESS FILE: No existing witness.dat found in {case_folder}"
+        f"\n\nNew witness.dat created with parameters:"
+        f"\nprobe_type: {output_params['probe_type']}"
+        f"\npattern: {pattern}"
+        f"\ny_value_density: {y_value_density}"
+        f"\ny_skipping: {y_skipping}"
+        f"\ny_skip_values: {y_skip_values}"
+        f"\nnx_Qs: {nx_Qs}"
+        f"\nnz_Qs: {nz_Qs}\n\n"
+    )
 
 ############################################################################################
 ####    These are the probe positions for S85   ####
@@ -574,7 +672,7 @@ list_position_probes = []
 ###############################################################################
 ######################################################################
 
-simulation_params = {
+simulation_params: Dict[str, Any] = {
     "simulation_duration": baseline_duration,  # the time the simulation is in permanant regime
     "simulation_timeframe": [
         baseline_time_start,
@@ -590,7 +688,7 @@ simulation_params = {
 }
 
 # Variational input
-variational_input = {
+variational_input: Dict[str, Any] = {
     "filename": "channel",  # basename
     "bound": [
         5,
@@ -605,7 +703,7 @@ variational_input = {
         14,
     ],  # Boundaries to postprocess. Comma separated
     "porous": False,  # Variational boundaries to postprocess. Comma separated
-    "density": rho,  # Fluid density #TODO: repeated parameter
+    "density": rho,  # Fluid density #TODO: repeated parameter - Pol
     "veloc": 1,  # average velocity of a parabolic inflow
     # "scale_area": frontal_area,  # Projected frontal area. Scale if it is need it
     "d": 0,  # Distance for momentum calculation
@@ -625,8 +723,17 @@ variational_input = {
     # "Y_exp": 0,  # Experimental yaw
 }
 
+# Normalization factors
+# TODO: @pietero @canordq Get actual values for these!!! - Pieter
+norm_factors: Dict[str, float] = {
+    "pressure": norm_press,  # original norm_press value for backwards compatibility
+    "velox": 10.0,  # example value, replace with actual value
+    "veloy": 10.0,  # example value, replace with actual value
+    "veloz": 10.0,  # example value, replace with actual value
+}
+
 # Optimization
-optimization_params = {
+optimization_params: Dict[str, Any] = {
     "num_steps_in_pressure_history": 1,
     "min_value_jet_MFR": -1,
     "max_value_jet_MFR": 1,
@@ -641,8 +748,18 @@ optimization_params = {
     "random_start": False,
 }
 
-inspection_params = {
-    "plot": False,  # TODO: inspection_params is never used
+# TODO: @pietero @canordq Update for channel parameters!! (if necessary??) - Pieter
+history_parameters: Dict[str, List[Union[float, int]]] = {
+    "drag": [],
+    "lift": [],
+    "drag_GLOBAL": [],
+    "lift_GLOBAL": [],
+    "time": [],
+    "episode_number": [],
+}
+
+inspection_params: Dict[str, Any] = {
+    "plot": False,  # TODO: inspection_params is never used - Pol
     "step": 50,
     "dump": 100,
     "range_pressure_plot": [-2.0, 1],
@@ -652,4 +769,15 @@ inspection_params = {
     "line_lift": 0,
     "show_all_at_reset": True,
     "single_run": False,
+}
+
+reward_params: Dict[str, str] = {
+    "reward_function": reward_function,
+    "neighbor_state": str(neighbor_state),
+    "Lx": str(Lx),
+    "Ly": str(Ly),
+    "Lz": str(Lz),
+    "H": str(h_qevent_sensitivity),
+    "nx_Qs": str(nx_Qs),
+    "nz_Qs": str(nz_Qs),
 }

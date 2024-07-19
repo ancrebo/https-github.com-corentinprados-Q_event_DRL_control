@@ -11,14 +11,13 @@ Lz: float = 1.0  # Length in the z direction
 n: int = 2  # Number of sections in the x direction
 m: int = 2  # Number of sections in the z direction
 
-pattern: str = 'X'  # Pattern type ('X' or '+')
+pattern: str = "X"  # Pattern type ('X' or '+')
 y_value_density: int = 8  # Number of y values total
 y_skipping: bool = True  # Skip y values in the list
 y_skip_values: int = 3  # Number of y values to skip between full pattern layers
 
 
-
-def calculate_y_values(Ly: float, y_value_density: int) -> List[float]:
+def calculatewit_y_values(Ly: float, y_value_density: int) -> List[float]:
     """
     Calculate the y-values for placing the pattern, excluding 0.
 
@@ -30,8 +29,8 @@ def calculate_y_values(Ly: float, y_value_density: int) -> List[float]:
     List[float]: List of y-values for placing the pattern, excluding 0.
     """
     y_values: List[float] = np.linspace(0, Ly, y_value_density + 1).tolist()[
-                            1:
-                            ]  # Exclude the first term (0)
+        1:
+    ]  # Exclude the first term (0)
     return y_values
 
 
@@ -40,16 +39,16 @@ def calculate_y_values(Ly: float, y_value_density: int) -> List[float]:
 # TODO: change y_value list to density instead of specific values
 
 
-def calculate_witness_coordinates(
-        n: int,
-        m: int,
-        Lx: float,
-        Ly: float,
-        Lz: float,
-        y_values: List[float],
-        pattern: str = "X",
-        y_skipping: bool = False,
-        y_skipping_value: int = 3,
+def calculate_channel_witness_coordinates(
+    n: int,
+    m: int,
+    Lx: float,
+    Ly: float,
+    Lz: float,
+    y_values: List[float],
+    pattern: str = "X",
+    y_skipping: bool = False,
+    y_skipping_value: int = 3,
 ) -> Tuple[List[Tuple[float, float, float]], List[Tuple[int, int]]]:
     """
     Calculate witness point coordinates in a 3D grid with specified pattern and their local volume indices.
