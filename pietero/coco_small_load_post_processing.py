@@ -40,7 +40,9 @@ def load_data_and_give_average_velocity(directory, file_name):
         sum_w += w
 
         count += 1
-        # print(f"Data from {path} loaded and velocity components added.") # If you want to check the files loaded
+        print(
+            f"Data from {path} loaded and velocity components added."
+        )  # If you want to check the files loaded
 
     # Calculate the average of the velocity components
     avg_u = sum_u / count
@@ -62,7 +64,7 @@ def load_data_and_give_average_velocity(directory, file_name):
         }
     )
 
-    print(f"Total data sets processed: {count}")
+    print(f"Total data sets processed for average velocity calculation: {count}")
 
     # Calculate mean over x and z for u, v, w
     data_avg = (
@@ -139,7 +141,9 @@ def load_data_and_give_RMS_velocity(directory, file_name, mean_velocities):
         sum_w2 += df["w_fluc"] ** 2
 
         count += 1
-        # print(f"Data from {path} loaded and velocity components added.")  # Uncomment if you want to check the files loaded
+        print(
+            f"Data from {path} loaded and velocity components added."
+        )  # Uncomment if you want to check the files loaded
 
     # Calculate the RMS of the velocity fluctuations
     rms_u = (sum_u2 / count) ** 0.5
@@ -158,7 +162,7 @@ def load_data_and_give_RMS_velocity(directory, file_name, mean_velocities):
         }
     )
 
-    print(f"Total data sets processed: {count}")
+    print(f"Total data sets processed for RMS velocity calculation: {count}")
 
     # Calculate mean over x and z for u', v', w'
     rms_velocities = data_t_rms.groupby("y").agg(
