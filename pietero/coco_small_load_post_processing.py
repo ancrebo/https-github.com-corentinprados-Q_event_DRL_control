@@ -1,4 +1,6 @@
 import os
+import argparse
+import logging
 import numpy as np
 import matplotlib.pyplot as plt
 import xml.etree.ElementTree as ET  # For XML parsing
@@ -10,7 +12,60 @@ from scipy.ndimage import label  # Function to count the number of clusters
 import plotly.express as px  # Package to color each clusters different Path # To have an absolute path
 from pathlib import Path
 
-print("Libraries imported successfully.")
+# Argument parsing
+parser = argparse.ArgumentParser(
+    description="Calculate average and RMS velocity profiles of given VTK files."
+)
+parser.add_argument(
+    "--loglvl",
+    type=str,
+    default="INFO",
+    help="Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
+)
+parser.add_argument(
+    "--logfilelvl",
+    type=str,
+    default="INFO",
+    help="Logging level for the file handler (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
+)
+
+args = parser.parse_args()
+logging_level = getattr(logging, args.log.upper(), None)
+if not isinstance(logging_level, int):
+    raise ValueError("Invalid log level: %s" % args.log)
+logging_level_file = getattr(logging, args.logfilelvl.upper(), None)
+if not isinstance(logging_level_file, int):
+    raise ValueError("Invalid log level: %s" % args.logfilelvl)
+
+# Setup logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)  # Set the logger to the lowest level
+
+# Create logs directory if it doesn't exist
+logs_dir = Path("logs")
+logs_dir.mkdir(exist_ok=True)
+
+# Create console handler and set level
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging_level)
+console_handler.setFormatter(
+    logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+)
+
+# Create file handler and set level
+file_handler = logging.FileHandler(logs_dir / "logfile.log")
+file_handler.setLevel(logging_level_file)
+file_handler.setFormatter(
+    logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+)
+
+# Add handlers to the logger
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
+
+logger.info("Logger started. Logging level: %s", args.log)
+
+logger.info("Libraries imported successfully.")
 
 
 def load_data_and_give_average_velocity(directory, file_name):
@@ -40,9 +95,7 @@ def load_data_and_give_average_velocity(directory, file_name):
         sum_w += w
 
         count += 1
-        print(
-            f"Data from {path} loaded and velocity components added."
-        )  # If you want to check the files loaded
+        logger.debug("Data from %s loaded and velocity components added.", path)
 
     # Calculate the average of the velocity components
     avg_u = sum_u / count
@@ -64,7 +117,7 @@ def load_data_and_give_average_velocity(directory, file_name):
         }
     )
 
-    print(f"Total data sets processed for average velocity calculation: {count}")
+    logger.info("Total data sets processed for average velocity calculation: %d", count)
 
     # Calculate mean over x and z for u, v, w
     data_avg = (
@@ -141,9 +194,8 @@ def load_data_and_give_RMS_velocity(directory, file_name, mean_velocities):
         sum_w2 += df["w_fluc"] ** 2
 
         count += 1
-        print(
-            f"Data from {path} loaded and velocity components added."
-        )  # Uncomment if you want to check the files loaded
+
+        logger.debug("Data from %s loaded and velocity components added.", path)
 
     # Calculate the RMS of the velocity fluctuations
     rms_u = (sum_u2 / count) ** 0.5
@@ -162,7 +214,7 @@ def load_data_and_give_RMS_velocity(directory, file_name, mean_velocities):
         }
     )
 
-    print(f"Total data sets processed for RMS velocity calculation: {count}")
+    logger.info("Total data sets processed for RMS velocity calculation: %d", count)
 
     # Calculate mean over x and z for u', v', w'
     rms_velocities = data_t_rms.groupby("y").agg(
@@ -249,7 +301,8 @@ def normalize_data(mean_velocities, rms_velocities, nu):
     u_tau_max = (Omega_bar_max * nu) ** 0.5
     u_tau = (u_tau_min + u_tau_max) / 2
     # u_tau = 0.57231059E-01 # Test
-    print(f"Calculated u_tau: {u_tau}")
+
+    logger.info("Calculated u_tau: %f", u_tau)
 
     # Normalize the mean velocity components
     mean_velocities_normalized = mean_velocities.copy()
@@ -266,7 +319,9 @@ def normalize_data(mean_velocities, rms_velocities, nu):
     # Normalize the y-coordinate in both DataFrames
     delta_tau = nu / u_tau
     # delta_tau = 0.005376316864804261# Test
-    print(f"Calculated delta_tau: {delta_tau}")
+
+    logger.info("Calculated delta_tau: %f", delta_tau)
+
     mean_velocities_normalized["y"] = mean_velocities_normalized.index / delta_tau
     rms_velocities_normalized["y"] = rms_velocities_normalized.index / delta_tau
 
@@ -410,25 +465,55 @@ mean_velocities_normalized, rms_velocities_normalized, u_tau, delta_tau = (
 # Re_tau
 h = 1
 Re_tau = u_tau / nu * h
-print(f"Calculated Re_tau: {Re_tau}")
+logger.info("Calculated Re_tau: %f", Re_tau)
 
 # t_tau
 t_tau = delta_tau / u_tau
-print(f"Calculated t_tau: {t_tau}")
+logger.info("Calculated t_tau: %f", t_tau)
+
 t_i = 891.744
 t_i_plus = t_i / t_tau
-print(f"Calculated t_i_plus: {t_i_plus}")
+logger.info("Calculated t_i_plus: %f", t_i_plus)
+
 t_f = 1376.61
 t_f_plus = t_f / t_tau
-print(f"Calculated t_f_plus: {t_f_plus}")
+logger.info("Calculated t_f_plus: %f", t_f_plus)
+
 # U_b
 U_b = mean_velocities["U_bar"].mean()
-print(f"Calculated U_b: {U_b}")
+logger.info("Calculated U_b: %f", U_b)
+
 # t_w
 L_x = 2.67
 t_w = L_x / U_b
 t_w_plus = t_w / t_tau
-print(f"Calculated t_w: {t_w}")
-print(f"Calculated t_w_plus: {t_w_plus}")
+logger.info("Calculated t_w: %f", t_w)
+logger.info("Calculated t_w_plus: %f", t_w_plus)
+
+## Save calculated values to a csv file
+calculated_values = {
+    "u_tau": u_tau,
+    "delta_tau": delta_tau,
+    "Re_tau": Re_tau,
+    "t_tau": t_tau,
+    "t_i": t_i,
+    "t_i_plus": t_i_plus,
+    "t_f": t_f,
+    "t_f_plus": t_f_plus,
+    "U_b": U_b,
+    "t_w": t_w,
+    "t_w_plus": t_w_plus,
+}
+
+# Convert dictionary to DataFrame
+df_calculated_values = pd.DataFrame(
+    list(calculated_values.items()), columns=["Parameter", "Value"]
+)
+
+# Save DataFrame to CSV
+output_file_path = logs_dir / "calculated_values.csv"
+df_calculated_values.to_csv(output_file_path, index=False)
+
+logger.info(f"Calculated values saved to {output_file_path}")
 
 # plot_velocity_normalize_profiles(mean_velocities_normalized, rms_velocities_normalized)
