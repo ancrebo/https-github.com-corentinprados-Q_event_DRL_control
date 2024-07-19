@@ -153,6 +153,7 @@ class Jet(ABC):
         self.Q_new: List[float] = Q_new
         # Call specialized method to set up the jet geometry
         self.set_geometry(params)
+        # TO BE DELETED!!! This is pulled from parameters in JetChannel instead
         # Update to this current timestep
         # self.Qs_position_x: float = self.Qs_position_x
         # self.Qs_position_z: float = self.Qs_position_z
