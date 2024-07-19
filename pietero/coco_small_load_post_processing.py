@@ -32,7 +32,7 @@ parser.add_argument(
 args = parser.parse_args()
 logging_level = getattr(logging, args.loglvl.upper(), None)
 if not isinstance(logging_level, int):
-    raise ValueError("Invalid log level: %s" % args.log)
+    raise ValueError("Invalid log level: %s" % args.loglvl)
 logging_level_file = getattr(logging, args.logfilelvl.upper(), None)
 if not isinstance(logging_level_file, int):
     raise ValueError("Invalid log level: %s" % args.logfilelvl)
@@ -63,7 +63,8 @@ file_handler.setFormatter(
 logger.addHandler(console_handler)
 logger.addHandler(file_handler)
 
-logger.info("Logger started. Logging level: %s", args.log)
+logger.info("Logger started. Logging level: %s", args.loglvl)
+logger.info("File handler logging level: %s", args.logfilelvl)
 
 logger.info("Libraries imported successfully.")
 
