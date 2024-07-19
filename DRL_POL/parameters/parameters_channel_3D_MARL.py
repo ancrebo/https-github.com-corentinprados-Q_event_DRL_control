@@ -260,7 +260,7 @@ jets = build_jets(JetChannel, delta_t_smooth)
 #n_jets = len(jets)
 
 # Commented out MOST OF section as it only applies to cylinder case -Chriss
-# TO BE DELETED!!! Except jet_name
+# TO BE DELETED!!! Except jet_name -Chriss juli 2024
 geometry_params = (
     {  # Kept for legacy purposes but to be deleted when reworking the mesh script
 #        "output": ".".join(["cylinder", "geo"]),

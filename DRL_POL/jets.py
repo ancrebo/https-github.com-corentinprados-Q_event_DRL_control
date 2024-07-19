@@ -153,7 +153,7 @@ class Jet(ABC):
         self.Q_new: List[float] = Q_new
         # Call specialized method to set up the jet geometry
         self.set_geometry(params)
-        # TO BE DELETED!!! This is pulled from parameters in JetChannel instead
+        # TO BE DELETED!!! This is pulled from parameters in JetChannel instead -Chriss juli 2024
         # Update to this current timestep
         # self.Qs_position_x: float = self.Qs_position_x
         # self.Qs_position_z: float = self.Qs_position_z
@@ -593,7 +593,7 @@ class JetChannel(Jet):
         Specialized method that sets up the geometry of the jet, including importing Qs_position_x, Qs_position_z, delta_Q_z and delta_Q_z
         """
         from parameters import (
-# TO BE DELETED!!!
+# TO BE DELETED!!! -Chriss juli 2024
 #            cylinder_coordinates,  # Remove?? Necessary??
             Qs_position_x,
             delta_Q_x,
@@ -601,7 +601,7 @@ class JetChannel(Jet):
             delta_Q_z,
         )
 # Commented out since these only apply to cylinder case -Chriss
-# TO BE DELETED!!!
+# TO BE DELETED!!! -Chriss juli 2024
 #        # Sanity check
 #        # TODO: asserts are dangerous... we need a function that stops everything!!
 #        if params["width"] <= 0.0:
@@ -612,7 +612,7 @@ class JetChannel(Jet):
 #            raise ValueError("Invalid jet angle=%f" % params["positions_angle"])
 
         # Recover parameters from dictionary
-# TO BE DELETED!!!
+# TO BE DELETED!!! -Chriss juli 2024
 #        self.radius: float = params["radius"]
 #        self.width: float = params["width"]
 #        self.theta0: float = self.normalize_angle(np.deg2rad(params["positions_angle"]))
