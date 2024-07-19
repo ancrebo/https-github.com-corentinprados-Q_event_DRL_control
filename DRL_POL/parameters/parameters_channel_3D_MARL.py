@@ -266,7 +266,7 @@ geometry_params = (
 #        "output": ".".join(["cylinder", "geo"]),
 #        "jet_width": 10,
 #        "jet_angle": jet_angle,
-        "jet_name": ['JET_TOP_BOTTOM']
+        "jet_name": ['JET_TOP_BOTTOM'],
 #        "jet_positions_angle": [
 #            90 + jet_angle,
 #            270 - jet_angle,
@@ -275,7 +275,7 @@ geometry_params = (
 #            [cylinder_coordinates[0], cylinder_coordinates[1] + radius],
 #            [cylinder_coordinates[0], cylinder_coordinates[1] - radius],
 #        ],
-#        "remesh": False,
+        "remesh": False,
     }
 )
 #assert (
