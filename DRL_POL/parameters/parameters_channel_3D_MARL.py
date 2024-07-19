@@ -259,13 +259,14 @@ jets = build_jets(JetChannel, delta_t_smooth)
 #jets = build_jets(JetChannel, jets_definition, delta_t_smooth)
 #n_jets = len(jets)
 
-# Commented out section as it only applies to cylinder case -Chriss
-#geometry_params = (
-#    {  # Kept for legacy purposes but to be deleted when reworking the mesh script
+# Commented out MOST OF section as it only applies to cylinder case -Chriss
+# TO BE DELETED!!! Except jet_name
+geometry_params = (
+    {  # Kept for legacy purposes but to be deleted when reworking the mesh script
 #        "output": ".".join(["cylinder", "geo"]),
 #        "jet_width": 10,
 #        "jet_angle": jet_angle,
-#        "jet_name": ["JET_TOP", "JET_BOTTOM"],
+        "jet_name": ['JET_TOP_BOTTOM']
 #        "jet_positions_angle": [
 #            90 + jet_angle,
 #            270 - jet_angle,
@@ -275,8 +276,8 @@ jets = build_jets(JetChannel, delta_t_smooth)
 #            [cylinder_coordinates[0], cylinder_coordinates[1] - radius],
 #        ],
 #        "remesh": False,
-#    }
-#)
+    }
+)
 #assert (
 #    jet_angle != geometry_params["jet_width"] / 2
 #)  # Maybe to check during mesh construction?
