@@ -259,9 +259,7 @@ jets_definition = {
 
 # Build the jets
 # Removed jets_definition as it only (currently) applies to cylinder case. Can be used in the future for adding parameters -Chriss
-jets = build_jets(JetChannel, delta_t_smooth)
-# jets = build_jets(JetChannel, jets_definition, delta_t_smooth)
-# n_jets = len(jets)
+jets = build_jets(JetChannel, jets_definition, delta_t_smooth)
 
 # Commented out MOST OF section as it only applies to cylinder case -Chriss
 # TO BE DELETED!!! Except jet_name -Chriss juli 2024

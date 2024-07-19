@@ -13,7 +13,6 @@ from typing import List, Type, Any, Dict, Optional
 from alya import write_jet_file
 
 
-# Use vim to edit
 # Function to build and return the jets
 # See `jets_definition` in `parameters.py` for the use of this function
 def build_jets(
@@ -243,6 +242,10 @@ class JetCylinder(Jet):
         """
         super().__init__(
             name, params, Q_pre, Q_new, time_start, dimension, T_smoo, smooth_func
+        )
+        from parameters import (
+            Qs_position_z,
+            delta_Q_z,
         )
 
         self.update(
@@ -651,7 +654,7 @@ class JetChannel(Jet):
             Qs_position_z,
             delta_Q_z,
         )
-
+        
         self.Qs_position_x: List[float] = Qs_position_x
         self.delta_Q_x: float = delta_Q_x
         self.Qs_position_z: List[float] = Qs_position_z
@@ -679,6 +682,7 @@ class JetChannel(Jet):
         # w = 1.0  # NOT channel width but width of jet. Leftover from cylinder case
         # w = self.width * (np.pi / 180)  # deg2rad
         scale = 1.0  # TODO: fix this with correct scaling value. Can be assigned as needed - Chriss
+
 
         string_all_Q_pre = "0"
         string_all_Q_new = "0"
