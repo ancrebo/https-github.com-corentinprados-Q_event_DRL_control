@@ -7,7 +7,7 @@
 from __future__ import print_function, division
 
 import os, subprocess
-from typing import Union, List
+from typing import Union, List, Tuple
 import numpy as np
 
 from configuration import ALYA_GMSH, ALYA_INCON
@@ -268,9 +268,11 @@ def write_jet_file(filepath: str, name: str, functions: List[str]) -> None:
     file.close()
 
 
-def write_witness_file(filepath: str, probes_positions: np.ndarray) -> None:
+def write_witness_file(
+    filepath: str, probes_positions: List[Tuple[float, float, float]]
+) -> None:
     """
-    UPDATED FUNCTION AS OF JULY 12, 2024 - @pietero
+    UPDATED FUNCTION AS OF JULY 19, 2024 - @pietero
     Writes the witness file that is included in the .ker.dat file.
 
     Parameters:
@@ -281,7 +283,7 @@ def write_witness_file(filepath: str, probes_positions: np.ndarray) -> None:
     os.makedirs(filepath, exist_ok=True)
 
     nprobes = len(probes_positions)
-    ndim = probes_positions.shape[1]
+    ndim = len(probes_positions[0]) if probes_positions else 0
 
     # Open file for writing
     with open(os.path.join(filepath, "witness.dat"), "w") as file:
@@ -297,7 +299,7 @@ def write_witness_file(filepath: str, probes_positions: np.ndarray) -> None:
                 file.write(f"{pos[0]:.4f},{pos[1]:.4f},{pos[2]:.4f}\n")
         else:
             raise ValueError(
-                f"witness: write_witness_file: Unsupported number of dimensions: {ndim}"
+                f"alya.py: write_witness_file: write_witness_file: Unsupported number of dimensions: {ndim}"
             )
 
         # Write end

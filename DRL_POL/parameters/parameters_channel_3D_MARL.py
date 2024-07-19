@@ -238,53 +238,51 @@ for i in range(nx_Qs):
 
 jets_definition = {
     "JET_TOP_BOTTOM": {
-#        "width": 10,
-#        "radius": radius,
-#        "angle": jet_angle,
-#        "positions_angle": 90
-#        + jet_angle,  # make sure the width doesn't not coincide with 0,90,180 or 270
-#        "positions": [cylinder_coordinates[0], cylinder_coordinates[1] + radius],
-#        "remesh": False,
+        #        "width": 10,
+        #        "radius": radius,
+        #        "angle": jet_angle,
+        #        "positions_angle": 90
+        #        + jet_angle,  # make sure the width doesn't not coincide with 0,90,180 or 270
+        #        "positions": [cylinder_coordinates[0], cylinder_coordinates[1] + radius],
+        #        "remesh": False,
     },
-#    "JET_BOTTOM": {
-#        "width": 10,
-#        "radius": radius,
-#        "angle": jet_angle,
-#        "positions_angle": 270
-#        - jet_angle,  # make sure the width doesn't not coincide with 0,90,180 or 270
-#        "positions": [cylinder_coordinates[0], cylinder_coordinates[1] - radius],
-#        "remesh": False,
-#    },
+    #    "JET_BOTTOM": {
+    #        "width": 10,
+    #        "radius": radius,
+    #        "angle": jet_angle,
+    #        "positions_angle": 270
+    #        - jet_angle,  # make sure the width doesn't not coincide with 0,90,180 or 270
+    #        "positions": [cylinder_coordinates[0], cylinder_coordinates[1] - radius],
+    #        "remesh": False,
+    #    },
 }
 
 # Build the jets
 # Removed jets_definition as it only (currently) applies to cylinder case. Can be used in the future for adding parameters -Chriss
 jets = build_jets(JetChannel, delta_t_smooth)
-#jets = build_jets(JetChannel, jets_definition, delta_t_smooth)
-#n_jets = len(jets)
+# jets = build_jets(JetChannel, jets_definition, delta_t_smooth)
+# n_jets = len(jets)
 
 # Commented out MOST OF section as it only applies to cylinder case -Chriss
 # TO BE DELETED!!! Except jet_name -Chriss juli 2024
-geometry_params = (
-    {  # Kept for legacy purposes but to be deleted when reworking the mesh script
-#        "output": ".".join(["cylinder", "geo"]),
-#        "jet_width": 10,
-#        "jet_angle": jet_angle,
-        "jet_name": ['JET_TOP_BOTTOM'],
-#        "jet_positions_angle": [
-#            90 + jet_angle,
-#            270 - jet_angle,
-#        ],  # make sure the width doesn't not coincide with 0,90,180 or 270
-#        "jet_positions": [
-#            [cylinder_coordinates[0], cylinder_coordinates[1] + radius],
-#            [cylinder_coordinates[0], cylinder_coordinates[1] - radius],
-#        ],
-        "remesh": False,
-    }
-)
-#assert (
+geometry_params = {  # Kept for legacy purposes but to be deleted when reworking the mesh script
+    #        "output": ".".join(["cylinder", "geo"]),
+    #        "jet_width": 10,
+    #        "jet_angle": jet_angle,
+    "jet_name": ["JET_TOP_BOTTOM"],
+    #        "jet_positions_angle": [
+    #            90 + jet_angle,
+    #            270 - jet_angle,
+    #        ],  # make sure the width doesn't not coincide with 0,90,180 or 270
+    #        "jet_positions": [
+    #            [cylinder_coordinates[0], cylinder_coordinates[1] + radius],
+    #            [cylinder_coordinates[0], cylinder_coordinates[1] - radius],
+    #        ],
+    "remesh": False,
+}
+# assert (
 #    jet_angle != geometry_params["jet_width"] / 2
-#)  # Maybe to check during mesh construction?
+# )  # Maybe to check during mesh construction?
 
 
 ### ***************************************************************
@@ -381,9 +379,7 @@ if os.path.exists(witness_file_path):
         )
 
         # Write the new witness.dat file
-        with open(witness_file_path, "w") as f:
-            for location in output_params["locations"]:
-                f.write(f"{location}\n")
+        write_witness_file(witness_file_path, output_params["locations"])
         need_witness_file_override = False
         print(f"\nNew witness.dat has been created in {case_folder}\n")
         print(
@@ -403,9 +399,7 @@ if os.path.exists(witness_file_path):
         )
 else:
     # Create and write the witness.dat file if it does not exist
-    with open(witness_file_path, "w") as f:
-        for location in output_params["locations"]:
-            f.write(f"{location}\n")
+    write_witness_file(witness_file_path, output_params["locations"])
     print(
         f"CREATING NEW WITNESS FILE: No existing witness.dat found in {case_folder}"
         f"\n\nNew witness.dat created with parameters:"
