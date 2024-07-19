@@ -440,7 +440,7 @@ def plot_velocity_normalize_profiles(mean_velocities, rms_velocities):
 
 # Last directory
 directory_path = Path(
-    "/scratch/pietero/baseline/prados_recent/re180_min_channel_900_calculating_Ubar/vtk"
+    "/scratch/pietero/baseline/prados_recent/re180_min_channel_900_calculating_Ubar/vtk_for_average/vtk"
 )
 file_name = "channel.pvd"
 
