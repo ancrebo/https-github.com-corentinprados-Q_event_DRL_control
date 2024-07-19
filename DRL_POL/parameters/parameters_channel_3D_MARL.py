@@ -50,10 +50,11 @@ run_baseline = True
 ### **********************************************************
 ### DOMAIN BOX ***********************************************
 # TODO: Update for channel parameters!! @canordq
+# Changed h (2 -> 1) and Ly (h -> 2*h) as per channel dimensions defined by Coco
 
-h = 2.0
+h = 1
 Lx = 2.67 * h
-Ly = h
+Ly = 2 * h
 Lz = 0.8 * h
 
 
