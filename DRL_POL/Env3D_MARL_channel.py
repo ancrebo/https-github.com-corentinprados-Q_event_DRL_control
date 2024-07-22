@@ -1328,8 +1328,9 @@ class Environment(Environment):
         self.previous_action = self.action  # save the older one to smooth the change
         self.action = action  # update the new to reach at the end of smooth
 
-        # Write the action
-        self.save_this_action()
+        if case == "cylinder":
+            # Write the action
+            self.save_this_action()
 
         if case == "cylinder":
             print(f"New flux computed for INV: {self.ENV_ID}  :\n\tQs : {self.action}")
