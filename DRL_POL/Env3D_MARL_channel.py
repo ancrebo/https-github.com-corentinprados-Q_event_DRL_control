@@ -717,12 +717,17 @@ class Environment(Environment):
         name_a = "output_actions.csv"
         if not os.path.exists("actions"):
             os.mkdir("actions")
+            print(f"Created actions folder at {os.getcwd()}")
 
         if not os.path.exists(f"actions/{self.host}"):
             os.mkdir(f"actions/{self.host}")
+            print(f"Created actions/{self.host} folder at {os.getcwd()}")
 
         if not os.path.exists(f"actions/{self.host}/{self.ENV_ID[0]}_{self.ENV_ID[1]}"):
             os.mkdir(f"actions/{self.host}/{self.ENV_ID[0]}_{self.ENV_ID[1]}")
+            print(
+                f"Created actions/{self.host}/{self.ENV_ID[0]}_{self.ENV_ID[1]} folder at {os.getcwd()}"
+            )
 
         if not os.path.exists(
             f"actions/{self.host}/{self.ENV_ID[0]}_{self.ENV_ID[1]}/ep_{self.episode_number}"
@@ -730,13 +735,19 @@ class Environment(Environment):
             os.mkdir(
                 f"actions/{self.host}/{self.ENV_ID[0]}_{self.ENV_ID[1]}/ep_{self.episode_number}"
             )
+            print(
+                f"Created actions/{self.host}/{self.ENV_ID[0]}_{self.ENV_ID[1]}/ep_{self.episode_number} folder at {os.getcwd()}"
+            )
 
         path_a = f"actions/{self.host}/{self.ENV_ID[0]}_{self.ENV_ID[1]}/ep_{self.episode_number}/"
+        print(f"Path to save actions: {path_a}")
 
         action_line = f"{self.action_count}"
+        print(f"Action line: {action_line}")
 
         for i in range(self.actions_per_inv):
             action_line += f"; {self.action[i]}"
+            print(f"Action line: {action_line}")
 
         if not os.path.exists(path_a + name_a):
             header_line = "Action"
@@ -1328,9 +1339,8 @@ class Environment(Environment):
         self.previous_action = self.action  # save the older one to smooth the change
         self.action = action  # update the new to reach at the end of smooth
 
-        if case == "cylinder":
-            # Write the action
-            self.save_this_action()
+        # Write the action
+        self.save_this_action()
 
         if case == "cylinder":
             print(f"New flux computed for INV: {self.ENV_ID}  :\n\tQs : {self.action}")
