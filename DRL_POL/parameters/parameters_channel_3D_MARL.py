@@ -28,10 +28,11 @@ from alya import write_witness_file
 
 ### CASE NAME ************************************************
 
-case = "channel" # This is the ALYA case name, so "channel" or "cylinder", not "channel_3D_MARL" or "cylinder_3D_WS_TEST" - Pieter
-simu_name = "3DChan"
-dimension = 3
-reward_function = "q_event_volume"
+training_case: str = "channel_3D_MARL" # This is the DRL training case name, like "channel_3D_MARL" or "cylinder_3D_WS_TEST" - Pieter
+case: str = "channel"  # This is the ALYA case name, so "channel" or "cylinder", NOT "channel_3D_MARL" or "cylinder_3D_WS_TEST" - Pieter
+simu_name: str = "3DChan"
+dimension: int = 3
+reward_function: str = "q_event_volume"
 
 Re_case: int = 6
 slices_probes_per_jet: int = 1  # Unused for channel case - Pieter
