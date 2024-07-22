@@ -1431,6 +1431,7 @@ class Environment(Environment):
                     self.previous_action_global[i] = self.action_global[i]
                     self.action_global[i] = last_action
 
+            print(f"ENV_ID {self.ENV_ID}: Starting to update the time interval file\n")
             write_time_interval(
                 os.path.join(
                     "alya_files",
@@ -1441,13 +1442,16 @@ class Environment(Environment):
                 t1,
                 t2,
             )
+            print(f"ENV_ID {self.ENV_ID}: Time interval file updated successfully\n")
 
+            print(f"ENV_ID {self.ENV_ID}: Assigning `simu_path`\n")
             simu_path = os.path.join(
                 "alya_files",
                 f"{self.host}",
                 f"{self.ENV_ID[1]}",  # This is always 1
                 f"EP_{self.episode_number}",
             )
+            print(f"ENV_ID {self.ENV_ID}: `simu_path` assigned successfully\n")
 
             if self.case == "cylinder":
 
@@ -1487,6 +1491,7 @@ class Environment(Environment):
                     jet.update_file(simu_path)
 
             elif self.case == "channel":
+                print(f"ENV_ID {self.ENV_ID}: Updating jets for the given actions\n")
                 for ijet, jet in enumerate(self.Jets.values()):
                     jet.update(
                         self.previous_action_global,
@@ -1498,10 +1503,12 @@ class Environment(Environment):
                         Qs_position_x=self.Qs_position_x,
                         delta_Q_x=self.delta_Q_x,
                     )  # TODO: @pietero make sure this works for channel - Pieter
+                print(f"ENV_ID {self.ENV_ID}: Jets updated successfully\n")
 
             if self.reward_function == "q_event_volume":
                 ## Setting up for computing the rewards and save as .csv file
                 # First need to identify and convert ALYA postprocessing files to VTK files
+                print(f"ENV_ID {self.ENV_ID}: Setting up for computing the rewards and saving as .csv file\n")
                 directory_post = os.path.join(
                     "alya_files",
                     f"{self.host}",
