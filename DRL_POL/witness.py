@@ -158,10 +158,15 @@ def read_last_wit(
     # TODO: case name cannot be hardcoded as cylinder and should be passed as input - Pol
     # TODO: implement crashes - Pol
     cr_start("WIT.read_last_wit", 0)
-
+    print(
+        f"\n\n\nwitness.read_last_wit: Starting to read the last witness file at {filename}"
+    )
     # Read witness file
     itw, timew, data = witnessReadNByBehind(filename, n_to_read)
-
+    print(
+        f"witness.read_last_wit: Finished reading the last witness file at {filename}"
+    )
+    print(f"witness.read_last_wit: Length of data: {len(data)}")
     # Initialize result dictionary
     result_data = {}
 
@@ -176,13 +181,14 @@ def read_last_wit(
         raise ValueError(
             "Witness.py: read_last_wit: Invalid `probe_type`: must be 'pressure' or 'velocity'"
         )
-
+    print(f"witness.read_last_wit: Selected probe type: {probe_type}")
     # If we have more than one instant, average them
     if n_to_read > 1:
         for key in result_data.keys():
             result_data[key] = (
                 1.0 / (timew[-1] - timew[0]) * np.trapz(result_data[key], timew, axis=0)
             )
+        print(f"witness.read_last_wit: Averaged {n_to_read} instants")
 
     # Normalize the data using the provided norm dictionary
     for key in result_data.keys():
@@ -192,7 +198,7 @@ def read_last_wit(
             raise ValueError(
                 f"Witness.py: read_last_wit: Normalization value for {key} not found in norm dictionary"
             )
-
+    print(f"witness.read_last_wit: Normalized data")
     # if var is None:
     #     raise ValueError("Invalid probe_type: must be 'pressure' or 'velocity'")
     #     # raise ValueError("Crash very hard!")  # TODO: Do crash very hard
@@ -204,7 +210,9 @@ def read_last_wit(
     # Ensure that data has the correct shape
     for key in result_data.keys():
         result_data[key] = result_data[key][0, :]  # (nprobes,)
-
+    print(
+        f"witness.read_last_wit: Corrected shape if needed, about to return `result_data`"
+    )
     return result_data
 
 
