@@ -64,7 +64,7 @@ file_handler.setFormatter(
 logger.addHandler(console_handler)
 logger.addHandler(file_handler)
 
-logger.info("Logger started. Logging level: %s", args.loglvl)
+logger.info("\n\n\nLogger started. Logging level: %s", args.loglvl)
 logger.info("File handler logging level: %s", args.logfilelvl)
 
 logger.info("Libraries imported successfully.")
@@ -99,7 +99,7 @@ def load_data_and_give_average_velocity(directory, file_name):
 
         count += 1
         filename = os.path.basename(path)
-        tqdm.write("Data from %s loaded and velocity components added." % filename)
+        # tqdm.write("Data from %s loaded and velocity components added." % filename)
         logger.debug("Data from %s loaded and velocity components added.", filename)
 
     # Calculate the average of the velocity components
@@ -444,7 +444,7 @@ if __name__ == "__main__":
     # First check if output file already exists:
     output_file_path = logs_dir / "calculated_values.csv"
     if output_file_path.exists():
-        logger.info(
+        logger.warning(
             f"Output file {output_file_path} already exists. Please back it up or delete it before running the script."
         )
         exit()
