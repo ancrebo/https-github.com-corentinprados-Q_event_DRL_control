@@ -211,6 +211,7 @@ def read_last_wit(
     # Ensure that data has the correct shape
     for key in result_data.keys():
         result_data[key] = result_data[key][0, :]  # (nprobes,)
+    print(f"witness.read_last_wit: keys of result_data: {result_data.keys()}\n")
     print(
         f"witness.read_last_wit: Corrected shape if needed, about to return `result_data`"
     )
