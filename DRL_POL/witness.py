@@ -166,7 +166,8 @@ def read_last_wit(
     print(
         f"witness.read_last_wit: Finished reading the last witness file at {filename}"
     )
-    print(f"witness.read_last_wit: Length of data: {len(data)}")
+    print(f"witness.read_last_wit: Length of data: {len(data)}\n")
+    print(f"witness.read_last_wit: keys of data: {data.keys()}\n")
     # Initialize result dictionary
     result_data = {}
 
