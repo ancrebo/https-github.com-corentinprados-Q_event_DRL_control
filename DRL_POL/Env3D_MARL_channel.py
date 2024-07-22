@@ -29,6 +29,7 @@ from configuration import (
     ALYA_VTK,
     OVERSUBSCRIBE,
     DEBUG,
+    USE_SLURM,
 )
 from parameters import (
     bool_restart,
@@ -1520,7 +1521,9 @@ class Environment(Environment):
                     f"ENV_ID {self.ENV_ID}: Assigned directory post: {directory_post}\n"
                 )
 
-                print(f"ENV_ID {self.ENV_ID}: Probe Type: {self.output_params['probe_type']}\n")
+                print(
+                    f"ENV_ID {self.ENV_ID}: Probe Type: {self.output_params['probe_type']}\n"
+                )
                 if self.output_params["probe_type"] == "velocity":
                     post_name = "VELOC"
                     print(f"ENV_ID {self.ENV_ID}: Assigned post name: {post_name}\n")
@@ -1563,6 +1566,8 @@ class Environment(Environment):
                 print(
                     f"ENV_ID {self.ENV_ID}: Starting to convert the previous timestep postprocess files to VTK format..."
                 )
+
+                print(f"ENV_ID {self.ENV_ID}: Number of processors: {self.nb_proc}\n")
                 # Convert the copied file to VTK format
                 # Run subprocess that launches mpio2vtk to convert the file to VTK
                 run_subprocess(
@@ -1573,6 +1578,7 @@ class Environment(Environment):
                     mem_per_srun=mem_per_srun,
                     num_nodes_srun=num_nodes_srun,
                     host=self.nodelist,
+                    slurm=USE_SLURM,
                 )
                 print(
                     f"\n{self.ENV_ID}: execute: VTK file created for episode {self.episode_number} action {self.action_count}\n"
