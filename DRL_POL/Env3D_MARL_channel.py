@@ -11,6 +11,7 @@ AUTHORS ->  POL
 
 ## IMPORT PYTHON LIBRARIES
 import os, csv, numpy as np
+import logging
 import sys
 import inspect
 import shutil
@@ -1567,7 +1568,7 @@ class Environment(Environment):
                     f"ENV_ID {self.ENV_ID}: Starting to convert the previous timestep postprocess files to VTK format..."
                 )
 
-                print(f"ENV_ID {self.ENV_ID}: Number of processors: {self.nb_proc}\n")
+                print(f"ENV_ID {self.ENV_ID}: Number of processors: {nb_proc}\n")
                 # Convert the copied file to VTK format
                 # Run subprocess that launches mpio2vtk to convert the file to VTK
                 run_subprocess(
