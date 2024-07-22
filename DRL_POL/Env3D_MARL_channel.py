@@ -1326,6 +1326,8 @@ class Environment(Environment):
                 action.append(
                     -self.optimization_params["norm_Q"] * actions[i]
                 )  # This is to ensure 0 mass flow rate in the jets
+        if case == "channel":
+            action.append(self.optimization_params["norm_Q"] * actions[0])
 
         # for i in range(self.actions_per_inv, self.actions_per_inv*2):
         # action.append(-self.optimization_params["norm_Q"]*actions[i-self.actions_per_inv])
