@@ -49,16 +49,28 @@ from parameters import (
     optimization_params,
     output_params,
     history_parameters,
-    nb_proc,
     nb_actuations,
     nb_actuations_deterministic,
 )
 from env_utils import (
     run_subprocess,
+    detect_system,
     find_highest_timestep_file,
     copy_mpio2vtk_required_files,
     printDebug,
 )
+
+# Import system-specific parameters
+if detect_system() == "LOCAL":
+    from parameters import (
+        num_servers_ws as num_servers,
+        nb_proc_ws as nb_proc,
+    )
+else:
+    from parameters import (
+        num_servers,
+        nb_proc,
+    )
 from alya import (
     write_case_file,
     write_witness_file,
@@ -151,7 +163,10 @@ class Environment(Environment):
         self.previous_action_global: np.ndarray = np.zeros(self.nb_inv_per_CFD)
         self.action_global: np.ndarray = np.zeros(self.nb_inv_per_CFD)
 
-        self.action: np.ndarray = np.zeros(self.actions_per_inv * 2)
+        if self.case == "cylinder":
+            self.action: np.ndarray = np.zeros(self.actions_per_inv * 2)
+        elif self.case == "channel":
+            self.action: np.ndarray = np.zeros(self.actions_per_inv)
 
         # postprocess values
         self.history_parameters: Dict[str, Any] = history_parameters
@@ -256,8 +271,11 @@ class Environment(Environment):
             else:
                 pass
 
-        # Initialize action
-        self.action = np.zeros(self.actions_per_inv * 2)  #
+        if case == "cylinder":
+            # Initialize action
+            self.action = np.zeros(self.actions_per_inv * 2)  #
+        elif case == "channel":
+            self.action = np.zeros(self.actions_per_inv)
 
         self.check_id = True  # check if the folder with cpuid number is created
         cr_stop("ENV.start", 0)
@@ -970,7 +988,8 @@ class Environment(Environment):
             NotImplementedError: If the probe type is not supported.
             NotImplementedError: If the neighbor state is True.
         """
-        if not self.neightbor_state:
+        print(f"Environment.list_observation_updated: {self.ENV_ID}: starting ...")
+        if not self.neighbor_state:
             probe_type = self.output_params["probe_type"]
             batch_size_probes = int(
                 len(
@@ -1275,11 +1294,14 @@ class Environment(Environment):
 
         action: List[np.ndarray] = []
         # action = []
-        for i in range(self.actions_per_inv):
-            action.append(self.optimization_params["norm_Q"] * actions[i])
-            action.append(
-                -self.optimization_params["norm_Q"] * actions[i]
-            )  # This is to ensure 0 mass flow rate in the jets
+        if case == "cylinder":
+            for i in range(self.actions_per_inv):
+                action.append(self.optimization_params["norm_Q"] * actions[i])
+                action.append(
+                    -self.optimization_params["norm_Q"] * actions[i]
+                )  # This is to ensure 0 mass flow rate in the jets
+        if case == "channel":
+            action.append(self.optimization_params["norm_Q"] * actions[0])
 
         # for i in range(self.actions_per_inv, self.actions_per_inv*2):
         # action.append(-self.optimization_params["norm_Q"]*actions[i-self.actions_per_inv])
@@ -1290,7 +1312,14 @@ class Environment(Environment):
         # Write the action
         self.save_this_action()
 
-        print(f"New flux computed for INV: {self.ENV_ID}  :\n\tQs : {self.action}")
+        if case == "cylinder":
+            print(f"New flux computed for INV: {self.ENV_ID}  :\n\tQs : {self.action}")
+        elif case == "airfoil":
+            pass
+        elif case == "channel":
+            print(
+                f"New action computed for INV: {self.ENV_ID}  :\n\tQs : {self.action}"
+            )
 
         dir_name = os.path.join(
             "alya_files",
@@ -1356,7 +1385,9 @@ class Environment(Environment):
                     for row in lines:
                         last_action = float(row[1].strip())
 
-                    # print("POOOOOOOOOOL -> last action : ", last_action)
+                    print(
+                        f"ENV_ID {self.ENV_ID}: Last action of {self.ENV_ID[0]}_{i+1}: {last_action}"
+                    )
                     self.previous_action_global[i] = self.action_global[i]
                     self.action_global[i] = last_action
 
@@ -1438,16 +1469,19 @@ class Environment(Environment):
                     f"EP_{self.episode_number}",
                 )
 
-                if self.probe_type == "velocity":
+                if self.output_params["probe_type"] == "velocity":
                     post_name = "VELOC"
-                elif self.probe_type == "pressure":
+                elif self.output_params["probe_type"] == "pressure":
                     post_name = "PRESS"
                 else:
                     post_name = None
                     raise NotImplementedError(
-                        f"{self.ENV_ID}: execute: post.mpio.bin associated with type {self.probe_type} not implemented yet"
+                        f"{self.ENV_ID}: execute: post.mpio.bin associated with type {self.output_params['probe_type']} not implemented yet"
                     )
 
+                print(
+                    f"ENV_ID {self.ENV_ID}: Identifying the file with the highest timestep...\n"
+                )
                 # Identify the file with the highest timestep
                 last_post_file = find_highest_timestep_file(
                     directory_post, f"{self.case}", f"{post_name}"
