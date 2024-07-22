@@ -1272,7 +1272,9 @@ class Environment(Environment):
             f"EP_{self.episode_number}",
             f"{self.case}.nsi.wit",
         )
-
+        print(
+            f"\n\n\nEnv3D_MARL_channel.Environment.reset: witness filename to read = {filename}\n\n\n"
+        )
         # read witness file and extract the entire array list
         # This now outputs a dictionary of probe values for all probe types - Pieter
         self.probes_values_global_dict: Dict[str, np.ndarray] = read_last_wit(
@@ -1284,7 +1286,9 @@ class Environment(Environment):
 
         # filter probes per jet (corresponding to the ENV.ID[])
         probes_values_2 = self.list_observation_updated()
-        print("\n\n\nEnv3D_MARL_channel.Environment.reset: probes_values_2 being returned to Tensorforce!!!\n\n\n")
+        print(
+            "\n\n\nEnv3D_MARL_channel.Environment.reset: probes_values_2 being returned to Tensorforce!!!\n\n\n"
+        )
         return probes_values_2
 
     # -----------------------------------------------------------------------------------------------------
