@@ -1430,6 +1430,10 @@ class Environment(Environment):
                     )
                     self.previous_action_global[i] = self.action_global[i]
                     self.action_global[i] = last_action
+                    print(
+                        f"ENV_ID {self.ENV_ID}: New action of {self.ENV_ID[0]}_{i+1}: {self.action_global[i]}"
+                    )
+            print(f"ENV_ID {self.ENV_ID}: All actions merged successfully to {self.action_global}\n")
 
             print(f"ENV_ID {self.ENV_ID}: Starting to update the time interval file\n")
             write_time_interval(
@@ -1508,7 +1512,9 @@ class Environment(Environment):
             if self.reward_function == "q_event_volume":
                 ## Setting up for computing the rewards and save as .csv file
                 # First need to identify and convert ALYA postprocessing files to VTK files
-                print(f"ENV_ID {self.ENV_ID}: Setting up for computing the rewards and saving as .csv file\n")
+                print(
+                    f"ENV_ID {self.ENV_ID}: Setting up for computing the rewards and saving as .csv file\n"
+                )
                 directory_post = os.path.join(
                     "alya_files",
                     f"{self.host}",
@@ -1533,14 +1539,27 @@ class Environment(Environment):
                 last_post_file = find_highest_timestep_file(
                     directory_post, f"{self.case}", f"{post_name}"
                 )
+                print(f"ENV_ID {self.ENV_ID}: Last post file: {last_post_file}\n")
 
                 # Copy the identified file to a specific directory for processing
                 target_directory = os.path.join(directory_post, "final_post_of_action")
+                print(
+                    f"ENV_ID {self.ENV_ID}: Copying the identified file to {target_directory}\n"
+                )
 
+                print(
+                    f"ENV_ID {self.ENV_ID}: Starting to copy files required for mpio2vtk translation..."
+                )
                 copy_mpio2vtk_required_files(
                     self.case, directory_post, target_directory, last_post_file
                 )
+                print(
+                    f"ENV_ID {self.ENV_ID}: Files required for mpio2vtk translation copied successfully\n"
+                )
 
+                print(
+                    f"ENV_ID {self.ENV_ID}: Starting to convert the previous timestep postprocess files to VTK format..."
+                )
                 # Convert the copied file to VTK format
                 # Run subprocess that launches mpio2vtk to convert the file to VTK
                 run_subprocess(
