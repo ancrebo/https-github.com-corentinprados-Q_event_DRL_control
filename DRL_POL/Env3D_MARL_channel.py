@@ -988,7 +988,8 @@ class Environment(Environment):
             NotImplementedError: If the probe type is not supported.
             NotImplementedError: If the neighbor state is True.
         """
-        print(f"Environment.list_observation_updated: {self.ENV_ID}: starting ...")
+        print(f"Environment.list_observation_updated: {self.ENV_ID}: starting ...\n")
+        print(f"Environment.list_observation_updated: {self.ENV_ID}: self.probes_values_global_dict.keys() = {self.probes_values_global_dict.keys()}\n")
         if not self.neighbor_state:
             probe_type = self.output_params["probe_type"]
             batch_size_probes = int(
@@ -1013,6 +1014,9 @@ class Environment(Environment):
             elif probe_type == "velocity":
                 vel_components = ["VELOX", "VELOY", "VELOZ"]
                 probes_values_2 = []
+                print(
+                    f"Environment.list_observation_updated: {self.ENV_ID}: velocity selected for probe type"
+                )
                 for comp in vel_components:
                     data = self.probes_values_global_dict[comp]
                     slice_data = data[
