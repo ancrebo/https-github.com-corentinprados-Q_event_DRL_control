@@ -126,7 +126,14 @@ def process_velocity_data_single(
 
     # Process the dataset for detailed fluctuation analysis
     y_means = averaged_data.loc[df["y"]]
+    logger.debug(f"y_means: {y_means}")
+    logger.debug(f"y_means columns: {y_means.columns.tolist()}")
+    logger.debug(f"y_means index: {y_means.index}")
+
     df_processed = df.copy()
+    logger.debug(f"df_processed columns: {df_processed.columns.tolist()}")
+    logger.debug(f"df_processed index: {df_processed.index}")
+    logger.debug(f"df_processed y values: {df_processed['y'].values}")
     df_processed["U"] = df["u"]
     df_processed["V"] = df["v"]
     df_processed["W"] = df["w"]
