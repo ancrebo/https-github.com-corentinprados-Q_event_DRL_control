@@ -28,7 +28,7 @@ from alya import write_witness_file
 
 ### CASE NAME ************************************************
 
-case = "channel_3D_MARL"
+case = "channel" # This is the ALYA case name, so "channel" or "cylinder", not "channel_3D_MARL" or "cylinder_3D_WS_TEST" - Pieter
 simu_name = "3DChan"
 dimension = 3
 reward_function = "q_event_volume"
