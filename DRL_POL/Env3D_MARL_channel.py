@@ -1424,6 +1424,7 @@ class Environment(Environment):
                     for row in lines:
                         last_action = float(row[1].strip())
 
+                    print(f"ENV_ID {self.ENV_ID}: Last action of {self.ENV_ID[0]}_{i+1}: {last_action}")
                     print(
                         f"ENV_ID {self.ENV_ID}: Last action of {self.ENV_ID[0]}_{i+1}: {last_action}"
                     )
