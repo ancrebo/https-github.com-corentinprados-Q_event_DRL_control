@@ -725,10 +725,10 @@ variational_input: Dict[str, Any] = {
 # Normalization factors
 # TODO: @pietero @canordq Get actual values for these!!! - Pieter
 norm_factors: Dict[str, float] = {
-    "pressure": norm_press,  # original norm_press value for backwards compatibility
-    "velox": 10.0,  # example value, replace with actual value
-    "veloy": 10.0,  # example value, replace with actual value
-    "veloz": 10.0,  # example value, replace with actual value
+    "PRESS": norm_press,  # original norm_press value for backwards compatibility
+    "VELOX": 10.0,  # example value, replace with actual value
+    "VELOY": 10.0,  # example value, replace with actual value
+    "VELOZ": 10.0,  # example value, replace with actual value
 }
 
 # Optimization
