@@ -1265,7 +1265,7 @@ class Environment(Environment):
 
         # filter probes per jet (corresponding to the ENV.ID[])
         probes_values_2 = self.list_observation_updated()
-
+        print("\n\n\nEnv3D_MARL_channel.Environment.reset: probes_values_2 being returned to Tensorforce!!!\n\n\n")
         return probes_values_2
 
     # -----------------------------------------------------------------------------------------------------
