@@ -1596,22 +1596,37 @@ class Environment(Environment):
                 print(
                     f"\n{self.ENV_ID}: execute: VTK file created for episode {self.episode_number} action {self.action_count}\n"
                 )
+                print(
+                    f"ENV_ID {self.ENV_ID}: Starting to set up for reward calculation\n"
+                )
                 # Second we set up for Q event identification and reward calculation
                 directory_vtk = os.path.join(
                     target_directory,
                     "vtk",
                 )
+                print(
+                    f"ENV_ID {self.ENV_ID}: Assigned directory vtk: {directory_vtk}\n"
+                )
                 averaged_data_path = os.path.join(
                     directory_post,
                     "averaged_data.csv",
+                )
+                print(
+                    f"ENV_ID {self.ENV_ID}: Assigned averaged data path: {averaged_data_path}\n"
                 )
                 output_folder_path_reward = os.path.join(
                     directory_post,
                     "rewards",
                 )
+                print(
+                    f"ENV_ID {self.ENV_ID}: Assigned output folder path reward: {output_folder_path_reward}\n"
+                )
                 output_file_name = f"rewards_{self.host}_EP_{self.episode_number}.csv"
                 output_file_path = os.path.join(
                     output_folder_path_reward, output_file_name
+                )
+                print(
+                    f"ENV_ID {self.ENV_ID}: Assigned output file path: {output_file_path}\n"
                 )
 
                 if not os.path.exists(directory_vtk):
@@ -1624,9 +1639,15 @@ class Environment(Environment):
                     )
                 if not os.path.exists(output_folder_path_reward):
                     os.makedirs(output_folder_path_reward)
+                    print(
+                        f"{self.ENV_ID}: execute: Created directory {output_folder_path_reward} for reward files!!!"
+                    )
 
                 # Launches a subprocess to calculate the reward
                 # Must use a separate conda environment for compatibility
+                print(
+                    f"ENV_ID {self.ENV_ID}: Continuing to set up for reward calculation...\n"
+                )
                 runpath_vtk = "./"
                 runbin_vtk = "python3 calc_reward.py"
 
@@ -1640,6 +1661,9 @@ class Environment(Environment):
                     f"--m {reward_params['nz_Qs']} "
                     f"--averaged_data_path {averaged_data_path} "
                     f"--output_file {output_file_path}"
+                )
+                print(
+                    f"ENV_ID {self.ENV_ID}: Starting to subprocess to calculate the reward...\n"
                 )
                 run_subprocess(
                     runpath_vtk,
