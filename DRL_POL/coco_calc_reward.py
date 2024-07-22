@@ -290,9 +290,9 @@ def calculate_reward_full(
 
     # List all precalculated values
     logger.info(f"Pre-calculated values: {precalc_values}")
-    logger.debug(
-        f"u_tau: {precalc_values['u_tau'].values[0]}, delta_tau: {precalc_values['delta_tau'].values[0]}"
-    )
+    # logger.debug(
+    #     f"u_tau: {precalc_values['u_tau'].values[0]}, delta_tau: {precalc_values['delta_tau'].values[0]}"
+    # )
 
     # List all pre-calculated values
     logger.info(f"Pre-calculated values DataFrame:\n{precalc_values}")
