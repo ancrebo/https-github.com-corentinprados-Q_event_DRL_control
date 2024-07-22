@@ -11,6 +11,7 @@ AUTHORS ->  POL
 
 ## IMPORT PYTHON LIBRARIES
 import os, csv, numpy as np
+import logging
 import sys
 import inspect
 import shutil
