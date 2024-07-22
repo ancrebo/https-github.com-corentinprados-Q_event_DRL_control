@@ -1414,9 +1414,11 @@ class Environment(Environment):
                     for row in lines:
                         last_action = float(row[1].strip())
 
-                    print("POOOOOOOOOOL -> last action : ", last_action)
+                    print(f"ENV_ID {self.ENV_ID}: Last action of {self.ENV_ID[0]}_{i+1}: {last_action}")
                     self.previous_action_global[i] = self.action_global[i]
+                    print(f"ENV_ID {self.ENV_ID}: Previous action of {self.ENV_ID[0]}_{i+1}: {self.previous_action_global[i]}")
                     self.action_global[i] = last_action
+                    print(f"ENV_ID {self.ENV_ID}: New action of {self.ENV_ID[0]}_{i+1}: {self.action_global[i]}")
 
             write_time_interval(
                 os.path.join(
