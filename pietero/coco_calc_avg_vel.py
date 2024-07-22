@@ -42,9 +42,10 @@ def load_data_and_convert_to_dataframe(directory, file_name):
     data_frames = []
 
     # Process each PVTU file according to its mapped timestep, wrapped in tqdm:
-    # for file, timestep in tqdm(timestep_file_map.items(), desc="Loading data"):
-    for file, timestep in timestep_file_map.items():
-        path = os.path.join(directory, file)
+    for file, timestep in tqdm(
+        timestep_file_map.items(), desc="Loading data", unit="file"
+    ):
+        path = os.path.join(directory, str(file))
         mesh = pv.read(path)  # Read the mesh data from the PVTU file
 
         # Extract the spatial coordinates and velocity components from the mesh
@@ -91,7 +92,7 @@ def normalize_all(data, u_tau, delta_tau):
 
     logger.info("Normalizing data...")
 
-    for timestep, df in data:
+    for timestep, df in tqdm(data):
         # Copy the DataFrame to preserve original data
         df_copy = df.copy()
 
@@ -135,9 +136,12 @@ def process_velocity_data(data, N):
     logger.info(f"Processing velocity data for the last {N} timesteps.")
 
     # Aggregate data from the last N timesteps to compute averages and fluctuations
-    for timestep, df in data[-N:]:
+    for timestep, df in tqdm(data[-N:]):
         df["timestep"] = timestep  # Temporarily add timestep to differentiate data
         recent_data = pd.concat([recent_data, df], ignore_index=True)
+        logger.debug(
+            "Data from timestep {} added to data to be averaged.".format(timestep)
+        )
 
     # Calculate mean and standard deviation for u, v, w across the recent data
     averaged_data = (
@@ -155,7 +159,7 @@ def process_velocity_data(data, N):
     ]  # Clear column names
 
     # Process each individual dataset for detailed fluctuation analysis
-    for timestep, df in data:
+    for timestep, df in tqdm(data):
         y_means = averaged_data.loc[df["y"]]
         df_processed = df.copy()
         df_processed["U"] = df["u"]
@@ -168,6 +172,7 @@ def process_velocity_data(data, N):
         # Ensure no 'timestep' column remains in the output data
         df_processed.drop(columns="timestep", inplace=True, errors="ignore")
         processed_data.append((timestep, df_processed))
+        logger.debug("Data from timestep {} processed.".format(timestep))
 
     # Prepare averaged data for output
     averaged_data = averaged_data.reset_index()
@@ -207,7 +212,7 @@ if __name__ == "__main__":
         help="Number of most recent timesteps to include in the averaging process.",
     )
     parser.add_argument(
-        "--output_file",
+        "--output_path",
         type=str,
         required=True,
         help="Path to the output .csv file.",
@@ -249,9 +254,11 @@ if __name__ == "__main__":
     del normalized_data
 
     # Save the averaged data to a CSV file
-    output_file: str = args.output_file
-    averaged_data.to_csv(output_file, index=False)
-    logger.info(f"Averaged data saved to {output_file}")
+    output_path: str = args.output_file
+    output_filename = "averaged_data.csv"
+    output_filepath = os.path.join(output_path, output_filename)
+    averaged_data.to_csv(output_filepath, index=False)
+    logger.info(f"Averaged data saved to {output_filepath}")
 
     # Clean up
     del averaged_data
