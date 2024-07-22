@@ -140,7 +140,7 @@ else:
 ### *****************************************************
 ### TIMESCALES ******************************************
 
-baseline_duration = 1404  # to converge with velocity max = 1
+baseline_duration = 1228.6  # to converge with velocity max = 1
 baseline_time_start = 0.0
 
 delta_t_smooth = 0.25  # ACTION DURATION smooth law duration
@@ -361,7 +361,7 @@ if probes_location == 5:
 
 ## CREATION OF WITNESS FILE
 need_witness_file_override: bool = (
-    True  # Whether to overwrite the witness file if exists, True overwrites existing file
+    False  # Whether to overwrite the witness file if exists, True overwrites existing file
 )
 
 case_folder = f"alya_files/case_{case}"

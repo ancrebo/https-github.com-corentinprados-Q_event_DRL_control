@@ -1,7 +1,7 @@
 $------------------------------------------------------------
 RUN_DATA                                                     
   ALYA                chan180
-$  RUN_TYPE:           nonconti, PRELIMINARY, FREQUENCY=8000 
+$  RUN_TYPE:           nonconti, PRELIMINARY, FREQUENCY=200 
   RUN_TYPE:           conti, PRELIMINARY, FREQUENCY=200 
   LATEX_INFO_FILE:    Yes                                
   LIVE_INFORMATION:   Screen                             

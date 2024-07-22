@@ -58,8 +58,24 @@ END_NUMERICAL_TREATMENT
 $------------------------------------------------------------
 OUTPUT_&_POST_PROCESS  
   START_POSTPROCES_AT       STEP  = 0
-  POSTPROCESS VELOCITY      STEPS = 1
-  POSTPROCESS PRESSURE      STEPS = 1
+  POSTPROCESS VELOCITY      STEPS = 100
+  POSTPROCESS PRESSURE      STEPS = 100
+  POSTPROCESS AVVEL         STEPS = 100
+$  POSTPROCESS USTAR         STEPS = 100 $ this produces an error requesting additional coded properties
+$  POSTPROCESS VESGS         STEPS = 100 $ this produces a segmentation error
+  POSTPROCESS YPLUS         STEPS = 100
+  POSTPROCESS DUDT          STEPS = 100
+  POSTPROCESS D2UDT         STEPS = 100
+  POSTPROCESS TURMU         STEPS = 100
+  POSTPROCESS AVMUT         STEPS = 100
+  POSTPROCESS EIGEN         STEPS = 100
+  POSTPROCESS SCASS         STEPS = 100
+  WITNESS_POINTS
+    VELOX,
+    VELOY,
+    VELOZ,
+    PRESS
+  END_WITNESS
 END_OUTPUT_&_POST_PROCESS  
 $------------------------------------------------------------
 BOUNDARY_CONDITIONS
