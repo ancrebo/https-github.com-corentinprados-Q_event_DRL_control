@@ -1315,6 +1315,9 @@ class Environment(Environment):
     # TODO: figure out structure/type of actions in `execute` argument @pietero
     def execute(self, actions: np.ndarray) -> Tuple[np.ndarray, bool, float]:
 
+        print(f"Environment.reset: actions = {actions}")
+        print(f"Environment.reset: self.action = {self.action}")
+
         action: List[np.ndarray] = []
         # action = []
         if case == "cylinder":
@@ -1328,7 +1331,9 @@ class Environment(Environment):
         # action.append(-self.optimization_params["norm_Q"]*actions[i-self.actions_per_inv])
 
         self.previous_action = self.action  # save the older one to smooth the change
+        print(f"Previous action: {self.previous_action}")
         self.action = action  # update the new to reach at the end of smooth
+        print(f"New action: {self.action}")
 
         # Write the action
         self.save_this_action()
