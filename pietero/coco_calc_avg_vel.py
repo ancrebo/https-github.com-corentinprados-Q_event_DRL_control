@@ -233,13 +233,19 @@ if __name__ == "__main__":
     directory_path: str = args.directory
     file_name: str = "channel.pvd"
 
+    output_path: str = args.output_path
+    output_filename = "averaged_data.csv"
+    output_filepath = os.path.join(output_path, output_filename)
+
+    N: int = args.N  # Averaging over the last N timesteps
+
+    u_tau: float = args.u_tau
+    delta_tau: float = args.delta_tau
+
     # Load the data and store it in `data`
     data: List[Tuple[float, pd.DataFrame]] = load_data_and_convert_to_dataframe(
         directory_path, file_name
     )
-
-    u_tau: float = args.u_tau
-    delta_tau: float = args.delta_tau
 
     # Normalize the data
     normalized_data: List[Tuple[float, pd.DataFrame]] = normalize_all(
@@ -248,15 +254,11 @@ if __name__ == "__main__":
 
     del data
 
-    N: int = args.N  # Averaging over the last N timesteps
     averaged_data, _ = process_velocity_data(normalized_data, N)
 
     del normalized_data
 
     # Save the averaged data to a CSV file
-    output_path: str = args.output_path
-    output_filename = "averaged_data.csv"
-    output_filepath = os.path.join(output_path, output_filename)
     averaged_data.to_csv(output_filepath, index=False)
     logger.info(f"Averaged data saved to {output_filepath}")
 
