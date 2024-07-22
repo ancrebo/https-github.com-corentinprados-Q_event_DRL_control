@@ -79,7 +79,7 @@ def run_subprocess(
 
     # Build command to run
     if use_new_env:
-        runbin = "run_reward_in_new_env.sh " + runbin  # Prepend the shell script
+        runbin = "run_reward_in_new_env_NEW.sh " + runbin  # Prepend the shell script
     cmd_bin = (
         _cmd_parallel(f"{runbin} {runargs}", **kwargs)
         if parallel
