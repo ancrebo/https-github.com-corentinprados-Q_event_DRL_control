@@ -177,7 +177,7 @@ def read_last_wit(
     if probe_type == "velocity":
         vel_components = ["VELOX", "VELOY", "VELOZ"]
         for comp in vel_components:
-            result_data[comp.lower()] = data[comp]
+            result_data[comp] = data[comp]
     else:
         raise ValueError(
             "Witness.py: read_last_wit: Invalid `probe_type`: must be 'pressure' or 'velocity'"
