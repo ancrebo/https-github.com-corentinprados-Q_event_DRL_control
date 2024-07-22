@@ -1309,15 +1309,18 @@ class Environment(Environment):
         self.previous_action = self.action  # save the older one to smooth the change
         self.action = action  # update the new to reach at the end of smooth
 
-        # Write the action
-        self.save_this_action()
+        if case == "cylinder":
+            # Write the action
+            self.save_this_action()
 
         if case == "cylinder":
             print(f"New flux computed for INV: {self.ENV_ID}  :\n\tQs : {self.action}")
         elif case == "airfoil":
             pass
         elif case == "channel":
-            print(f"New action computed for INV: {self.ENV_ID}  :\n\tQs : {self.action}")
+            print(
+                f"New action computed for INV: {self.ENV_ID}  :\n\tQs : {self.action}"
+            )
 
         dir_name = os.path.join(
             "alya_files",
