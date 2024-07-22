@@ -971,7 +971,9 @@ class Environment(Environment):
             NotImplementedError: If the neighbor state is True.
         """
         print(f"Environment.list_observation_updated: {self.ENV_ID}: starting ...\n")
-        print(f"Environment.list_observation_updated: {self.ENV_ID}: self.probes_values_global_dict.keys() = {self.probes_values_global_dict.keys()}\n")
+        print(
+            f"Environment.list_observation_updated: {self.ENV_ID}: self.probes_values_global_dict.keys() = {self.probes_values_global_dict.keys()}\n"
+        )
         if not self.neighbor_state:
             probe_type = self.output_params["probe_type"]
             batch_size_probes = int(
