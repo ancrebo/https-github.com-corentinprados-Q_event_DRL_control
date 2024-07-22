@@ -11,6 +11,7 @@ from plotly.subplots import make_subplots  # For 3D interactive plot
 from scipy.ndimage import label  # Function to count the number of clusters
 import plotly.express as px  # Package to color each clusters different Path # To have an absolute path
 from pathlib import Path
+from tqdm import tqdm  # For progress bar
 
 # Argument parsing
 parser = argparse.ArgumentParser(
@@ -70,7 +71,7 @@ logger.info("Libraries imported successfully.")
 
 
 def load_data_and_give_average_velocity(directory, file_name):
-
+    logger.info("Loading data and calculating average velocity...")
     # Parse the PVD file to extract mappings of timesteps to their corresponding PVTU files
     pvd_path = os.path.join(
         directory, file_name
@@ -86,8 +87,9 @@ def load_data_and_give_average_velocity(directory, file_name):
     sum_u, sum_v, sum_w = 0, 0, 0
     count = 0
 
+    # Wrap in tqdm for progress bar
     # Process each PVTU file
-    for path in file_list:
+    for path in tqdm(file_list, desc="Loading data", unit="file"):
         mesh = pv.read(path)  # Read the mesh data from the PVTU file
         # Accumulate the velocity components
         u, v, w = mesh["VELOC"].T
@@ -96,7 +98,8 @@ def load_data_and_give_average_velocity(directory, file_name):
         sum_w += w
 
         count += 1
-        logger.debug("Data from %s loaded and velocity components added.", path)
+        filename = os.path.basename(path)
+        logger.debug("Data from %s loaded and velocity components added.", filename)
 
     # Calculate the average of the velocity components
     avg_u = sum_u / count
@@ -127,7 +130,7 @@ def load_data_and_give_average_velocity(directory, file_name):
         .rename(columns={"mean": "bar"}, level=1)
     )
     data_avg.columns = ["U_bar", "V_bar", "W_bar"]  # Clear column names
-
+    logger.info("Average velocity calculated successfully.")
     return data_avg
 
 
@@ -144,7 +147,7 @@ def load_data_and_give_RMS_velocity(directory, file_name, mean_velocities):
     Returns:
     pd.DataFrame: DataFrame with RMS velocity components for each y-coordinate.
     """
-
+    logger.info("Loading data and calculating RMS velocity fluctuations...")
     # Parse the PVD file to extract mappings of timesteps to their corresponding PVTU files
     pvd_path = os.path.join(
         directory, file_name
@@ -163,7 +166,7 @@ def load_data_and_give_RMS_velocity(directory, file_name, mean_velocities):
     count = 0
 
     # Process each PVTU file
-    for path in file_list:
+    for path in tqdm(file_list, desc="Loading data", unit="file"):
         mesh = pv.read(path)  # Read the mesh data from the PVTU file
 
         # Extract velocity components
@@ -195,8 +198,8 @@ def load_data_and_give_RMS_velocity(directory, file_name, mean_velocities):
         sum_w2 += df["w_fluc"] ** 2
 
         count += 1
-
-        logger.debug("Data from %s loaded and velocity components added.", path)
+        filename = os.path.basename(path)
+        logger.debug("Data from %s loaded and velocity components added.", filename)
 
     # Calculate the RMS of the velocity fluctuations
     rms_u = (sum_u2 / count) ** 0.5
@@ -224,7 +227,7 @@ def load_data_and_give_RMS_velocity(directory, file_name, mean_velocities):
 
     # Rename columns for clarity
     rms_velocities.columns = ["u_prime", "v_prime", "w_prime"]
-
+    logger.info("RMS velocity fluctuations calculated successfully.")
     return rms_velocities
 
 
@@ -283,6 +286,7 @@ def normalize_data(mean_velocities, rms_velocities, nu):
     - rms_velocities_normalized (DataFrame): DataFrame with the same columns as rms_velocities,
       where the RMS velocity components and y-coordinate have been normalized.
     """
+    logger.info("Normalizing the velocity profiles...")
     # Calculate u_tau based on the mean velocities
     y = mean_velocities.index.values
     u_y = mean_velocities["U_bar"]
@@ -328,7 +332,7 @@ def normalize_data(mean_velocities, rms_velocities, nu):
 
     mean_velocities_normalized.set_index("y", inplace=True)
     rms_velocities_normalized.set_index("y", inplace=True)
-
+    logger.info("Velocity profiles normalized successfully.")
     return mean_velocities_normalized, rms_velocities_normalized, u_tau, delta_tau
 
 
@@ -435,86 +439,87 @@ def plot_velocity_normalize_profiles(mean_velocities, rms_velocities):
     plt.show()
 
 
-# Old directory
-# directory_path = Path('/Users/corentinprados/Documents/Stage_M2/testALYA.nosync/Ancien/long_run/vtk_for_average_vtk')
+if __name__ == "__main__":
+    # Old directory
+    # directory_path = Path('/Users/corentinprados/Documents/Stage_M2/testALYA.nosync/Ancien/long_run/vtk_for_average_vtk')
 
-# Last directory
-directory_path = Path(
-    "/scratch/pietero/baseline/prados_recent/re180_min_channel_900_RESTART_WITNESS_18nproc/vtk_for_average"
-)
-file_name = "channel.pvd"
+    # Last directory
+    directory_path = Path(
+        "/scratch/pietero/baseline/prados_recent/re180_min_channel_900_RESTART_WITNESS_18nproc/vtk_for_average"
+    )
+    file_name = "channel.pvd"
 
-# Small
-# directory_path = Path('/Users/corentinprados/Documents/Stage_M2/Q_event_DRL_control/ALYA/longer_run_vtk')
+    # Small
+    # directory_path = Path('/Users/corentinprados/Documents/Stage_M2/Q_event_DRL_control/ALYA/longer_run_vtk')
 
-mean_velocities = load_data_and_give_average_velocity(directory_path, file_name)
+    mean_velocities = load_data_and_give_average_velocity(directory_path, file_name)
 
-rms_velocities = load_data_and_give_RMS_velocity(
-    directory_path, file_name, mean_velocities
-)
+    rms_velocities = load_data_and_give_RMS_velocity(
+        directory_path, file_name, mean_velocities
+    )
 
-# plot_velocity_profiles(directory_path, mean_velocities, rms_velocities)
+    # plot_velocity_profiles(directory_path, mean_velocities, rms_velocities)
 
-# Need to calculate normalized profiles before plotting them!!!
-# Normalisation
+    # Need to calculate normalized profiles before plotting them!!!
+    # Normalisation
 
-nu = 0.0003546986585888876
-mean_velocities_normalized, rms_velocities_normalized, u_tau, delta_tau = (
-    normalize_data(mean_velocities, rms_velocities, nu)
-)
+    nu = 0.0003546986585888876
+    mean_velocities_normalized, rms_velocities_normalized, u_tau, delta_tau = (
+        normalize_data(mean_velocities, rms_velocities, nu)
+    )
 
-# Re_tau
-h = 1
-Re_tau = u_tau / nu * h
-logger.info("Calculated Re_tau: %f", Re_tau)
+    # Re_tau
+    h = 1
+    Re_tau = u_tau / nu * h
+    logger.info("Calculated Re_tau: %f", Re_tau)
 
-# t_tau
-t_tau = delta_tau / u_tau
-logger.info("Calculated t_tau: %f", t_tau)
+    # t_tau
+    t_tau = delta_tau / u_tau
+    logger.info("Calculated t_tau: %f", t_tau)
 
-t_i = 891.744
-t_i_plus = t_i / t_tau
-logger.info("Calculated t_i_plus: %f", t_i_plus)
+    t_i = 891.744
+    t_i_plus = t_i / t_tau
+    logger.info("Calculated t_i_plus: %f", t_i_plus)
 
-t_f = 1376.61
-t_f_plus = t_f / t_tau
-logger.info("Calculated t_f_plus: %f", t_f_plus)
+    t_f = 1376.61
+    t_f_plus = t_f / t_tau
+    logger.info("Calculated t_f_plus: %f", t_f_plus)
 
-# U_b
-U_b = mean_velocities["U_bar"].mean()
-logger.info("Calculated U_b: %f", U_b)
+    # U_b
+    U_b = mean_velocities["U_bar"].mean()
+    logger.info("Calculated U_b: %f", U_b)
 
-# t_w
-L_x = 2.67
-t_w = L_x / U_b
-t_w_plus = t_w / t_tau
-logger.info("Calculated t_w: %f", t_w)
-logger.info("Calculated t_w_plus: %f", t_w_plus)
+    # t_w
+    L_x = 2.67
+    t_w = L_x / U_b
+    t_w_plus = t_w / t_tau
+    logger.info("Calculated t_w: %f", t_w)
+    logger.info("Calculated t_w_plus: %f", t_w_plus)
 
-## Save calculated values to a csv file
-calculated_values = {
-    "u_tau": u_tau,
-    "delta_tau": delta_tau,
-    "Re_tau": Re_tau,
-    "t_tau": t_tau,
-    "t_i": t_i,
-    "t_i_plus": t_i_plus,
-    "t_f": t_f,
-    "t_f_plus": t_f_plus,
-    "U_b": U_b,
-    "t_w": t_w,
-    "t_w_plus": t_w_plus,
-}
+    ## Save calculated values to a csv file
+    calculated_values = {
+        "u_tau": u_tau,
+        "delta_tau": delta_tau,
+        "Re_tau": Re_tau,
+        "t_tau": t_tau,
+        "t_i": t_i,
+        "t_i_plus": t_i_plus,
+        "t_f": t_f,
+        "t_f_plus": t_f_plus,
+        "U_b": U_b,
+        "t_w": t_w,
+        "t_w_plus": t_w_plus,
+    }
 
-# Convert dictionary to DataFrame
-df_calculated_values = pd.DataFrame(
-    list(calculated_values.items()), columns=["Parameter", "Value"]
-)
+    # Convert dictionary to DataFrame
+    df_calculated_values = pd.DataFrame(
+        list(calculated_values.items()), columns=["Parameter", "Value"]
+    )
 
-# Save DataFrame to CSV
-output_file_path = logs_dir / "calculated_values.csv"
-df_calculated_values.to_csv(output_file_path, index=False)
+    # Save DataFrame to CSV
+    output_file_path = logs_dir / "calculated_values.csv"
+    df_calculated_values.to_csv(output_file_path, index=False)
 
-logger.info(f"Calculated values saved to {output_file_path}")
+    logger.info(f"Final calculated values saved to {output_file_path}")
 
-# plot_velocity_normalize_profiles(mean_velocities_normalized, rms_velocities_normalized)
+    # plot_velocity_normalize_profiles(mean_velocities_normalized, rms_velocities_normalized)
