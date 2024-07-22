@@ -1481,7 +1481,7 @@ class Environment(Environment):
                 )
                 averaged_data_path = os.path.join(
                     directory_post,
-                    "averaged_data.csv",
+                    "calculated_data",
                 )
                 output_folder_path_reward = os.path.join(
                     directory_post,
@@ -1506,16 +1506,15 @@ class Environment(Environment):
                 # Launches a subprocess to calculate the reward
                 # Must use a separate conda environment for compatibility
                 runpath_vtk = "./"
-                runbin_vtk = "python3 calc_reward.py"
+                runbin_vtk = "python3 coco_calc_reward.py"
 
                 runargs_vtk = (
                     f"--directory {directory_vtk} "
                     f"--Lx {reward_params['Lx']} "
-                    f"--Ly {reward_params['Ly']} "
                     f"--Lz {reward_params['Lz']} "
                     f"--H {reward_params['H']} "
-                    f"--n {reward_params['nx_Qs']} "
-                    f"--m {reward_params['nz_Qs']} "
+                    f"--nx {reward_params['nx_Qs']} "
+                    f"--nz {reward_params['nz_Qs']} "
                     f"--averaged_data_path {averaged_data_path} "
                     f"--output_file {output_file_path}"
                 )
@@ -1567,7 +1566,7 @@ class Environment(Environment):
         reward: float = self.compute_reward()
         self.save_reward(
             reward
-        )  # TODO: @pietero Is this still needed? All rewards are saved by `calc_reward.py`- Pieter
+        )  # TODO: @pietero Is this still needed? All rewards are saved by `coco_calc_reward.py`- Pieter
         print(f"reward: {reward}")
 
         print(f"The actual action is {self.action_count} of {nb_actuations}")
