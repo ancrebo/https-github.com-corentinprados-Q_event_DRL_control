@@ -51,16 +51,28 @@ from parameters import (
     optimization_params,
     output_params,
     history_parameters,
-    nb_proc,
     nb_actuations,
     nb_actuations_deterministic,
 )
 from env_utils import (
     run_subprocess,
+    detect_system,
     find_highest_timestep_file,
     copy_mpio2vtk_required_files,
     printDebug,
 )
+
+# Import system-specific parameters
+if detect_system() == "LOCAL":
+    from parameters import (
+        num_servers_ws as num_servers,
+        nb_proc_ws as nb_proc,
+    )
+else:
+    from parameters import (
+        num_servers,
+        nb_proc,
+    )
 from alya import (
     write_case_file,
     write_witness_file,
