@@ -1519,17 +1519,18 @@ class Environment(Environment):
                 print(
                     f"ENV_ID {self.ENV_ID}: Assigned directory post: {directory_post}\n"
                 )
-                print(f"ENV_ID {self.ENV_ID}: Probe Type: {self.probe_type}\n")
-                if self.probe_type == "velocity":
+
+                print(f"ENV_ID {self.ENV_ID}: Probe Type: {self.output_params['probe_type']}\n")
+                if self.output_params["probe_type"] == "velocity":
                     post_name = "VELOC"
                     print(f"ENV_ID {self.ENV_ID}: Assigned post name: {post_name}\n")
-                elif self.probe_type == "pressure":
+                elif self.output_params["probe_type"] == "pressure":
                     post_name = "PRESS"
                     print(f"ENV_ID {self.ENV_ID}: Assigned post name: {post_name}\n")
                 else:
                     post_name = None
                     raise NotImplementedError(
-                        f"{self.ENV_ID}: execute: post.mpio.bin associated with type {self.probe_type} not implemented yet"
+                        f"{self.ENV_ID}: execute: post.mpio.bin associated with type {self.output_params['probe_type']} not implemented yet"
                     )
 
                 print(
