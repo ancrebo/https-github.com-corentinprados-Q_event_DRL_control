@@ -745,6 +745,10 @@ class Environment(Environment):
         action_line = f"{self.action_count}"
         print(f"Action line: {action_line}")
 
+        # Debug the content and length of self.action
+        print(f"self.action: {self.action}")
+        print(f"self.actions_per_inv: {self.actions_per_inv}")
+
         for i in range(self.actions_per_inv):
             action_line += f"; {self.action[i]}"
             print(f"Action line: {action_line}")
