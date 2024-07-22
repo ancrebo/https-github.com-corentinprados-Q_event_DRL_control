@@ -1532,11 +1532,16 @@ class Environment(Environment):
                         f"{self.ENV_ID}: execute: post.mpio.bin associated with type {self.output_params['probe_type']} not implemented yet"
                     )
 
+                print(
+                    f"ENV_ID {self.ENV_ID}: Identifying the file with the highest timestep...\n"
+                )
                 # Identify the file with the highest timestep
                 last_post_file = find_highest_timestep_file(
                     directory_post, f"{self.case}", f"{post_name}"
                 )
-                print(f"ENV_ID {self.ENV_ID}: Last postprocess file: {last_post_file}\n")
+                print(
+                    f"ENV_ID {self.ENV_ID}: Last postprocess file: {last_post_file}\n"
+                )
 
                 # Copy the identified file to a specific directory for processing
                 target_directory = os.path.join(directory_post, "final_post_of_action")
