@@ -1516,8 +1516,10 @@ class Environment(Environment):
                     f"EP_{self.episode_number}",
                 )
 
-                print(f"ENV_ID {self.ENV_ID}: Assigned directory post: {directory_post}\n")
-
+                print(
+                    f"ENV_ID {self.ENV_ID}: Assigned directory post: {directory_post}\n"
+                )
+                print(f"ENV_ID {self.ENV_ID}: Probe Type: {self.probe_type}\n")
                 if self.probe_type == "velocity":
                     post_name = "VELOC"
                     print(f"ENV_ID {self.ENV_ID}: Assigned post name: {post_name}\n")
