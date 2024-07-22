@@ -80,7 +80,8 @@ def run_subprocess(
     # Build command to run
     if use_new_env:
         runbin = (
-            "/scratch/pietero/andres_clone/DRL_POL/run_reward_in_new_env_NEW.sh " + runbin
+            "/scratch/pietero/andres_clone/DRL_POL/run_reward_in_new_env_NEW.sh "
+            + runbin
         )  # Prepend the shell script
     cmd_bin = (
         _cmd_parallel(f"{runbin} {runargs}", **kwargs)
@@ -93,8 +94,8 @@ def run_subprocess(
     # DEBUG
     print(f"Running command: {cmd}")
     print(f"Current working directory: {os.getcwd()}")
-    print(f"Environment PATH: {os.environ['PATH']}")
-    print(f"Environment variables: {os.environ}")
+    # print(f"Environment PATH: {os.environ['PATH']}")
+    # print(f"Environment variables: {os.environ}")
 
     # # Execute run
     # retval = subprocess.call(cmd, shell=True)  # old version
