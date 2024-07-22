@@ -970,6 +970,7 @@ class Environment(Environment):
             NotImplementedError: If the probe type is not supported.
             NotImplementedError: If the neighbor state is True.
         """
+        print(f"Environment.list_observation_updated: {self.ENV_ID}: starting ...")
         if not self.neightbor_state:
             probe_type = self.output_params["probe_type"]
             batch_size_probes = int(
@@ -1264,7 +1265,7 @@ class Environment(Environment):
             self.norm_factors,
             NWIT_TO_READ,
         )
-
+        print(f"Env3D_MARL_channel.Environment.reset: probes_values_global_dict returned, about to filter probes per jet (corresponding to the ENV.ID[])\n\n\n")
         # filter probes per jet (corresponding to the ENV.ID[])
         probes_values_2 = self.list_observation_updated()
         print(
