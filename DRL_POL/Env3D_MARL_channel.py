@@ -1007,6 +1007,9 @@ class Environment(Environment):
                         self.ENV_ID[1] * batch_size_probes
                     )
                 ]
+                print(
+                    f"Environment.list_observation_updated: {self.ENV_ID}: pressure selected, len(probes_values_2) = {len(probes_values_2)}"
+                )
             elif probe_type == "velocity":
                 vel_components = ["VELOX", "VELOY", "VELOZ"]
                 probes_values_2 = []
@@ -1020,6 +1023,9 @@ class Environment(Environment):
                     probes_values_2.append(slice_data)
                 # Flatten the array in column-major order
                 probes_values_2 = np.array(probes_values_2).flatten(order="F")
+                print(
+                    f"Environment.list_observation_updated: {self.ENV_ID}: velocity selected, len(probes_values_2) = {len(probes_values_2)}"
+                )
             else:
                 raise NotImplementedError(
                     f"Env3D_MARL_channel: list_obervation_update: Probe type {probe_type} not implemented yet"
@@ -1029,6 +1035,9 @@ class Environment(Environment):
             raise NotImplementedError(
                 "Env3D_MARL_channel: list_obervation_update: Neighbor state True not implemented yet"
             )
+        print(
+            f"Environment.list_observation_updated: {self.ENV_ID}: about to return `probes_values_2`"
+        )
 
         return probes_values_2
 
