@@ -29,6 +29,7 @@ from configuration import (
     ALYA_VTK,
     OVERSUBSCRIBE,
     DEBUG,
+    USE_SLURM,
 )
 from parameters import (
     bool_restart,
@@ -1424,7 +1425,6 @@ class Environment(Environment):
                     for row in lines:
                         last_action = float(row[1].strip())
 
-                    print(f"ENV_ID {self.ENV_ID}: Last action of {self.ENV_ID[0]}_{i+1}: {last_action}")
                     print(
                         f"ENV_ID {self.ENV_ID}: Last action of {self.ENV_ID[0]}_{i+1}: {last_action}"
                     )
@@ -1433,7 +1433,9 @@ class Environment(Environment):
                     print(
                         f"ENV_ID {self.ENV_ID}: New action of {self.ENV_ID[0]}_{i+1}: {self.action_global[i]}"
                     )
-            print(f"ENV_ID {self.ENV_ID}: All actions merged successfully to {self.action_global}\n")
+            print(
+                f"ENV_ID {self.ENV_ID}: All actions merged successfully to {self.action_global}\n"
+            )
 
             print(f"ENV_ID {self.ENV_ID}: Starting to update the time interval file\n")
             write_time_interval(
@@ -1572,6 +1574,7 @@ class Environment(Environment):
                     mem_per_srun=mem_per_srun,
                     num_nodes_srun=num_nodes_srun,
                     host=self.nodelist,
+                    slurm=USE_SLURM,
                 )
                 print(
                     f"\n{self.ENV_ID}: execute: VTK file created for episode {self.episode_number} action {self.action_count}\n"
