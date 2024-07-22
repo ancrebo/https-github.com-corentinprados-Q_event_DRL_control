@@ -254,7 +254,7 @@ if __name__ == "__main__":
     del normalized_data
 
     # Save the averaged data to a CSV file
-    output_path: str = args.output_file
+    output_path: str = args.output_path
     output_filename = "averaged_data.csv"
     output_filepath = os.path.join(output_path, output_filename)
     averaged_data.to_csv(output_filepath, index=False)
