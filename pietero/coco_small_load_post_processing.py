@@ -99,6 +99,7 @@ def load_data_and_give_average_velocity(directory, file_name):
 
         count += 1
         filename = os.path.basename(path)
+        tqdm.write("Data from %s loaded and velocity components added." % filename)
         logger.debug("Data from %s loaded and velocity components added.", filename)
 
     # Calculate the average of the velocity components
@@ -440,6 +441,14 @@ def plot_velocity_normalize_profiles(mean_velocities, rms_velocities):
 
 
 if __name__ == "__main__":
+    # First check if output file already exists:
+    output_file_path = logs_dir / "calculated_values.csv"
+    if output_file_path.exists():
+        logger.info(
+            f"Output file {output_file_path} already exists. Please back it up or delete it before running the script."
+        )
+        exit()
+
     # Old directory
     # directory_path = Path('/Users/corentinprados/Documents/Stage_M2/testALYA.nosync/Ancien/long_run/vtk_for_average_vtk')
 
