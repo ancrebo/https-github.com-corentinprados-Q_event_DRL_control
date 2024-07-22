@@ -88,6 +88,10 @@ def run_subprocess(
     cmd = f"cd {runpath} && {cmd_bin} {arg_log}"  # TODO: DARDEL DEBUG ONGOING
     # print('POOOOOOOOOOOOOL --> cmd: %s' % cmd)
 
+    # Print the command and current working directory
+    print(f"Running command: {cmd}")
+    print(f"Current working directory: {os.getcwd()}")
+
     # # Execute run
     # retval = subprocess.call(cmd, shell=True)  # old version
 
