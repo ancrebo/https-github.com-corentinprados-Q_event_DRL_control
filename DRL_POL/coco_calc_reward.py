@@ -305,8 +305,8 @@ def calculate_reward_full(
         f"First few rows of pre-calculated values DataFrame:\n{precalc_values.head()}"
     )
 
-    u_tau = precalc_values["u_tau"].values[0]
-    delta_tau = precalc_values["delta_tau"].values[0]
+    u_tau = precalc_values.iloc[0, 1]
+    delta_tau = precalc_values.iloc[1, 1]
 
     data_normalized = normalize_all_single(data, u_tau, delta_tau)
 
