@@ -1399,9 +1399,10 @@ class Environment(Environment):
             ## NOW READY TO MERGE ACTIONS:
             # append and reading file
             # open the file for reading
-
+            print(f"Starting to merge the actions for episode {self.episode_number}")
             for i in range(self.nb_inv_per_CFD):
                 path_action_file = f"actions/{self.host}/{self.ENV_ID[0]}_{i+1}/ep_{self.episode_number}/output_actions.csv"
+                print(f"ENV_ID {self.ENV_ID}: Reading action file: {path_action_file}")
                 with open(path_action_file, "r") as file:
                     # read the lines of the file into a list
                     lines = csv.reader(file, delimiter=";")
@@ -1413,7 +1414,7 @@ class Environment(Environment):
                     for row in lines:
                         last_action = float(row[1].strip())
 
-                    # print("POOOOOOOOOOL -> last action : ", last_action)
+                    print("POOOOOOOOOOL -> last action : ", last_action)
                     self.previous_action_global[i] = self.action_global[i]
                     self.action_global[i] = last_action
 
