@@ -1296,11 +1296,12 @@ class Environment(Environment):
 
         action: List[np.ndarray] = []
         # action = []
-        for i in range(self.actions_per_inv):
-            action.append(self.optimization_params["norm_Q"] * actions[i])
-            action.append(
-                -self.optimization_params["norm_Q"] * actions[i]
-            )  # This is to ensure 0 mass flow rate in the jets
+        if case == "cylinder":
+            for i in range(self.actions_per_inv):
+                action.append(self.optimization_params["norm_Q"] * actions[i])
+                action.append(
+                    -self.optimization_params["norm_Q"] * actions[i]
+                )  # This is to ensure 0 mass flow rate in the jets
 
         # for i in range(self.actions_per_inv, self.actions_per_inv*2):
         # action.append(-self.optimization_params["norm_Q"]*actions[i-self.actions_per_inv])
@@ -1311,7 +1312,12 @@ class Environment(Environment):
         # Write the action
         self.save_this_action()
 
-        print(f"New flux computed for INV: {self.ENV_ID}  :\n\tQs : {self.action}")
+        if case == "cylinder":
+            print(f"New flux computed for INV: {self.ENV_ID}  :\n\tQs : {self.action}")
+        elif case == "airfoil":
+            pass
+        elif case == "channel":
+            print(f"New action computed for INV: {self.ENV_ID}  :\n\tQs : {self.action}")
 
         dir_name = os.path.join(
             "alya_files",
