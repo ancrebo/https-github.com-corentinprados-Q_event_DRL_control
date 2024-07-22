@@ -48,6 +48,20 @@ h_qevent_sensitivity: float = (
 n_agents_x: int = 2  # Number of agents along x direction
 n_agents_z: int = 2  # Number of agents along z direction
 
+# THESE VALUES ARE CALCULATED FROM `coco_small_load_post_processing.py` and are specific to THIS BASELINE! - Pieter
+# Check `calculated_values.csv` in baseline folder for these values
+u_tau: float = 0.04871566388520865
+delta_tau: float = 0.007280998149274599
+Re_tau: float = 137.343806370783
+t_tau: float = 0.14945907678547107
+t_i: float = 891.744
+t_i_plus: float = 5966.47603597861
+t_f: float = 1376.61
+t_f_plus: float = 9210.614902806761
+U_b: float = 0.8975133576311723
+t_w: float = 2.974886086427719
+t_w_plus: float = 19.9043520835993
+
 
 #### Reynolds cases
 #### 0 --> Re = 100
@@ -684,6 +698,7 @@ simulation_params: Dict[str, Any] = {
     "mu": mu,
     "rho": rho,
     "post_process_steps": post_process_steps,
+    "u_tau": u_tau,
 }
 
 # Variational input
@@ -779,4 +794,5 @@ reward_params: Dict[str, str] = {
     "H": str(h_qevent_sensitivity),
     "nx_Qs": str(nx_Qs),
     "nz_Qs": str(nz_Qs),
+    "u_tau": str(u_tau),
 }

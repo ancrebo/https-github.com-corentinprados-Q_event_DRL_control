@@ -121,7 +121,7 @@ def process_velocity_data(
     Args:
         data (list of tuples): Each tuple contains a timestep and a NumPy array with spatial coordinates (x, y, z)
             and instantaneous velocity components (U, V, W).
-        averaged_data (np.ndarray): Pre-calculated averaged data containing velocities ($\overline{U}(y)$, $\overline{V}(y)$, $\overline{W}(y)$)
+        averaged_data (np.ndarray): Pre-calculated averaged data containing average velocities ($\overline{U}(y)$, $\overline{V}(y)$, $\overline{W}(y)$)
             and rms of velocity fluctuations ($u'(y)$, $v'(y)$, $w'(y)$) as columns, indexed by the y-coordinate.
 
     Returns:
@@ -334,7 +334,6 @@ def calculate_reward_full(
         comments="",
     )
     print(f"Rewards saved to {output_file}")
-
 
     # Clean up # TODO: @pietero is this useful? - Pieter
 
