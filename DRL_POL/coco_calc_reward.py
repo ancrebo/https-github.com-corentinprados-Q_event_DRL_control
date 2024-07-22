@@ -41,9 +41,6 @@ def load_data_and_convert_to_dataframe_single(
         for dataset in root.find("Collection")
     }
 
-    # List to store data tuples of timestep and DataFrame
-    data_frames = []
-
     # Assuming we are only interested in a single timestep
     file, timestep = next(iter(timestep_file_map.items()))
     path = os.path.join(directory, file)
@@ -64,6 +61,8 @@ def load_data_and_convert_to_dataframe_single(
             "w": w,
         }
     )
+
+    data_frames: Tuple[float, pd.DataFrame] = (timestep, df)
 
     logger.info(f"Data from {file} at timestep {timestep} loaded into DataFrame.")
     return data_frames
@@ -288,6 +287,10 @@ def calculate_reward_full(
     precalc_value_filename = "calculated_values.csv"
     precalc_value_filepath = os.path.join(averaged_data_path, precalc_value_filename)
     precalc_values = pd.read_csv(precalc_value_filepath)
+
+    # List all precalculated values
+    logger.info(f"Pre-calculated values: {precalc_values}")
+    logger.debug(f"u_tau: {precalc_values['u_tau'].values[0]}, delta_tau: {precalc_values['delta_tau'].values[0]}")
 
     u_tau = precalc_values["u_tau"].values[0]
     delta_tau = precalc_values["delta_tau"].values[0]
