@@ -141,7 +141,7 @@ def process_velocity_data_single(
     df_processed["W"] = df["w"]
     df_processed["u"] = df["u"] - df_merged["U_bar"]
     df_processed["v"] = df["v"] - df_merged["V_bar"]
-    df_processed["w"] = df["w"] - df.merged["W_bar"]
+    df_processed["w"] = df["w"] - df_merged["W_bar"]
 
     # Ensure no 'timestep' column remains in the output data
     df_processed.drop(columns="timestep", inplace=True, errors="ignore")
