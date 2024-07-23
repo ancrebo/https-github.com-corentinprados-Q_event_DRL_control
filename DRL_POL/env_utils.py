@@ -86,7 +86,7 @@ def run_subprocess(
         else f"{runbin} {runargs}"
     )
     cmd = f"cd {runpath} && {cmd_bin} {arg_log}"  # TODO: DARDEL DEBUG ONGOING
-    # print('POOOOOOOOOOOOOL --> cmd: %s' % cmd)
+    print('POOOOOOOOOOOOOL --> cmd: %s' % cmd)
 
     # # Execute run
     # retval = subprocess.call(cmd, shell=True)  # old version
