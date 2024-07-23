@@ -96,6 +96,10 @@ def write_time_interval(filepath: str, start_time: float, end_time: float) -> No
     """
     Writes the time interval file that is included in the .dat
     """
+    # Check that file exists
+    if not os.path.exists(filepath):
+        raise FileNotFoundError(f"alya.write_time_interval: File {filepath} not found")
+
     file = open(os.path.join(filepath, "time_interval.dat"), "w")
     # Write file
     file.write(f"TIME_INTERVAL: {start_time}, {end_time}\n")
