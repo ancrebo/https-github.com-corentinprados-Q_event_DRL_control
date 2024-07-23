@@ -408,6 +408,7 @@ class Environment(Environment):
 
         elif which == "execute":
             # Actions run
+            print(f"{self.ENV_ID}: Environment.run: starting an execute run for episode {self.episode_number}")
             printDebug(
                 "\n \n Alya has started executing an action! (Env3D-->run-->execute) \n \n"
             )
@@ -434,9 +435,11 @@ class Environment(Environment):
             if self.ENV_ID[1] == 1:
 
                 write_run_type(filepath, "CONTI", freq=1000)
+                print(f"Environment.run: Starting to write time interval")
                 write_time_interval(
                     filepath, self.simulation_timeframe[0], self.simulation_timeframe[1]
                 )
+                print(f"Environment.run: Finished writing time interval")
                 casepath = os.path.join(
                     "alya_files",
                     f"{self.host}",
