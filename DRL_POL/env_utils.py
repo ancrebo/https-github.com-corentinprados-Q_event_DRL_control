@@ -8,9 +8,32 @@ from __future__ import print_function, division
 from typing import Optional, List
 import re
 import shutil
+import logging
 
 import os, subprocess
 from configuration import NODELIST, USE_SLURM, DEBUG
+
+# Set up logging
+logger = logging.getLogger(__name__)
+
+# Set up console logging
+
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.WARNING)
+formatter_console = logging.Formatter(
+    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+console_handler.setFormatter(formatter_console)
+
+# Add a file handler specific to this module
+file_handler = logging.FileHandler("env_utils.log")
+formatter_file = logging.Formatter(
+    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+file_handler.setFormatter(formatter_file)
+
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)
 
 
 def run_subprocess(
@@ -92,8 +115,10 @@ def run_subprocess(
     # print('POOOOOOOOOOOOOL --> cmd: %s' % cmd)
 
     # DEBUG
-    print(f"Running command: {cmd}")
-    print(f"Current working directory: {os.getcwd()}")
+    logger.info(f"Running command: {cmd}")
+    # print(f"Running command: {cmd}")
+    logger.debug(f"Current working directory: {os.getcwd()}")
+    # print(f"Current working directory: {os.getcwd()}")
     # print(f"Environment PATH: {os.environ['PATH']}")
     # print(f"Environment variables: {os.environ}")
 
@@ -104,7 +129,9 @@ def run_subprocess(
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
 
     # Print the stdout and stderr from the shell script
+    logger.info(result.stdout)
     print(result.stdout)
+    logger.error(result.stderr)
     print(result.stderr)
 
     # Check return
@@ -156,7 +183,8 @@ def _slurm_generate_node_list(
     start = num_cores_node.find("(")
     num_cores_node = int(num_cores_node[:start])
     num_cores_node = 100
-    print(f"POOOOOL --> SLURM_JOB_CPUS_PER_NODE: {num_cores_node}" % num_cores_node)
+    logger.debug("POOOOOL --> SLURM_NNODES: %s" % num_cores_node)
+    # print(f"POOOOOL --> SLURM_JOB_CPUS_PER_NODE: {num_cores_node}" % num_cores_node)
 
     # Query SLURM to print the nodes used for this job to a temporal file
     # read it and store it as a variable
@@ -343,4 +371,5 @@ def printDebug(*args) -> None:
     ...
     """
     if DEBUG:
+        logger.debug(*args)
         print(*args)
