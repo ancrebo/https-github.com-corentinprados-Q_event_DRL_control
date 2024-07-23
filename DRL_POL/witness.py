@@ -215,6 +215,7 @@ def read_last_wit(
     print(
         f"witness.read_last_wit: Corrected shape if needed, about to return `result_data`"
     )
+    cr_stop("WIT.read_last_wit", 0)
     return result_data
 
 
