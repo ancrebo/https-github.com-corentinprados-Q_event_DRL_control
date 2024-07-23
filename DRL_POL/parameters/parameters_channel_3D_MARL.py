@@ -383,7 +383,7 @@ need_witness_file_override: bool = (
     False  # Whether to overwrite the witness file if exists, True overwrites existing file
 )
 
-case_folder = f"alya_files/case_{case}"
+case_folder = f"alya_files/case_{training_case}"
 witness_file_path = os.path.join(case_folder, "witness.dat")
 
 if os.path.exists(witness_file_path):
