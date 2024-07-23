@@ -131,7 +131,7 @@ def run_subprocess(
     # Print the stdout and stderr from the shell script
     logger.info(result.stdout)
     print(result.stdout)
-    logger.error(result.stderr)
+    logger.debug(result.stderr)
     print(result.stderr)
 
     # Check return
