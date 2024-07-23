@@ -334,7 +334,7 @@ def calculate_reward_full(
     Lz_norm = Lz / delta_tau
 
     all_results = []
-    timestep, df = Q_event_frames[0]  # Since there is only one timestep
+    timestep, df = Q_event_frames  # Since there is only one timestep
 
     result_df = calculate_local_Q_ratios(df, nx, nz, Lx_norm, Lz_norm)
     result_df["timestep"] = timestep
