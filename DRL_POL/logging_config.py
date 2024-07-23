@@ -3,6 +3,7 @@ from typing import Dict, Any
 import logging
 
 ## This file sets the logging levels for the project
+# IN GENERAL: logging messages should use %s formatting, not f-strings
 
 # Possible logging levels (for reference)
 possible_logging_levels = {
