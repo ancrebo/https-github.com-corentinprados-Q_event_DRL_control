@@ -41,9 +41,6 @@ def load_data_and_convert_to_dataframe_single(
         for dataset in root.find("Collection")
     }
 
-    # List to store data tuples of timestep and DataFrame
-    data_frames = []
-
     # Assuming we are only interested in a single timestep
     file, timestep = next(iter(timestep_file_map.items()))
     path = os.path.join(directory, file)
@@ -64,6 +61,8 @@ def load_data_and_convert_to_dataframe_single(
             "w": w,
         }
     )
+
+    data_frames: Tuple[float, pd.DataFrame] = (timestep, df)
 
     logger.info(f"Data from {file} at timestep {timestep} loaded into DataFrame.")
     return data_frames
@@ -126,14 +125,23 @@ def process_velocity_data_single(
     logger.info("Processing velocity data using loaded averaged data...")
 
     # Process the dataset for detailed fluctuation analysis
-    y_means = averaged_data.loc[df["y"]]
+    # y_means = averaged_data.loc[df["y"]]
+    # logger.debug(f"y_means: {y_means}")
+    # logger.debug(f"y_means columns: {y_means.columns.tolist()}")
+    # logger.debug(f"y_means index: {y_means.index}")
+
+    df_merged = pd.merge(df, averaged_data, on="y", how="left")
+
     df_processed = df.copy()
     df_processed["U"] = df["u"]
     df_processed["V"] = df["v"]
     df_processed["W"] = df["w"]
-    df_processed["u"] = df["u"] - y_means["U_bar"].values
-    df_processed["v"] = df["v"] - y_means["V_bar"].values
-    df_processed["w"] = df["w"] - y_means["W_bar"].values
+    df_processed["u"] = df["u"] - df_merged["U_bar"]
+    df_processed["v"] = df["v"] - df_merged["V_bar"]
+    df_processed["w"] = df["w"] - df_merged["W_bar"]
+
+    # Ensure no 'timestep' column remains in the output data
+    df_processed.drop(columns="timestep", inplace=True, errors="ignore")
 
     logger.info("Velocity data processing complete.")
 
@@ -289,8 +297,29 @@ def calculate_reward_full(
     precalc_value_filepath = os.path.join(averaged_data_path, precalc_value_filename)
     precalc_values = pd.read_csv(precalc_value_filepath)
 
-    u_tau = precalc_values["u_tau"].values[0]
-    delta_tau = precalc_values["delta_tau"].values[0]
+    # List all precalculated values
+    logger.debug(f"Pre-calculated values: {precalc_values}")
+    # logger.debug(
+    #     f"u_tau: {precalc_values['u_tau'].values[0]}, delta_tau: {precalc_values['delta_tau'].values[0]}"
+    # )
+
+    # List all pre-calculated values
+    logger.debug(f"Pre-calculated values DataFrame:\n{precalc_values}")
+    logger.debug(
+        f"Columns in pre-calculated values DataFrame: {precalc_values.columns.tolist()}"
+    )
+
+    # Print first few rows of the pre-calculated values DataFrame
+    logger.debug(
+        f"First few rows of pre-calculated values DataFrame:\n{precalc_values.head()}"
+    )
+
+    u_tau = precalc_values.iloc[
+        0, 1
+    ]  # HARDCODED TO u_tau location in file saved by `coco_calc_avg_vel.py` - Pieter
+    delta_tau = precalc_values.iloc[
+        1, 1
+    ]  # HARDCODED TO delta_tau location in file saved by `coco_calc_avg_vel.py` - Pieter
 
     data_normalized = normalize_all_single(data, u_tau, delta_tau)
 
@@ -306,7 +335,7 @@ def calculate_reward_full(
     Lz_norm = Lz / delta_tau
 
     all_results = []
-    timestep, df = Q_event_frames[0]  # Since there is only one timestep
+    timestep, df = Q_event_frames  # Since there is only one timestep
 
     result_df = calculate_local_Q_ratios(df, nx, nz, Lx_norm, Lz_norm)
     result_df["timestep"] = timestep
