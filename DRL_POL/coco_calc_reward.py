@@ -125,10 +125,12 @@ def process_velocity_data_single(
     logger.info("Processing velocity data using loaded averaged data...")
 
     # Process the dataset for detailed fluctuation analysis
-    y_means = averaged_data.loc[df["y"]]
-    logger.debug(f"y_means: {y_means}")
-    logger.debug(f"y_means columns: {y_means.columns.tolist()}")
-    logger.debug(f"y_means index: {y_means.index}")
+    # y_means = averaged_data.loc[df["y"]]
+    # logger.debug(f"y_means: {y_means}")
+    # logger.debug(f"y_means columns: {y_means.columns.tolist()}")
+    # logger.debug(f"y_means index: {y_means.index}")
+
+    df_merged = pd.merge(df, averaged_data, on="y", how="left")
 
     df_processed = df.copy()
     logger.debug(f"df_processed columns: {df_processed.columns.tolist()}")
@@ -137,9 +139,12 @@ def process_velocity_data_single(
     df_processed["U"] = df["u"]
     df_processed["V"] = df["v"]
     df_processed["W"] = df["w"]
-    df_processed["u"] = df["u"] - y_means["U_bar"].values
-    df_processed["v"] = df["v"] - y_means["V_bar"].values
-    df_processed["w"] = df["w"] - y_means["W_bar"].values
+    df_processed["u"] = df["u"] - df_merged["U_bar"]
+    df_processed["v"] = df["v"] - df_merged["V_bar"]
+    df_processed["w"] = df["w"] - df.merged["W_bar"]
+
+    # Ensure no 'timestep' column remains in the output data
+    df_processed.drop(columns="timestep", inplace=True, errors="ignore")
 
     logger.info("Velocity data processing complete.")
 
