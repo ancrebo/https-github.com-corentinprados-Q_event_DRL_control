@@ -408,7 +408,9 @@ class Environment(Environment):
 
         elif which == "execute":
             # Actions run
-            print(f"{self.ENV_ID}: Environment.run: starting an execute run for episode {self.episode_number}")
+            print(
+                f"{self.ENV_ID}: Environment.run: starting an execute run for episode {self.episode_number}"
+            )
             printDebug(
                 "\n \n Alya has started executing an action! (Env3D-->run-->execute) \n \n"
             )
@@ -431,9 +433,11 @@ class Environment(Environment):
                 filepath_flag_sync, f"action_end_flag_{self.action_count}"
             )
             time.sleep(0.1)
-
+            print(
+                f"ENV_ID {self.ENV_ID} is starting to wait for ENV_ID [1, 1] to start and finish ALYA run"
+            )
             if self.ENV_ID[1] == 1:
-
+                print(f"Environment.run: Starting ENV_ID [1, 1] specific section")
                 write_run_type(filepath, "CONTI", freq=1000)
                 print(f"Environment.run: Starting to write time interval")
                 write_time_interval(
@@ -1287,7 +1291,9 @@ class Environment(Environment):
 
         # filter probes per jet (corresponding to the ENV.ID[])
         probes_values_2 = self.list_observation_updated()
-        print("\n\n\nEnv3D_MARL_channel.Environment.reset: probes_values_2 being returned to Tensorforce!!!\n\n\n")
+        print(
+            "\n\n\nEnv3D_MARL_channel.Environment.reset: probes_values_2 being returned to Tensorforce!!!\n\n\n"
+        )
         return probes_values_2
 
     # -----------------------------------------------------------------------------------------------------
