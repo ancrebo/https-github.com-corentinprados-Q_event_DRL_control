@@ -145,7 +145,7 @@ num_servers_ws = 1
 ### RUN BASELINE ****************************************
 use_MARL = True
 
-nb_inv_per_CFD = 10  # same as nz_Qs¿¿¿ # TODO: @pietero is this necessary with nTotal_Qs defined later? - Pieter
+nb_inv_per_CFD = 4  # same as nz_Qs¿¿¿ # TODO: @pietero is this necessary with nTotal_Qs defined later? - Pieter
 actions_per_inv = 1  # how many actions to control per pseudoenvironment
 batch_size = nb_inv_per_CFD * num_servers
 # frontal_area = Lz / nb_inv_per_CFD
