@@ -13,27 +13,10 @@ import logging
 import os, subprocess
 from configuration import NODELIST, USE_SLURM, DEBUG
 
-# Set up logging
-logger = logging.getLogger(__name__)
+from logging_config import configure_logger
 
-# Set up console logging
-
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.WARNING)
-formatter_console = logging.Formatter(
-    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-console_handler.setFormatter(formatter_console)
-
-# Add a file handler specific to this module
-file_handler = logging.FileHandler("env_utils.log")
-formatter_file = logging.Formatter(
-    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-file_handler.setFormatter(formatter_file)
-
-logger.addHandler(file_handler)
-logger.addHandler(console_handler)
+# Set up logger
+logger = configure_logger(__name__, default_level="WARNING")
 
 
 def run_subprocess(
