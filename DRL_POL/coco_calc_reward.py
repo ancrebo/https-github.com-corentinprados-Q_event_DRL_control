@@ -8,6 +8,7 @@ import pandas as pd  # For data manipulation and DataFrame creation
 from typing import Tuple, List
 from pathlib import Path
 import gc
+from env_utils import agent_index_2d_to_1d
 
 # Configure logging
 logging.basicConfig(
@@ -346,9 +347,11 @@ def calculate_reward_full(
     for i in range(nx):
         for j in range(nz):
             reward = calculate_reward(final_result_df, i, j)
-            rewards.append({"x_index": i, "z_index": j, "reward": reward})
+            env_id = agent_index_2d_to_1d(i, j, nz)  # Converted 2D index to 1D
+            rewards.append({"ENV_ID": env_id, "reward": reward})
 
     reward_df = pd.DataFrame(rewards)
+
     reward_df.to_csv(output_file, index=False)
     logger.info(f"Rewards saved to {output_file}!")
 
