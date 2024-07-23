@@ -31,6 +31,11 @@ from env_utils import (
 )
 from configuration import ALYA_ULTCL
 
+from logging_config import configure_logger
+
+# Set up logger
+logger = configure_logger(__name__, default_level="WARNING")
+
 # Parser for command line arguments
 # example use: `python3 PARALLEL_TRAINING.py --case cylinder_2D`
 parser = argparse.ArgumentParser(
@@ -57,16 +62,19 @@ run_subprocess("./", ALYA_ULTCL, "", preprocess=True)
 
 # Set up which case to run
 training_case = args.case
-
+logger.info("PARALLEL_TRAINING: Running case: %s", training_case)
+logger.debug("PARALLEL_TRAINING: Cleaning up old files...")
 run_subprocess(
     "./", "rm -f", "parameters.py", preprocess=True
 )  # Ensure deleting old parameters
+logger.debug("PARALLEL_TRAINING: Copying parameters for %s ...", training_case)
 run_subprocess(
     "./",
     "ln -s",
     f"parameters/parameters_{training_case}.py parameters.py",
     preprocess=True,
 )
+logger.debug("PARALLEL_TRAINING: Copying case files for %s ...", training_case)
 run_subprocess("alya_files", "cp -r", f"case_{training_case} case", preprocess=True)
 
 from Env3D_MARL_channel import Environment
@@ -84,11 +92,13 @@ from parameters import (
 
 # Import system-specific parameters
 if detect_system() == "LOCAL":
+    logger.debug("PARALLEL_TRAINING: Detected LOCAL system.")
     from parameters import (
         num_servers_ws as num_servers,
         nb_proc_ws as nb_proc,
     )
 else:
+    logger.debug("PARALLEL_TRAINING: Detected SLURM system.")
     from parameters import (
         num_servers,
         nb_proc,
@@ -117,6 +127,7 @@ initial_time = time.time()
 
 # Generate the list of nodes
 # TODO --- ADD NUM_CFD (MARL)
+logger.debug("PARALLEL_TRAINING: Generating node list...")
 generate_node_list(num_servers=num_servers, num_cores_server=nb_proc)
 # TODO: check if this works in MN!
 # TODO: Update to local nodelists with num_servers
@@ -125,15 +136,22 @@ generate_node_list(num_servers=num_servers, num_cores_server=nb_proc)
 nodelist = read_node_list()
 
 # IMPORTANT: this environment base is needed to do the baseline, the main one
+logger.debug("PARALLEL_TRAINING: Creating base environment...")
 environment_base = Environment(simu_name=simu_name, node=nodelist[0])  # Baseline
-print(f"\nDEBUG: Environment Base ENV_ID: {environment_base.ENV_ID}\n")
+logger.debug(
+    "PARALLEL_TRAINING: Created base environment with ENV_ID %s",
+    environment_base.ENV_ID,
+)
+# print(f"\nDEBUG: Environment Base ENV_ID: {environment_base.ENV_ID}\n")
 
 if run_baseline:
+    logger.info("PARALLEL_TRAINING: `run_baseline` is TRUE, running baseline...")
     run_subprocess("alya_files", "rm -rf", "baseline")  # Ensure deleting old parameters
     environment_base.run_baseline(True)
 
 network = [dict(type="dense", size=512), dict(type="dense", size=512)]
 
+logger.debug("PARALLEL_TRAINING: Creating agent...")
 agent = Agent.create(
     # Agent + Environment
     agent="ppo",
@@ -173,6 +191,7 @@ agent = Agent.create(
         summaries=["entropy", "kl-divergence", "loss", "reward", "update-norm"],
     ),
 )
+logger.debug("PARALLEL_TRAINING: Created agent.")
 
 
 def split(
@@ -219,10 +238,15 @@ def split(
 #         list_inv_envs.append(env)
 #     return list_inv_envs
 
-
-print("Here is the nodelist: ", nodelist)
+logger.info("PARALLEL_TRAINING: nodelist: %s", nodelist)
+# print("Here is the nodelist: ", nodelist)
 
 # here the array of environments is defined, will be n-1 host (the 1st one is MASTER) #TODO: assign more nodes to an environment
+logger.info(
+    "PARALLEL_TRAINING: Creating %d parallel environments for %d separate CFD environments...",
+    num_servers,
+    num_servers,
+)
 parallel_environments = [
     Environment(
         simu_name=simu_name,
@@ -236,6 +260,10 @@ parallel_environments = [
 if "nx_Qs" not in globals():
     nx_Qs = 1
 
+logger.info(
+    "PARALLEL_TRAINING: Splitting environments into %d local environments...",
+    nx_Qs * nz_Qs,
+)
 environments = [
     split(parallel_environments[i], i + 1, nx_Qs, nz_Qs)[j]
     for i in range(num_servers)
@@ -244,9 +272,16 @@ environments = [
 
 for env in environments:
     env_id_2d = agent_index_1d_to_2d(env.ENV_ID[1], nz_Qs)
-    print(
-        f"Verif : Host: {env.host:<20} ID: {str(env.ENV_ID):<10} Agent 1D Index: {env.ENV_ID[1]:<5} 2D Index: {str(env_id_2d):<10}"
+    logger.info(
+        "Verif:   Host: %s ID: %s Agent 1D Index: %s 2D Index: %s",
+        env.host,
+        env.ENV_ID,
+        env.ENV_ID[1],
+        env_id_2d,
     )
+    # print(
+    #     f"Verif : Host: {env.host:<20} ID: {str(env.ENV_ID):<10} Agent 1D Index: {env.ENV_ID[1]:<5} 2D Index: {str(env_id_2d):<10}"
+    # )
 
 time.sleep(1.0)
 
@@ -257,12 +292,16 @@ for e in environments:
 
 # start all environments at the same time
 # TODO: needs a toy case for the start class a 'light' baseline for everyone which is useless
+logger.info("PARALLEL_TRAINING: Starting all environments at the same time...")
 runner = Runner(agent=agent, environments=environments, remote="multiprocessing")
 
+logger.info("PARALLEL_TRAINING: Running training for %d episodes...", num_episodes)
 # now start the episodes and sync_episodes is very useful to update the DANN efficiently
 runner.run(num_episodes=num_episodes, sync_episodes=sync_episodes)
 runner.close()
+logger.info("PARALLEL_TRAINING: Training completed!!!")
 
+logger.info("PARALLEL_TRAINING: Saving model data in model-numpy format...")
 # saving all the model data in model-numpy format
 agent.save(
     directory=os.path.join(os.getcwd(), "model-numpy"),
@@ -270,14 +309,18 @@ agent.save(
     append="episodes",
 )
 
+logger.info("PARALLEL_TRAINING: Closing agent...")
 agent.close()
 
 end_time = time.time()
 
-print(
-    f"DRL simulation :\nStart at : {initial_time}.\nEnd at {end_time}\nDone in : {end_time - initial_time}"
-)
+logger.info("PARALLEL_TRAINING: Start at: %s", initial_time)
+logger.info("PARALLEL_TRAINING: End at: %s", end_time)
+logger.info("PARALLEL_TRAINING: Done in: %s", end_time - initial_time)
+# print(
+#     f"DRL simulation :\nStart at : {initial_time}.\nEnd at {end_time}\nDone in : {end_time - initial_time}"
+# )
 
-
+logger.info("PARALLEL_TRAINING: Creating CR report...")
 cr_info()
 cr_report("DRL_TRAINING.csv")
