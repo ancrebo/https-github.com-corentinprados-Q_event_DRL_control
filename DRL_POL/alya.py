@@ -7,17 +7,41 @@
 from __future__ import print_function, division
 
 import os, subprocess
+import logging
 from typing import Union, List, Tuple
 import numpy as np
 
 from configuration import ALYA_GMSH, ALYA_INCON
 from env_utils import run_subprocess
 
+# Set up logging
+logger = logging.getLogger(__name__)
+
+# Create console handler
+ch = logging.StreamHandler()
+formatter_ch = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+ch.setFormatter(formatter_ch)
+
+# Create file handler
+fh = logging.FileHandler("pythonDRL-alya.log")
+formatter_fh = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+fh.setFormatter(formatter_fh)
+
+# Add handlers to the logger
+logger.addHandler(ch)
+logger.addHandler(fh)
+
 
 def run_mesh(runpath, casename, ndim, ini_vel=None):
     """
     Use pyAlya tools to generate the mesh from gmsh
     """
+    logger.debug(
+        "alya.run_mesh: Running mesh generation in %s with casename %s and ndim %d",
+        runpath,
+        casename,
+        ndim,
+    )
     # Build arguments string
     # Convert from GMSH to ALYA
     if ini_vel is None:
@@ -34,6 +58,12 @@ def run_mesh(runpath, casename, ndim, ini_vel=None):
     run_subprocess(os.path.join(runpath, "mesh"), ALYA_INCON, args)
     # Symbolic link the mesh to the case main folder
     run_subprocess(runpath, "ln", "-s mesh/*.mpio.bin .")
+    logger.debug(
+        "alya.run_mesh: Finished running mesh generation in %s with casename %s and ndim %d",
+        runpath,
+        casename,
+        ndim,
+    )
 
 
 ### Functions to write ALYA configuration files ###
@@ -43,6 +73,12 @@ def write_case_file(filepath: str, casename: str, simu_name: str) -> None:
     """
     Writes the casename.dat file
     """
+    logger.debug(
+        "alya.write_case_file: Writing .dat file to %s with casename %s and simu_name %s",
+        filepath,
+        casename,
+        simu_name,
+    )
     file = open(os.path.join(filepath, f"{casename}.dat"), "w")
     file.write(
         f"""$-------------------------------------------------------------------
@@ -80,22 +116,46 @@ END_MPI_IO
 $-------------------------------------------------------------------"""
     )
     file.close()
+    logger.debug(
+        "alya.write_case_file: Finished writing .dat file to %s with casename %s and simu_name %s",
+        filepath,
+        casename,
+        simu_name,
+    )
 
 
 def write_run_type(filepath: str, type: str, freq: int = 1) -> None:
     """
     Writes the run type file that is included in the .dat
     """
+    logger.debug(
+        "alya.write_run_type: Writing run type file to %s with type %s and freq %d",
+        filepath,
+        type,
+        freq,
+    )
     file = open(os.path.join(filepath, "run_type.dat"), "w")
     # Write file
     file.write(f"RUN_TYPE: {type}, PRELIMINARY, FREQUENCY={freq}\n")
     file.close()
+    logger.debug(
+        "alya.write_run_type: Finished writing run type file to %s with type %s and freq %d",
+        filepath,
+        type,
+        freq,
+    )
 
 
 def write_time_interval(filepath: str, start_time: float, end_time: float) -> None:
     """
     Writes the time interval file that is included in the .dat
     """
+    logger.debug(
+        "alya.write_time_interval: Writing time interval file to %s with interval %f, %f",
+        filepath,
+        start_time,
+        end_time,
+    )
     # Check that file exists
     if not os.path.exists(filepath):
         raise FileNotFoundError(f"alya.write_time_interval: File {filepath} not found")
@@ -104,9 +164,18 @@ def write_time_interval(filepath: str, start_time: float, end_time: float) -> No
     # Write file
     file.write(f"TIME_INTERVAL: {start_time}, {end_time}\n")
     file.close()
+    logger.debug(
+        "alya.write_time_interval: Finished writing time interval file to %s with interval %f, %f",
+        filepath,
+        start_time,
+        end_time,
+    )
 
 
 def detect_last_timeinterval(filename: str) -> Union[float, None]:
+    logger.debug(
+        "alya.detect_last_timeinterval: Detecting last time interval in %s", filename
+    )
     # Open the file in read mode
     with open(filename, "r") as file:
         # Read all lines from the file
@@ -124,11 +193,19 @@ def detect_last_timeinterval(filename: str) -> Union[float, None]:
                 # Split the substring by comma to get individual values
                 values = substring.split(",")
 
-                # If there are values after 'TIME_INTERVAL:', return the first one
+                # If there are values after 'TIME_INTERVAL:', return the LAST one
                 if len(values) > 1:
+                    logger.debug(
+                        "alya.detect_last_timeinterval: Found time interval in %s, returning last value %s",
+                        filename,
+                        values[1].strip(),
+                    )
                     return float(values[1].strip())
 
     # If no values are found after 'TIME_INTERVAL:', return None
+    logger.debug(
+        "alya.detect_last_timeinterval: No time interval found in %s", filename
+    )
     return None
 
 
@@ -136,6 +213,7 @@ def write_dom_file(filepath: str, casename: str, ncpus: int) -> None:
     """
     Write the case_name.dom.dat
     """
+    logger.debug("alya.write_dom_file: Writing .dom.dat file to %s", filepath)
     file = open(os.path.join(filepath, "%s.dom.dat" % casename), "w")
     file.write(
         """$------------------------------------------------------------
@@ -168,6 +246,7 @@ $-------------------------------------------------------------"""
         % (casename, ncpus)
     )
     file.close()
+    logger.debug("alya.write_dom_file: Finished writing .dom.dat file to %s", filepath)
 
 
 def write_ker_file(
@@ -184,6 +263,7 @@ def write_ker_file(
 
     postprocess can include CODNO, MASSM, COMMU, EXNOR
     """
+    logger.debug("alya.write_ker_file: Writing .ker.dat file to %s", filepath)
     # Create jet includes
     jet_includes = ""
     for jet in jetlist:
@@ -231,12 +311,17 @@ END_OUTPUT_&_POST_PROCESS
 $------------------------------------------------------------"""
     )
     file.close()
+    logger.debug("alya.write_ker_file: Finished writing .ker.dat file to %s", filepath)
 
 
 def write_physical_properties(filepath: str, rho: float, mu: float) -> None:
     """
     Writes the physical properties file that is included in the .ker.dat
     """
+    logger.debug(
+        "alya.write_physical_properties: Writing physical properties file to %s",
+        filepath,
+    )
     file = open(os.path.join(filepath, "physical_properties.dat"), "w")
     # Write file
     file.write("MATERIAL: 1\n")
@@ -244,12 +329,17 @@ def write_physical_properties(filepath: str, rho: float, mu: float) -> None:
     file.write(f"  VISCOSITY: CONSTANT, VALUE={mu}\n")
     file.write("END_MATERIAL\n")
     file.close()
+    logger.debug(
+        "alya.write_physical_properties: Finished writing physical properties file to %s",
+        filepath,
+    )
 
 
 def write_inflow_file(filepath: str, functions: List[str]) -> None:
     """
     Writes the inflow file that is included in the .ker.dat
     """
+    logger.debug("alya.write_inflow_file: Writing inflow file to %s", filepath)
     file = open(os.path.join(filepath, "inflow.dat"), "w")
     # Write file
     file.write(f"FUNCTION=INFLOW, DIMENSION={len(functions)}\n")
@@ -257,12 +347,14 @@ def write_inflow_file(filepath: str, functions: List[str]) -> None:
         file.write(f"  {f}\n")
     file.write("END_FUNCTION\n")
     file.close()
+    logger.debug("alya.write_inflow_file: Finished writing inflow file to %s", filepath)
 
 
 def write_jet_file(filepath: str, name: str, functions: List[str]) -> None:
     """
     Writes the inflow file that is included in the .ker.dat
     """
+    logger.debug("alya.write_jet_file: Writing jet file %s to %s" % name, filepath)
     file = open(os.path.join(filepath, f"{name}.dat"), "w")
     # Write file
     file.write(f"FUNCTION={name.upper()}, DIMENSION={len(functions)}\n")
@@ -270,6 +362,9 @@ def write_jet_file(filepath: str, name: str, functions: List[str]) -> None:
         file.write(f"  {f}\n")
     file.write("END_FUNCTION\n")
     file.close()
+    logger.debug(
+        "alya.write_jet_file: Finished writing jet file %s to %s" % name, filepath
+    )
 
 
 def write_witness_file(
@@ -283,6 +378,11 @@ def write_witness_file(
         filepath (str): The path where the witness.dat file will be written.
         probes_positions (np.ndarray): An array of probe positions.
     """
+    logger.debug(
+        "alya.write_witness_file: Writing witness file to %s with %int witness points",
+        filepath,
+        len(probes_positions),
+    )
     # Ensure the directory exists
     os.makedirs(filepath, exist_ok=True)
 
@@ -308,6 +408,11 @@ def write_witness_file(
 
         # Write end
         file.write("END_WITNESS_POINTS\n")
+        logger.debug(
+            "alya.write_witness_file: Finished writing witness file to %s with %int witness points",
+            filepath,
+            len(probes_positions),
+        )
 
 
 def write_nsi_file(
@@ -321,6 +426,11 @@ def write_nsi_file(
 
     postprocess can include VELOC, PRESS, etc.
     """
+    logger.debug(
+        "alya.write_nsi_file: Writing .nsi.dat file to %s with casename %s",
+        filepath,
+        casename,
+    )
     # Create variable postprocess
     if witlist is None:
         witlist = ["VELOX", "VELOY", "VELOZ", "PRESS"]
@@ -418,3 +528,8 @@ END_BOUNDARY_CONDITIONS
 $------------------------------------------------------------"""
     )
     file.close()
+    logger.debug(
+        "alya.write_nsi_file: Finished writing .nsi.dat file to %s with casename %s",
+        filepath,
+        casename,
+    )
