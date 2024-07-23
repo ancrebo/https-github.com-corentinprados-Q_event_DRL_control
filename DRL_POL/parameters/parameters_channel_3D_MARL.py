@@ -100,7 +100,7 @@ Lz = 0.8 * h
 
 num_episodes = 2000  # Total number of episodes
 if Re_case != 5:
-    nb_actuations = 120  # Number of actuation of the neural network for each episode (ACTIONS/EPISODE)
+    nb_actuations = 2  # Number of actuation of the neural network for each episode (ACTIONS/EPISODE)
 else:
     nb_actuations = 200
 
