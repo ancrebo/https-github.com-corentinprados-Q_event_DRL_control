@@ -11,6 +11,7 @@ AUTHORS ->  POL
 
 ## IMPORT PYTHON LIBRARIES
 import os, csv, numpy as np
+import logging
 import sys
 import inspect
 import shutil
@@ -29,6 +30,7 @@ from configuration import (
     ALYA_VTK,
     OVERSUBSCRIBE,
     DEBUG,
+    USE_SLURM,
 )
 from parameters import (
     bool_restart,
@@ -1513,6 +1515,7 @@ class Environment(Environment):
                     mem_per_srun=mem_per_srun,
                     num_nodes_srun=num_nodes_srun,
                     host=self.nodelist,
+                    slurm=USE_SLURM,
                 )
                 print(
                     f"\n{self.ENV_ID}: execute: VTK file created for episode {self.episode_number} action {self.action_count}\n"

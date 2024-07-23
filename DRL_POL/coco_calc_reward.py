@@ -134,6 +134,9 @@ def process_velocity_data_single(
     df_merged = pd.merge(df, averaged_data, on="y", how="left")
 
     df_processed = df.copy()
+    logger.debug(f"df_processed columns: {df_processed.columns.tolist()}")
+    logger.debug(f"df_processed index: {df_processed.index}")
+    logger.debug(f"df_processed y values: {df_processed['y'].values}")
     df_processed["U"] = df["u"]
     df_processed["V"] = df["v"]
     df_processed["W"] = df["w"]
