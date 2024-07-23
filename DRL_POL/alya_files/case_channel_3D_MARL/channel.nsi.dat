@@ -1,14 +1,14 @@
 $------------------------------------------------------------
 PHYSICAL_PROBLEM                                             
- PROBLEM_DEFINITION
-   TEMPORAL_DERIVATIVES      ON
-   CONVECTIVE_TERM           EMAC
-   VISCOUS_TERM              DIVERGENCE
-   FORCE_TERM:               MATERIAL 
-     MATERIAL=1, MODEL=CONSTANT, PARAMETERS= 0.0040762808843141035 0.0 0.0
-   END_FORCE_TERM  
-$   TURBULENCE_COUPLING:      LESMO, VRMAN, PARAM = 0.1
- END_PROBLEM_DEFINITION
+  PROBLEM_DEFINITION
+    TEMPORAL_DERIVATIVES      ON
+    CONVECTIVE_TERM           EMAC
+    VISCOUS_TERM              DIVERGENCE
+    FORCE_TERM:               MATERIAL 
+      MATERIAL=1, MODEL=CONSTANT, PARAMETERS= 0.0040762808843141035 0.0 0.0
+    END_FORCE_TERM  
+$    TURBULENCE_COUPLING:      LESMO, VRMAN, PARAM = 0.1
+  END_PROBLEM_DEFINITION
 END_PHYSICAL_PROBLEM                                         
 $------------------------------------------------------------
  NUMERICAL_TREATMENT 
@@ -27,7 +27,7 @@ $------------------------------------------------------------
   GRAD_DIV:                 ON
   ASSEMBLY:                 GPU2
 
-  ALGORITHM:               SEMI_IMPLICIT $FRACTIONAL_STEP
+  ALGORITHM:                SEMI_IMPLICIT $FRACTIONAL_STEP
   END_ALGORITHM
 
   MOMENTUM
@@ -63,13 +63,13 @@ OUTPUT_&_POST_PROCESS
   POSTPROCESS AVVEL         STEPS = 100
 $  POSTPROCESS USTAR         STEPS = 100 $ this produces an error requesting additional coded properties
 $  POSTPROCESS VESGS         STEPS = 100 $ this produces a segmentation error
-  POSTPROCESS YPLUS         STEPS = 100
-  POSTPROCESS DUDT          STEPS = 100
-  POSTPROCESS D2UDT         STEPS = 100
-  POSTPROCESS TURMU         STEPS = 100
-  POSTPROCESS AVMUT         STEPS = 100
-  POSTPROCESS EIGEN         STEPS = 100
-  POSTPROCESS SCASS         STEPS = 100
+$  POSTPROCESS YPLUS         STEPS = 100
+$  POSTPROCESS DUDT          STEPS = 100
+$  POSTPROCESS D2UDT         STEPS = 100
+$  POSTPROCESS TURMU         STEPS = 100
+$  POSTPROCESS AVMUT         STEPS = 100
+$  POSTPROCESS EIGEN         STEPS = 100
+$  POSTPROCESS SCASS         STEPS = 100
   WITNESS_POINTS
     VELOX,
     VELOY,
@@ -80,10 +80,11 @@ END_OUTPUT_&_POST_PROCESS
 $------------------------------------------------------------
 BOUNDARY_CONDITIONS
   PARAMETERS
-     $FIX_PRESSURE: AUTO
-     INITIAL VALUE_FUNCTION = 1 ! use field 1 for initial condition
-     VARIATION_NON_CONSTANT
+    $FIX_PRESSURE: AUTO
+    INITIAL VALUE_FUNCTION = 1 ! use field 1 for initial condition
+    VARIATION_NON_CONSTANT
   END_PARAMETERs
+$  INCLUDE boundary_codes.dat
   CODES, NODES
    1   111   0.0 0.0 0.0 
    2   111   0.0 0.0 0.0 
