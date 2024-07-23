@@ -8,28 +8,17 @@ from __future__ import print_function, division
 
 import os, subprocess
 import logging
+
 from typing import Union, List, Tuple
 import numpy as np
 
 from configuration import ALYA_GMSH, ALYA_INCON
 from env_utils import run_subprocess
 
-# Set up logging
-logger = logging.getLogger(__name__)
+from logging_config import configure_logger
 
-# Create console handler
-ch = logging.StreamHandler()
-formatter_ch = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-ch.setFormatter(formatter_ch)
-
-# Create file handler
-fh = logging.FileHandler("pythonDRL-alya.log")
-formatter_fh = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-fh.setFormatter(formatter_fh)
-
-# Add handlers to the logger
-logger.addHandler(ch)
-logger.addHandler(fh)
+# Set up logger
+logger = configure_logger(__name__, default_level="WARNING")
 
 
 def run_mesh(runpath, casename, ndim, ini_vel=None):
