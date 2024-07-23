@@ -74,6 +74,7 @@ logging_config_dict: Dict[str, Dict[str, Any]] = {
 }
 
 
+# TODO: @pietero use `funcName` to automatically add the function name to the log - Pieter
 def configure_logger(module_name: str, default_level: str = "INFO") -> logging.Logger:
     logger = logging.getLogger(module_name)
     if module_name in logging_config_dict:
@@ -103,6 +104,9 @@ def configure_logger(module_name: str, default_level: str = "INFO") -> logging.L
         # Console handler
         ch = logging.StreamHandler()
         ch.setLevel(console_level)
+        formatter_ch_funcname = logging.Formatter(
+            "%(asctime)s - %(name)s.%(funcName)s - %(levelname)s - %(message)s"
+        )
         formatter_ch = logging.Formatter(
             "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
         )
@@ -115,6 +119,9 @@ def configure_logger(module_name: str, default_level: str = "INFO") -> logging.L
             os.makedirs("pythonlogs")
         fh = logging.FileHandler(f"pythonlogs/{module_name}.log")
         fh.setLevel(file_level)
+        formatter_fh_funcname = logging.Formatter(
+            "%(asctime)s - %(name)s.%(funcName)s - %(levelname)s - %(message)s"
+        )
         formatter_fh = logging.Formatter(
             "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
         )
