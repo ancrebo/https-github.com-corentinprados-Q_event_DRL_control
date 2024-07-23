@@ -10,8 +10,31 @@ from __future__ import print_function, division
 
 from typing import Tuple, TextIO, Dict, Union, List, Any
 
+import logging
+
 import os, numpy as np
 from cr import cr_start, cr_stop
+
+# Set up logging
+logger = logging.getLogger(__name__)
+
+# Set up console handler
+console_handler = logging.StreamHandler()
+formatter_console = logging.Formatter(
+    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+console_handler.setFormatter(formatter_console)
+
+# Set up file handler
+file_handler = logging.FileHandler("witness.log")
+formatter_file = logging.Formatter(
+    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+file_handler.setFormatter(formatter_file)
+
+# Add handlers to logger
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
 
 
 def readWitnessHeader(file: TextIO) -> Dict[str, Union[int, Dict[str, int]]]:
@@ -155,12 +178,20 @@ def read_last_wit(
     function that skips all the data from the entire time domain and gives the last value from nsi.wit
     expected increase the IO time extracting probes to send, restart are so much quicker
     """
-    # TODO: case name cannot be hardcoded as cylinder and should be passed as input - Pol
-    # TODO: implement crashes - Pol
     cr_start("WIT.read_last_wit", 0)
+    logger.info(
+        "witness.read_last_wit: Starting to process the last witness file at %s ...",
+        filename,
+    )
 
     # Read witness file
     itw, timew, data = witnessReadNByBehind(filename, n_to_read)
+    logger.debug(
+        "witness.read_last_wit: Finished reading the last witness file at %s", filename
+    )
+
+    logger.debug("witness.read_last_wit: Length of data: %s", len(data))
+    logger.debug("witness.read_last_wit: keys of data: %s", data.keys())
 
     # Initialize result dictionary
     result_data = {}
@@ -176,6 +207,7 @@ def read_last_wit(
         raise ValueError(
             "Witness.py: read_last_wit: Invalid `probe_type`: must be 'pressure' or 'velocity'"
         )
+    logger.debug("witness.read_last_wit: Selected probe type: %s", probe_type)
 
     # If we have more than one instant, average them
     if n_to_read > 1:
@@ -183,6 +215,7 @@ def read_last_wit(
             result_data[key] = (
                 1.0 / (timew[-1] - timew[0]) * np.trapz(result_data[key], timew, axis=0)
             )
+        logger.info("witness.read_last_wit: Averaged %s instants", n_to_read)
 
     # Normalize the data using the provided norm dictionary
     for key in result_data.keys():
@@ -192,19 +225,15 @@ def read_last_wit(
             raise ValueError(
                 f"Witness.py: read_last_wit: Normalization value for {key} not found in norm dictionary"
             )
-
-    # if var is None:
-    #     raise ValueError("Invalid probe_type: must be 'pressure' or 'velocity'")
-    #     # raise ValueError("Crash very hard!")  # TODO: Do crash very hard
-    #
-    # # If we have more than one instant, average them
-    # if n_to_read > 1:
-    #     data[var] = 1.0 / (timew[-1] - timew[0]) * np.trapz(data[var], timew, axis=0)
+    logger.info("witness.read_last_wit: Data Normalized")
 
     # Ensure that data has the correct shape
     for key in result_data.keys():
         result_data[key] = result_data[key][0, :]  # (nprobes,)
+    logger.debug("witness.read_last_wit: keys of result_data: %s", result_data.keys())
 
+    logger.info("witness.read_last_wit: Finished witness file processing!")
+    cr_stop("WIT.read_last_wit", 0)
     return result_data
 
 
