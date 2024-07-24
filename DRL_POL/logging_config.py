@@ -94,13 +94,16 @@ def configure_logger(module_name: str, default_level: str = "INFO") -> logging.L
         if override:
             logger.handlers = []
 
-        # Set the logging level to the lowest level needed
-        logger.setLevel(
-            min(
-                possible_logging_levels[console_level],
-                possible_logging_levels[file_level],
+            # Set the logging level to the lowest level needed
+            logger.setLevel(
+                min(
+                    possible_logging_levels[console_level],
+                    possible_logging_levels[file_level],
+                )
             )
-        )
+        else:
+            # Set the logging level to the default passed via argument
+            logger.setLevel(possible_logging_levels[default_level])
 
         # Console handler
         ch = logging.StreamHandler()
