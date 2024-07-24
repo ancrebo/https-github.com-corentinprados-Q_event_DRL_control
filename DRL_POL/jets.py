@@ -17,7 +17,7 @@ from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
 # Set up logger
 logger = configure_logger(__name__, default_level=DEFAULT_LOGGING_LEVEL)
 
-logger.info("%s.py: Logging level set to %s", __name__, logger.level)
+logger.info("%s.py: Logging level set to %s\n", __name__, logger.level)
 
 
 # Function to build and return the jets
@@ -40,7 +40,7 @@ def build_jets(
     for name in names:
         jets[name] = jet_class(name, jets_definition[name], T_smoo=delta_t_smooth)
     logger.info(
-        "`build_jets`: %d %s class instances created.", len(names), jet_class.__name__
+        "`build_jets`: %d %s class instances created.\n", len(names), jet_class.__name__
     )
     return jets
 
@@ -296,7 +296,7 @@ class JetCylinder(Jet):
             Qs_position_z=self.Qs_position_z,
             delta_Q_z=self.delta_Q_z,
         )
-        logger.debug("`JetCylinder.init`: Jet %s intial update complete.", name)
+        logger.debug("`JetCylinder.init`: Jet %s intial update complete.\n", name)
 
     def set_geometry(self, params: Dict[str, Any]) -> None:
         """
@@ -397,7 +397,7 @@ class JetCylinder(Jet):
             self.Vx = f"{smooth_fun}*cos({self.theta})"
             self.Vy = f"{smooth_fun}*abs(sin({self.theta}))"  # TODO: temporal fix for component y (not opposite? check update_jet)
             self.Vz = "0"
-        logger.info("`JetCylinder.update`: Jet %s updated.", self.name)
+        logger.info("`JetCylinder.update`: Jet %s updated.\n", self.name)
 
     def create_smooth_funcs(
         self,
@@ -752,7 +752,7 @@ class JetChannel(Jet):
             self.Vx = "0"
             self.Vy = f"{smooth_fun}"
             self.Vz = "0"
-        logger.info("`JetChannel.update`: Jet %s updated.", self.name)
+        logger.info("`JetChannel.update`: Jet %s updated.\n", self.name)
 
     # TODO: Update this function for channel
 
