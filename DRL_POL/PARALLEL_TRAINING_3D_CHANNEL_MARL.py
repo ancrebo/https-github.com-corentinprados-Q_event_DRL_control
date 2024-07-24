@@ -34,9 +34,9 @@ from configuration import ALYA_ULTCL
 from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
 
 # Set up logger
-logger = configure_logger(__name__, default_level=DEFAULT_LOGGING_LEVEL)
+logger = configure_logger("PARALLEL_TRAINING_3D_MARL", default_level=DEFAULT_LOGGING_LEVEL)
 
-logger.info("%s.py: Logging level set to %s", __name__, logger.level)
+logger.info("PARALLEL_TRAINING_3D_MARL.py: Logging level set to %s",  logger.level)
 
 # Parser for command line arguments
 # example use: `python3 PARALLEL_TRAINING.py --case cylinder_2D`
