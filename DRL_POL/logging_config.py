@@ -121,7 +121,7 @@ def configure_logger(module_name: str, default_level: str = "INFO") -> logging.L
         ch = logging.StreamHandler()
         ch.setLevel(console_level)
         formatter_ch = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+            "%(name)s - %(levelname)s - %(message)s"
         )
         ch.setFormatter(formatter_ch)
         logger.addHandler(ch)
