@@ -35,10 +35,10 @@ from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
 
 # Set up logger
 logger = configure_logger(
-    "PARALLEL_TRAINING_3D_MARL", default_level=DEFAULT_LOGGING_LEVEL
+    "PARALLEL_TRAINING_3D_CHANNEL_MARL", default_level=DEFAULT_LOGGING_LEVEL
 )
 
-logger.info("PARALLEL_TRAINING_3D_MARL.py: Logging level set to %s", logger.level)
+logger.info("PARALLEL_TRAINING_3D_CHANNEL_MARL.py: Logging level set to %s", logger.level)
 
 # Parser for command line arguments
 # example use: `python3 PARALLEL_TRAINING.py --case cylinder_2D`
