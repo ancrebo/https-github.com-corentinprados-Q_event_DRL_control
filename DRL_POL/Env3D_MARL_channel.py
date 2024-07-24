@@ -379,7 +379,7 @@ class Environment(Environment):
             )
         # Run alya
         logger.info(
-            "ENV_ID %s: Env3D.run_baseline: \n\n----STARTING ALYA FOR BASELINE...----",
+            "ENV_ID %s: Env3D.run_baseline: \n\n----STARTING ALYA FOR BASELINE...----\n",
             self.ENV_ID,
         )
 
@@ -461,7 +461,7 @@ class Environment(Environment):
                     run_subprocess(casepath, "mkdir -p", "logs")  # Create logs folder
 
                     logger.info(
-                        "ENV_ID %s: Env3D.run: 2D: \n\n----STARTING ALYA BASELINE RUN!!!...----",
+                        "ENV_ID %s: Env3D.run: 2D: \n\n----STARTING ALYA BASELINE RUN!!!...----\n",
                         self.ENV_ID,
                     )
                     run_subprocess(
@@ -495,7 +495,7 @@ class Environment(Environment):
                     )  # Create logs folder
 
                     logger.info(
-                        "ENV_ID %s: Env3D.run: 3D: \n\n----STARTING ALYA BASELINE RUN!!!...----",
+                        "ENV_ID %s: Env3D.run: 3D: \n\n----STARTING ALYA BASELINE RUN!!!...----\n",
                         self.ENV_ID,
                     )
                     run_subprocess(
@@ -596,8 +596,9 @@ class Environment(Environment):
                     run_subprocess(casepath, "mkdir -p", "logs")  # Create logs folder
 
                     logger.info(
-                        "ENV_ID %s: Env3D.run: 2D: \n\n----STARTING ALYA RUN WITH UPDATED ACTIONS!!!----",
+                        "ENV_ID %s: Env3D.run: 2D: \n\n----STARTING ALYA RUN WITH UPDATED ACTIONS!!!----\nAction #%d\n",
                         self.ENV_ID,
+                        self.action_count,
                     )
                     run_subprocess(
                         casepath,
@@ -630,8 +631,9 @@ class Environment(Environment):
                     )  # Create logs folder
 
                     logger.info(
-                        "ENV_ID %s: Env3D.run: 3D: \n\n----STARTING ALYA RUN WITH UPDATED ACTIONS!!!----",
+                        "ENV_ID %s: Env3D.run: 3D: \n\n----STARTING ALYA RUN WITH UPDATED ACTIONS!!!----\nAction #%d\n",
                         self.ENV_ID,
+                        self.action_count,
                     )
                     run_subprocess(
                         casepath,
@@ -1916,9 +1918,9 @@ class Environment(Environment):
         # Start an alya run
         t0 = time.time()
 
-        logger.info("ENV_ID %s: Env3D.execute: Calling `run` method! ...", self.ENV_ID)
+        logger.debug("ENV_ID %s: Env3D.execute: Calling `run` method! ...", self.ENV_ID)
         self.run(which="execute")
-        logger.info("ENV_ID %s: Env3D.execute: `run` method complete!", self.ENV_ID)
+        logger.debug("ENV_ID %s: Env3D.execute: `run` method complete!", self.ENV_ID)
         logger.info(
             "ENV_ID %s: Env3D.execute: Time elapsed for `run`: %f",
             self.ENV_ID,
