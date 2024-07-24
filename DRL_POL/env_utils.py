@@ -112,10 +112,15 @@ def run_subprocess(
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
 
     # Print the stdout and stderr from the shell script if length is longer than 0
-    if len(result.stdout) > 0:
-        logger.info(result.stdout)
-    if len(result.stderr) > 0:
-        logger.error(result.stderr)
+    if result.stdout:
+        for line in result.stdout.splitlines():
+            logger.info(line)
+    if result.stderr:
+        for line in result.stderr.splitlines():
+            if "ERROR" in line or "Failed" in line:
+                logger.error(line)
+            else:
+                logger.info(line)
 
     # Check return
     if check_return and result.returncode != 0:
