@@ -146,3 +146,56 @@ def configure_logger(module_name: str, default_level: str = "INFO") -> logging.L
     logger.propagate = False
 
     return logger
+
+
+def configure_env_logger() -> (logging.Logger, logging.Logger):
+    """
+    Configure loggers specifically for the Environment class.
+
+    Returns:
+        tuple: A tuple containing the primary logger and file-only logger.
+    """
+    # Define the logging levels for the Environment class
+    if logging_config_dict["Env3D_MARL_channel"]["override"]:
+        console_level = logging_config_dict["Env3D_MARL_channel"][
+            "console_level"
+        ].upper()
+        file_level = logging_config_dict["Env3D_MARL_channel"]["file_level"].upper()
+    else:
+        console_level = DEFAULT_LOGGING_LEVEL
+        file_level = DEFAULT_LOGGING_LEVEL
+
+    # Create primary logger that logs to both console and file
+    primary_logger = logging.getLogger("primary_logger")
+    primary_logger.setLevel(console_level)
+
+    # Create file handler
+    if not os.path.exists("logsPYTHON"):
+        os.makedirs("logsPYTHON")
+    primary_fh = logging.FileHandler("logsPYTHON/Env3D_MARL_channel.log")
+    primary_fh.setLevel(file_level)
+    primary_formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+    primary_fh.setFormatter(primary_formatter)
+    primary_logger.addHandler(primary_fh)
+
+    # Create console handler
+    primary_ch = logging.StreamHandler()
+    primary_ch.setLevel(console_level)
+    primary_ch.setFormatter(primary_formatter)
+    primary_logger.addHandler(primary_ch)
+
+    # Create global file handler
+    global_fh = logging.FileHandler("logsPYTHON/all.log")
+    global_fh.setLevel(file_level)  # Set to the lowest level to capture all messages
+    global_fh.setFormatter(primary_formatter)
+    primary_logger.addHandler(global_fh)
+
+    # Create file-only logger
+    file_only_logger = logging.getLogger("file_only_logger")
+    file_only_logger.setLevel(file_level)
+    file_only_logger.addHandler(primary_fh)
+    file_only_logger.addHandler(global_fh)
+
+    return primary_logger, file_only_logger

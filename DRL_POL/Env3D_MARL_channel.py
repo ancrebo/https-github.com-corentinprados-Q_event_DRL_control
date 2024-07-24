@@ -88,12 +88,17 @@ from cr import cr_start, cr_stop
 # from wrapper3D        import Wrapper
 import copy as cp
 
-from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
+from logging_config import configure_env_logger
 
 # Set up logger
-logger = configure_logger(__name__, default_level=DEFAULT_LOGGING_LEVEL)
+primary_logger, file_only_logger = configure_env_logger()
 
-logger.info("%s.py: Logging level set to %s", __name__, logger.level)
+primary_logger.info(
+    "%s.py: Primary logging level set to %s", __name__, primary_logger.level
+)
+file_only_logger.info(
+    "%s.py: File-only logging level set to %s", __name__, file_only_logger.level
+)
 
 ###-------------------------------------------------------------------------###
 ###-------------------------------------------------------------------------###
@@ -121,7 +126,7 @@ class Environment(Environment):
 
         if ENV_ID is None:
             ENV_ID = [-1, -1]
-        logger.debug("ENV_ID %s: Env3D.init: Initialization", ENV_ID)
+        primary_logger.debug("ENV_ID %s: Env3D.init: Initialization", ENV_ID)
 
         cr_start("ENV.init", 0)
 
@@ -152,7 +157,7 @@ class Environment(Environment):
         if self.case == "channel":
             from parameters import nx_Qs, Qs_position_x, delta_Q_x
 
-            logger.debug(
+            primary_logger.debug(
                 "ENV_ID %s: Env3D.init: Channel-specific parameters imported",
                 ENV_ID,
             )
@@ -219,13 +224,13 @@ class Environment(Environment):
 
         # check if the actual environment has to run cfd or not
         # quick way --> if the 2nd component of the ENVID[] is 1...
-        logger.debug(
+        primary_logger.debug(
             "ENV_ID %s: Env3D.init: Calling parent class constructor (TENSORFORCE)",
             ENV_ID,
         )
         # Call parent class constructor
         super().__init__()
-        logger.debug(
+        primary_logger.debug(
             "ENV_ID %s: Env3D.init: Parent class constructor called (TENSORFORCE)",
             ENV_ID,
         )
@@ -234,9 +239,23 @@ class Environment(Environment):
     # -----------------------------------------------------------------------------------------------------
     # -----------------------------------------------------------------------------------------------------
 
+    def log(self, level, message, *args, **kwargs):
+        if self.ENV_ID[1] == 1:
+            # Use primary logger to log to both console and file
+            if primary_logger.isEnabledFor(level):
+                primary_logger.log(level, message, args, **kwargs)
+        else:
+            # Use file-only logger to log only to file
+            if file_only_logger.isEnabledFor(level):
+                file_only_logger.log(level, message, args, **kwargs)
+
     def start(self) -> None:
         cr_start("ENV.start", 0)
-        logger.debug("ENV_ID %s: Env3D.start: Beginning `start` method...", self.ENV_ID)
+        self.log(
+            logging.DEBUG,
+            "ENV_ID %s: Env3D.start: Beginning `start` method...",
+            self.ENV_ID,
+        )
         # Get the new avg drag and lift and SAVE
         temp_id: str = (
             "{}".format(self.host)
@@ -284,7 +303,8 @@ class Environment(Environment):
             results = "\n".join(
                 f"\tAverage {key}: {value}" for key, value in averages.items()
             )
-            logger.info(
+            self.log(
+                logging.INFO,
                 "ENV_ID %s: Env3D.start: Cylinder Results:\n%s",
                 self.ENV_ID,
                 results,
@@ -305,7 +325,11 @@ class Environment(Environment):
             self.action = np.zeros(self.actions_per_inv)
 
         self.check_id = True  # check if the folder with cpuid number is created
-        logger.debug("ENV_ID %s: Env3D.start: Finished `start` method", self.ENV_ID)
+        self.log(
+            logging.DEBUG,
+            "ENV_ID %s: Env3D.start: Finished `start` method",
+            self.ENV_ID,
+        )
         cr_stop("ENV.start", 0)
 
     # -----------------------------------------------------------------------------------------------------
@@ -313,7 +337,9 @@ class Environment(Environment):
 
     def clean(self, full: bool = False) -> None:
         cr_start("ENV.clean", 0)
-        logger.debug("ENV_ID %s: Env3D.clean: Beginning `clean`...", self.ENV_ID)
+        self.log(
+            logging.DEBUG, "ENV_ID %s: Env3D.clean: Beginning `clean`...", self.ENV_ID
+        )
         if full:
             # saved_models contains the .csv of all cd and cl agt the end of each episode
             if os.path.exists("saved_models"):
@@ -323,7 +349,11 @@ class Environment(Environment):
                 run_subprocess("./", "rm -rf", "best_model")
         # si no hemos acabado el episodio, continuamos sumando actions
         self.action_count = 1
-        logger.debug("ENV_ID %s: Env3D.clean: Finished `clean` method.", self.ENV_ID)
+        self.log(
+            logging.DEBUG,
+            "ENV_ID %s: Env3D.clean: Finished `clean` method.",
+            self.ENV_ID,
+        )
         cr_stop("ENV.clean", 0)
 
     # -------------------------------------------------------------------------------------------------------
@@ -333,7 +363,8 @@ class Environment(Environment):
         self,
     ) -> None:  # TODO: Flag para que no tenga que volver a hacer la malla
         cr_start("ENV.mesh", 0)
-        logger.debug(
+        self.log(
+            logging.DEBUG,
             "ENV_ID %s: Env3D.create_mesh: Beginning `create_mesh`...",
             self.ENV_ID,
         )
@@ -347,8 +378,10 @@ class Environment(Environment):
                 jet.update_file("alya_files/case")
             write_witness_file("alya_files/case", output_params["locations"])
             run_subprocess("alya_files/case", ALYA_CLEAN, "")
-        logger.debug(
-            "ENV_ID %s: Env3D.create_mesh: Finished `create_mesh`", self.ENV_ID
+        self.log(
+            logging.DEBUG,
+            "ENV_ID %s: Env3D.create_mesh: Finished `create_mesh`",
+            self.ENV_ID,
         )
         cr_stop("ENV.mesh", 0)
 
@@ -357,7 +390,8 @@ class Environment(Environment):
 
     def run_baseline(self, clean: bool = True) -> None:
         cr_start("ENV.run_baseline", 0)
-        logger.debug(
+        self.log(
+            logging.DEBUG,
             "ENV_ID %s: Env3D.run_baseline: Beginning `run_baseline`...",
             self.ENV_ID,
         )
@@ -378,15 +412,17 @@ class Environment(Environment):
                 "initialCondition.py {0} 1. 0.".format(self.case),
             )
         # Run alya
-        logger.info(
+        self.log(logging.INFO,
             "ENV_ID %s: Env3D.run_baseline: \n\n----STARTING ALYA FOR BASELINE...----\n",
             self.ENV_ID,
         )
 
         self.run(which="reset")
 
-        logger.debug(
-            "ENV_ID %s: Env3D.run_baseline: Finished `run_baseline`", self.ENV_ID
+        self.log(
+            logging.DEBUG,
+            "ENV_ID %s: Env3D.run_baseline: Finished `run_baseline`",
+            self.ENV_ID,
         )
         cr_stop("ENV.run_baseline", 0)
 
@@ -394,9 +430,13 @@ class Environment(Environment):
     # -------------------------------------------------------------------------------------------------------
 
     def run(self, which: str) -> None:
-        logger.debug("ENV_ID %s: Env3D.run: Beginning `run` method...", self.ENV_ID)
+        self.log(
+            logging.DEBUG,
+            "ENV_ID %s: Env3D.run: Beginning `run` method...",
+            self.ENV_ID,
+        )
 
-        logger.info(
+        self.log(logging.INFO,
             "ENV_ID %s: Env3D.run: time interval: [%f, %f]",
             self.ENV_ID,
             self.simulation_timeframe[0],
@@ -406,10 +446,10 @@ class Environment(Environment):
 
         logssets = os.path.join("logs", "log_sets.log")
         if which == "reset":
-            logger.info("ENV_ID %s: Env3D.run: Starting reset...", self.ENV_ID)
+            self.log(logging.INFO, "ENV_ID %s: Env3D.run: Starting reset...", self.ENV_ID)
             # Baseline run
             if self.do_baseline == True:  # necessary? better?
-                logger.info(
+                self.log(logging.INFO,
                     "ENV_ID %s: Env3D.run: Starting baseline run preparation...",
                     self.ENV_ID,
                 )
@@ -418,20 +458,23 @@ class Environment(Environment):
                 # )
                 filepath = os.path.join("alya_files", "baseline")
 
-                logger.debug(
+                self.log(
+                    logging.DEBUG,
                     "ENV_ID %s: Env3D.run: Writing case %s.dat file...",
                     self.ENV_ID,
                     self.case,
                 )  # TODO: @pietero check if `self.case` is correct for this - Pieter
                 write_case_file(filepath, self.case, self.simu_name)
 
-                logger.debug(
+                self.log(
+                    logging.DEBUG,
                     "ENV_ID %s: Env3D.run: Writing run_type.dat file...",
                     self.ENV_ID,
                 )
                 write_run_type(filepath, "NONCONTI", freq=1000)
 
-                logger.debug(
+                self.log(
+                    logging.DEBUG,
                     "ENV_ID %s: Env3D.run: Writing time_interval.dat file...",
                     self.ENV_ID,
                 )
@@ -439,7 +482,8 @@ class Environment(Environment):
                     filepath, self.simulation_timeframe[0], self.simulation_timeframe[1]
                 )
 
-                logger.debug(
+                self.log(
+                    logging.DEBUG,
                     "ENV_ID %s: Env3D.run: Writing physical_properties.dat file...",
                     self.ENV_ID,
                 )
@@ -454,13 +498,14 @@ class Environment(Environment):
                 )  # TODO: @pietero can this work with logging? - Pieter
                 # Run subprocess
                 if self.dimension == 2:
-                    logger.debug(
+                    self.log(
+                        logging.DEBUG,
                         "ENV_ID %s: Env3D.run: 2D: Creating logs folder...",
                         self.ENV_ID,
                     )
                     run_subprocess(casepath, "mkdir -p", "logs")  # Create logs folder
 
-                    logger.info(
+                    self.log(logging.INFO,
                         "ENV_ID %s: Env3D.run: 2D: \n\n----STARTING ALYA BASELINE RUN!!!...----\n",
                         self.ENV_ID,
                     )
@@ -474,7 +519,8 @@ class Environment(Environment):
                         log=logsrun,
                     )  # ,parallel=True)
 
-                    logger.debug(
+                    self.log(
+                        logging.DEBUG,
                         "ENV_ID %s: Env3D.run: 2D: Running ALYA sets...",
                         self.ENV_ID,
                     )  # TODO: @pieter is this correct/necessary? - Pieter
@@ -486,7 +532,8 @@ class Environment(Environment):
                     )  # TODO: Boundary hardcoded!!
 
                 if self.dimension == 3:
-                    logger.debug(
+                    self.log(
+                        logging.DEBUG,
                         "ENV_ID %s: Env3D.run: 3D: Creating logs folder...",
                         self.ENV_ID,
                     )
@@ -494,7 +541,7 @@ class Environment(Environment):
                         casepath, "mkdir -p", "logs", preprocess=True
                     )  # Create logs folder
 
-                    logger.info(
+                    self.log(logging.INFO,
                         "ENV_ID %s: Env3D.run: 3D: \n\n----STARTING ALYA BASELINE RUN!!!...----\n",
                         self.ENV_ID,
                     )
@@ -509,7 +556,8 @@ class Environment(Environment):
                         log=logsrun,
                     )
 
-                    logger.debug(
+                    self.log(
+                        logging.DEBUG,
                         "ENV_ID %s: Env3D.run: 3D: Running ALYA sets...",
                         self.ENV_ID,
                     )  # TODO: @pieter is this correct/necessary? - Pieter
@@ -520,12 +568,15 @@ class Environment(Environment):
                         log=logssets,
                         preprocess=True,
                     )
-            logger.debug("ENV_ID %s: Env3D.run: ALYA Baseline done!", self.ENV_ID)
+            self.log(
+                logging.DEBUG, "ENV_ID %s: Env3D.run: ALYA Baseline done!", self.ENV_ID
+            )
             self.do_baseline = False  # Baseline done, no need to redo it
 
         elif which == "execute":
             # Actions run
-            logger.debug(
+            self.log(
+                logging.DEBUG,
                 "ENV_ID %s: Env3D.run: Starting to execute a new action!!!",
                 self.ENV_ID,
             )
@@ -553,18 +604,21 @@ class Environment(Environment):
             time.sleep(0.1)
 
             if self.ENV_ID[1] == 1:
-                logger.debug(
+                self.log(
+                    logging.DEBUG,
                     "ENV_ID %s: Env3D.run: Starting 'main' environment tasks...",
                     self.ENV_ID,
                 )
 
-                logger.debug(
+                self.log(
+                    logging.DEBUG,
                     "ENV_ID %s: Env3D.run: Writing run_type.dat file...",
                     self.ENV_ID,
                 )
                 write_run_type(filepath, "CONTI", freq=1000)
 
-                logger.debug(
+                self.log(
+                    logging.DEBUG,
                     "ENV_ID %s: Env3D.run: Writing time_interval.dat file...",
                     self.ENV_ID,
                 )
@@ -589,13 +643,14 @@ class Environment(Environment):
 
                 # Run subprocess
                 if self.dimension == 2:
-                    logger.debug(
+                    self.log(
+                        logging.DEBUG,
                         "ENV_ID %s: Env3D.run: 2D: Creating logs folder...",
                         self.ENV_ID,
                     )
                     run_subprocess(casepath, "mkdir -p", "logs")  # Create logs folder
 
-                    logger.info(
+                    self.log(logging.INFO,
                         "ENV_ID %s: Env3D.run: 2D: \n\n----STARTING ALYA RUN WITH UPDATED ACTIONS!!!----\n"
                         "--------------------Action #%d\n",
                         self.ENV_ID,
@@ -611,7 +666,8 @@ class Environment(Environment):
                         log=logsrun,
                     )  # ,parallel=True)
 
-                    logger.debug(
+                    self.log(
+                        logging.DEBUG,
                         "ENV_ID %s: Env3D.run: 2D: Updating ALYA sets...",
                         self.ENV_ID,
                     )
@@ -623,7 +679,8 @@ class Environment(Environment):
                     )  # TODO: Boundary hardcoded!!
 
                 if self.dimension == 3:
-                    logger.debug(
+                    self.log(
+                        logging.DEBUG,
                         "ENV_ID %s: Env3D.run: 3D: Creating logs folder...",
                         self.ENV_ID,
                     )
@@ -631,7 +688,7 @@ class Environment(Environment):
                         casepath, "mkdir -p", "logs", preprocess=True
                     )  # Create logs folder
 
-                    logger.info(
+                    self.log(logging.INFO,
                         "ENV_ID %s: Env3D.run: 3D: \n\n----STARTING ALYA RUN WITH UPDATED ACTIONS!!!----\n"
                         "--------------------Action #%d\n",
                         self.ENV_ID,
@@ -648,7 +705,8 @@ class Environment(Environment):
                         log=logsrun,
                     )
 
-                    logger.debug(
+                    self.log(
+                        logging.DEBUG,
                         "ENV_ID %s: Env3D.run: 3D: Updating ALYA sets...",
                         self.ENV_ID,
                     )
@@ -660,7 +718,8 @@ class Environment(Environment):
                         preprocess=True,
                     )
 
-                logger.debug(
+                self.log(
+                    logging.DEBUG,
                     "ENV_ID %s: Env3D.run: create directory as sync flag",
                     self.ENV_ID,
                 )
@@ -671,13 +730,15 @@ class Environment(Environment):
                     f"action_end_flag_{self.action_count}",
                 )  # Create dir? not so elegant I think
 
-                logger.debug(
+                self.log(
+                    logging.DEBUG,
                     "ENV_ID %s: Env3D.run: 'main' environment tasks done!",
                     self.ENV_ID,
                 )
 
             else:
-                logger.debug(
+                self.log(
+                    logging.DEBUG,
                     "ENV_ID %s: Env3D.run: Waiting for 'main' environment to finish tasks...",
                     self.ENV_ID,
                 )
@@ -687,7 +748,7 @@ class Environment(Environment):
                         action_end_flag_path
                     ):
                         if count_wait % 1000 == 0:
-                            logger.info(
+                            primary_logger.info(
                                 "ENV_ID %s: Env3D.run: Waiting for action #%d ...",
                                 self.ENV_ID,
                                 self.action_count,
@@ -699,10 +760,14 @@ class Environment(Environment):
                         count_wait += 1
 
                 time.sleep(1)
-                logger.info("ENV_ID %s: Env3D.run: Actions are in sync!", self.ENV_ID)
+                self.log(logging.INFO, "ENV_ID %s: Env3D.run: Actions are in sync!", self.ENV_ID)
                 # print(f"Actions in {self.ENV_ID} are sync")
 
-            logger.debug("ENV_ID %s: Env3D.run: Finished `run` method.", self.ENV_ID)
+            self.log(
+                logging.DEBUG,
+                "ENV_ID %s: Env3D.run: Finished `run` method.",
+                self.ENV_ID,
+            )
             cr_stop("ENV.run_actions", 0)
 
     # -----------------------------------------------------------------------------------------------------
@@ -713,7 +778,8 @@ class Environment(Environment):
     ) -> None:
 
         cr_start("ENV.save_history_parameters", 0)
-        logger.debug(
+        self.log(
+            logging.DEBUG,
             "ENV_ID %s: Env3D.save_history_parameters_all: Beginning method...",
             self.ENV_ID,
         )
@@ -732,7 +798,8 @@ class Environment(Environment):
         if self.action_count == nb_actuations or self.episode_number == 0:
             file = os.path.join("saved_models", name)
 
-            logger.debug(
+            self.log(
+                logging.DEBUG,
                 "ENV_ID %s: Env3D.save_history_parameters_all: Saving parameters in file %s...",
                 self.ENV_ID,
                 file,
@@ -792,7 +859,8 @@ class Environment(Environment):
                             best_file, skip_header=1, delimiter=";"
                         )[-1, 1]
                         if float(best_iter) < float(last_iter):
-                            logger.debug(
+                            self.log(
+                                logging.DEBUG,
                                 "ENV_ID %s: Env3D.save_history_parameters_all: Best model updated",
                                 self.ENV_ID,
                             )
@@ -801,7 +869,8 @@ class Environment(Environment):
                             run_subprocess("./", "cp -r", "saved_models best_model")
 
             # TODO: update what channel parameters are being saved? - Pieter @pietero
-            logger.debug(
+            self.log(
+                logging.DEBUG,
                 "ENV_ID %s: Env3D.save_history_parameters_all: Saving parameters...",
                 self.ENV_ID,
             )
@@ -809,8 +878,10 @@ class Environment(Environment):
             #     f"\n \n Saving parameters, [INSERT CHANNEL PARAMETERS HERE], which are the input of the neural network! (Env3D_MARL_channel-->execute-->save_history_parameters_all)\n \n"
             # )
             # print("Done.")
-            logger.debug(
-                "ENV_ID %s: Env3D.save_history_parameters_all: Done!", self.ENV_ID
+            self.log(
+                logging.DEBUG,
+                "ENV_ID %s: Env3D.save_history_parameters_all: Done!",
+                self.ENV_ID,
             )
         cr_stop("ENV.save_history_parameters", 0)
 
@@ -909,7 +980,8 @@ class Environment(Environment):
                             print("best_model updated")
                             run_subprocess("./", "rm -rf", "best_model")
                             run_subprocess("./", "cp -r", "saved_models best_model")
-            logger.debug(
+            self.log(
+                logging.DEBUG,
                 "ENV_ID %s: Env3D.save_history_parameters: Saving parameters AVG DRAG & AVG LIFT",
                 self.ENV_ID,
             )
@@ -917,7 +989,11 @@ class Environment(Environment):
             #     "\n \n Saving parameters, AVG DRAG & AVG LIFT, which are the input of the neural network! (Env2D-->execute-->save_history_parameters)\n \n"
             # )
             # print("Done.")
-            logger.debug("ENV_ID %s: Env3D.save_history_parameters: Done!", self.ENV_ID)
+            self.log(
+                logging.DEBUG,
+                "ENV_ID %s: Env3D.save_history_parameters: Done!",
+                self.ENV_ID,
+            )
         cr_stop("ENV.save_cd_cl", 0)
 
     # -----------------------------------------------------------------------------------------------------
@@ -926,7 +1002,7 @@ class Environment(Environment):
     def save_this_action(self) -> None:
 
         cr_start("ENV.save_action", 0)
-        logger.info(
+        self.log(logging.INFO,
             "ENV_ID %s: Env3D.save_this_action: Saving action N° %d ...",
             self.ENV_ID,
             self.action_count,
@@ -971,7 +1047,7 @@ class Environment(Environment):
                 spam_writer = csv.writer(csv_file, lineterminator="\n")
                 spam_writer.writerow([action_line])
 
-        logger.info("ENV_ID %s: Env3D.save_this_action: Done!", self.ENV_ID)
+        self.log(logging.INFO, "ENV_ID %s: Env3D.save_this_action: Done!", self.ENV_ID)
         # print("Done.")
         cr_stop("ENV.save_action", 0)
 
@@ -982,7 +1058,7 @@ class Environment(Environment):
         # TODO: @pietero is the reward always input as a float? - Pieter
 
         cr_start("ENV.save_reward", 0)
-        logger.info(
+        primary_logger.info(
             "ENV_ID %s: Env3D.save_reward: Saving reward N° %d: %f ...",
             self.ENV_ID,
             self.action_count,
@@ -1020,7 +1096,7 @@ class Environment(Environment):
                 spam_writer = csv.writer(csv_file, delimiter=";", lineterminator="\n")
                 spam_writer.writerow([self.action_count, reward])
 
-        logger.info("ENV_ID %s: Env3D.save_reward: Done!", self.ENV_ID)
+        primary_logger.info("ENV_ID %s: Env3D.save_reward: Done!", self.ENV_ID)
         # print("Done.")
 
         cr_stop("ENV.save_reward", 0)
@@ -1030,7 +1106,7 @@ class Environment(Environment):
 
     def save_final_reward(self, reward: float) -> None:
 
-        logger.info(
+        primary_logger.info(
             "ENV_ID %s: Env3D.save_final_reward: Saving the last reward from episode %d: %f ...",
             self.ENV_ID,
             self.episode_number,
@@ -1063,7 +1139,7 @@ class Environment(Environment):
                 spam_writer = csv.writer(csv_file, delimiter=";", lineterminator="\n")
                 spam_writer.writerow([self.episode_number, reward])
 
-        logger.info("ENV_ID %s: Env3D.save_final_reward: Done!", self.ENV_ID)
+        primary_logger.info("ENV_ID %s: Env3D.save_final_reward: Done!", self.ENV_ID)
         # print("Done.")
 
     # -----------------------------------------------------------------------------------------------------
@@ -1073,7 +1149,7 @@ class Environment(Environment):
         self,
     ) -> None:  # TODO: This function is not used. May be eliminated
 
-        logger.info(
+        primary_logger.info(
             "ENV_ID %s: Env3D.save_comms_probes: Saving probes inputs...", self.ENV_ID
         )
         # print(f"Saving probes inputs: N° {self.action_count}")
@@ -1101,7 +1177,7 @@ class Environment(Environment):
                 spam_writer = csv.writer(csv_file, delimiter=";", lineterminator="\n")
                 spam_writer.writerow([self.action_count, self.probes_values])
 
-        logger.info("ENV_ID %s: Env3D.save_comms_probes: Done!", self.ENV_ID)
+        primary_logger.info("ENV_ID %s: Env3D.save_comms_probes: Done!", self.ENV_ID)
         # print("Done.")
 
     # -----------------------------------------------------------------------------------------------------
@@ -1111,7 +1187,8 @@ class Environment(Environment):
     def recover_start(self) -> None:
 
         cr_start("ENV.recover_start", 0)
-        logger.debug(
+        self.log(
+            logging.DEBUG,
             "ENV_ID %s: Env3D.recover_start: Beginning `recover_start` method...",
             self.ENV_ID,
         )
@@ -1165,7 +1242,8 @@ class Environment(Environment):
             "action_end_flag_cp",
         )  # Create dir? not so elegant I think
 
-        logger.debug(
+        self.log(
+            logging.DEBUG,
             "ENV_ID %s: Env3D.recover_start: Finished `recover_start` method.",
             self.ENV_ID,
         )
@@ -1176,7 +1254,8 @@ class Environment(Environment):
 
     # create folder for each cpu id in parallel and folder per invariants inside
     def create_cpuID(self) -> None:
-        logger.debug(
+        self.log(
+            logging.DEBUG,
             "ENV_ID %s: Env3D.create_cpuID: Beginning `create_cpuID` method...",
             self.ENV_ID,
         )
@@ -1212,20 +1291,28 @@ class Environment(Environment):
         #    runargs = 'deterministic'
         #    run_subprocess(runpath,runbin,runargs,check_return=False)
 
-        logger.debug(
+        self.log(
+            logging.DEBUG,
             "ENV_ID %s: Env3D.create_cpuID: Folder created for CPU ID: %s/%s",
             self.ENV_ID,
             self.host,
             self.ENV_ID[1],
         )
-        logger.debug("ENV_ID %s: Env3D.create_cpuID: Finished `create_cpuID` method.")
+        self.log(
+            logging.DEBUG,
+            "ENV_ID %s: Env3D.create_cpuID: Finished `create_cpuID` method.",
+        )
         # print(f"Folder created for CPU ID: {self.host}/{self.ENV_ID[1]}")
 
     # Optional
     def close(self) -> None:
-        logger.debug("ENV_ID %s: Env3D.close: Closing environment...", self.ENV_ID)
+        self.log(
+            logging.DEBUG, "ENV_ID %s: Env3D.close: Closing environment...", self.ENV_ID
+        )
         super().close()
-        logger.debug("ENV_ID %s: Env3D.close: Environment closed!", self.ENV_ID)
+        self.log(
+            logging.DEBUG, "ENV_ID %s: Env3D.close: Environment closed!", self.ENV_ID
+        )
 
     # -----------------------------------------------------------------------------------------------------
     # -----------------------------------------------------------------------------------------------------
@@ -1246,7 +1333,9 @@ class Environment(Environment):
             NotImplementedError: If the probe type is not supported.
             NotImplementedError: If the neighbor state is True.
         """
-        logger.debug("ENV_ID %s: Env3D.list_observation_updated: starting ...")
+        self.log(
+            logging.DEBUG, "ENV_ID %s: Env3D.list_observation_updated: starting ..."
+        )
         # print(f"Env3D.list_observation_updated: {self.ENV_ID}: starting ...")
 
         if not self.neighbor_state:
@@ -1290,8 +1379,9 @@ class Environment(Environment):
                 "Env3D_MARL_channel: list_obervation_update: Neighbor state True not implemented yet"
             )
 
-        logger.debug(
-            "ENV_ID %s: Env3D.list_observation_updated: Probes filtered for this specific environment!"
+        self.log(
+            logging.DEBUG,
+            "ENV_ID %s: Env3D.list_observation_updated: Probes filtered for this specific environment!",
         )
         return probes_values_2
 
@@ -1368,7 +1458,11 @@ class Environment(Environment):
         Raises:
             NotImplementedError: If the probe type is not supported.
         """
-        logger.debug("ENV_ID %s: Env3D.states: Calculating state space...", self.ENV_ID)
+        self.log(
+            logging.DEBUG,
+            "ENV_ID %s: Env3D.states: Calculating state space...",
+            self.ENV_ID,
+        )
         if not self.neighbor_state:
             if self.output_params["probe_type"] == "velocity":
                 # 3 columns VELOX VELOY VELOZ flattened to 1
@@ -1391,7 +1485,11 @@ class Environment(Environment):
                 len(self.output_params["locations"]) / self.nb_inv_per_CFD
             ) * (3)
 
-        logger.debug("ENV_ID %s: Env3D.states: State space calculated!", self.ENV_ID)
+        self.log(
+            logging.DEBUG,
+            "ENV_ID %s: Env3D.states: State space calculated!",
+            self.ENV_ID,
+        )
         return dict(type="float", shape=(state_size,))
 
     # -----------------------------------------------------------------------------------------------------
@@ -1402,8 +1500,16 @@ class Environment(Environment):
         """UPDATE --> now with multiple Q per jet slot --> use nz_Qs"""
         """UPDATE 2 --> NOW WITH MARL --> ACTIONS_PER_INV = 1"""
 
-        logger.debug("ENV_ID %s: Env3D.actions: Defining action space...", self.ENV_ID)
-        logger.debug("ENV_ID %s: Env3D.actions: Action space defined!", self.ENV_ID)
+        self.log(
+            logging.DEBUG,
+            "ENV_ID %s: Env3D.actions: Defining action space...",
+            self.ENV_ID,
+        )
+        self.log(
+            logging.DEBUG,
+            "ENV_ID %s: Env3D.actions: Action space defined!",
+            self.ENV_ID,
+        )
         return dict(
             type="float",
             shape=(self.actions_per_inv),
@@ -1423,7 +1529,7 @@ class Environment(Environment):
 
         Returns: the initial actions based on the baseline (or previous episode if `. TODO: @pietero finish documentation - Pieter
         """
-        logger.info(
+        self.log(logging.INFO,
             "ENV_ID %s: Env3D.reset: Resetting environment to initialize a new episode...",
             self.ENV_ID,
         )
@@ -1442,7 +1548,7 @@ class Environment(Environment):
             self.check_id = False
 
         # Clean
-        logger.info(
+        self.log(logging.INFO,
             "ENV_ID %s: Env3D.reset: Cleaning the environment using `self.clean`...",
             self.ENV_ID,
         )
@@ -1474,13 +1580,15 @@ class Environment(Environment):
                     "time_interval.dat",
                 )
             )
-            logger.debug(
+            self.log(
+                logging.DEBUG,
                 "ENV_ID %s: Env3D.reset: Detected last time interval: %f",
                 self.ENV_ID,
                 t2,
             )
 
-            logger.debug(
+            self.log(
+                logging.DEBUG,
                 "ENV_ID %s: Env3D.reset: POOOOOL PATH: %s",
                 self.ENV_ID,
                 os.path.join(
@@ -1504,7 +1612,7 @@ class Environment(Environment):
         else:
             t2: float = self.simulation_timeframe[1]
         self.simulation_timeframe = [t1, t2]
-        logger.info(
+        self.log(logging.INFO,
             "ENV_ID %s: Env3D.reset: New ALYA time interval: %f to %f",
             self.ENV_ID,
             t1,
@@ -1518,7 +1626,8 @@ class Environment(Environment):
             self.recover_start()
 
         if self.ENV_ID[1] == 1:
-            logger.debug(
+            self.log(
+                logging.DEBUG,
                 "ENV_ID %s: Env3D.reset: Updating time_interval.dat file...",
                 self.ENV_ID,
             )
@@ -1533,14 +1642,14 @@ class Environment(Environment):
                 t2,
             )
 
-        logger.info(
+        self.log(logging.INFO,
             "ENV_ID %s: Env3D.reset: Actual episode: %d",
             self.ENV_ID,
             self.episode_number,
         )
         # print(f"Actual episode: {self.episode_number}")
         # print("\n\Action: extract the probes")
-        logger.info("ENV_ID %s: Env3D.reset: Extracting probes...", self.ENV_ID)
+        self.log(logging.INFO, "ENV_ID %s: Env3D.reset: Extracting probes...", self.ENV_ID)
         NWIT_TO_READ = 1  # Read n timesteps from witness file from behind, last instant
 
         # TODO: READ THE WITNESS OF EACH PSEUDOENV! - Pol
@@ -1565,7 +1674,8 @@ class Environment(Environment):
             filepath_flag_sync_cp, "action_end_flag_cp"
         )
 
-        logger.debug(
+        self.log(
+            logging.DEBUG,
             "ENV_ID %s: Env3D.reset: POOOOOOOL -> self.deterministics = %s",
             self.ENV_ID,
             self.deterministic,
@@ -1588,7 +1698,11 @@ class Environment(Environment):
 
         # read witness file and extract the entire array list
         # This now outputs a dictionary of probe values for all probe types - Pieter
-        logger.debug("ENV_ID %s: Env3D.reset: Reading witness file...", self.ENV_ID)
+        self.log(
+            logging.DEBUG,
+            "ENV_ID %s: Env3D.reset: Reading witness file...",
+            self.ENV_ID,
+        )
         self.probes_values_global_dict: Dict[str, np.ndarray] = read_last_wit(
             filename,
             output_params["probe_type"],
@@ -1597,13 +1711,15 @@ class Environment(Environment):
         )
 
         # filter probes per jet (corresponding to the ENV.ID[])
-        logger.debug("ENV_ID %s: Env3D.reset: Filtering probes...", self.ENV_ID)
+        self.log(
+            logging.DEBUG, "ENV_ID %s: Env3D.reset: Filtering probes...", self.ENV_ID
+        )
         probes_values_2 = self.list_observation_updated()
         # print(
         #     "\n\n\nEnv3D_MARL_channel.Env3D.reset: probes_values_2 being returned to Tensorforce!!!\n\n\n"
         # )
-        logger.info("ENV_ID %s: Env3D.reset: Probes extracted!", self.ENV_ID)
-        logger.info("ENV_ID %s: Env3D.reset: `reset` method complete!", self.ENV_ID)
+        self.log(logging.INFO, "ENV_ID %s: Env3D.reset: Probes extracted!", self.ENV_ID)
+        self.log(logging.DEBUG, "ENV_ID %s: Env3D.reset: `reset` method complete!", self.ENV_ID)
         return probes_values_2
 
     # -----------------------------------------------------------------------------------------------------
@@ -1611,8 +1727,10 @@ class Environment(Environment):
     # TODO: figure out structure/type of actions in `execute` argument @pietero
     def execute(self, actions: np.ndarray) -> Tuple[np.ndarray, bool, float]:
         # TODO: @pietero FINISH LOGGING IMPLEMENTATION STARTING HERE!!!!!!!!! - Pieter
-        logger.debug(
-            "ENV_ID %s: Env3D.execute: Starting `execute` method...", self.ENV_ID
+        self.log(
+            logging.DEBUG,
+            "ENV_ID %s: Env3D.execute: Starting `execute` method...",
+            self.ENV_ID,
         )
         action: List[np.ndarray] = []
         # action = []
@@ -1635,11 +1753,11 @@ class Environment(Environment):
         self.save_this_action()
 
         if case == "cylinder":
-            logger.info("ENV_ID %s: Env3D.execute: New action computed!", self.ENV_ID)
+            self.log(logging.INFO, "ENV_ID %s: Env3D.execute: New action computed!", self.ENV_ID)
         elif case == "airfoil":
             pass
         elif case == "channel":
-            logger.info("ENV_ID %s: Env3D.execute: New action computed!", self.ENV_ID)
+            self.log(logging.INFO, "ENV_ID %s: Env3D.execute: New action computed!", self.ENV_ID)
 
         dir_name = os.path.join(
             "alya_files",
@@ -1683,7 +1801,7 @@ class Environment(Environment):
                         all_actions_ready = False
                 time.sleep(0.2)
 
-            logger.info(
+            self.log(logging.INFO,
                 "ENV_ID %s: Env3D.execute: !!!ALL ACTIONS ARE READY TO APPLY TO BOUNDARY CONDITIONS!!!",
                 self.ENV_ID,
             )
@@ -1709,7 +1827,8 @@ class Environment(Environment):
                     for row in lines:
                         last_action = float(row[1].strip())
 
-                    logger.debug(
+                    self.log(
+                        logging.DEBUG,
                         "ENV_ID %s: Last action of %s_%d: %f",
                         self.ENV_ID,
                         self.ENV_ID[0],
@@ -1791,7 +1910,7 @@ class Environment(Environment):
                     )  # TODO: @pietero make sure this works for channel - Pieter
 
             if self.reward_function == "q_event_volume":
-                logger.info(
+                self.log(logging.INFO,
                     "ENV_ID %s: Env3D.execute: Starting reward calculation...",
                     self.ENV_ID,
                 )
@@ -1814,7 +1933,8 @@ class Environment(Environment):
                         f"{self.ENV_ID}: execute: post.mpio.bin associated with type {self.output_params['probe_type']} not implemented yet"
                     )
 
-                logger.debug(
+                self.log(
+                    logging.DEBUG,
                     "ENV_ID %s: Env3D.execute: Identifying the file with the highest timestep...",
                     self.ENV_ID,
                 )
@@ -1832,7 +1952,7 @@ class Environment(Environment):
 
                 # Convert the copied file to VTK format
                 # Run subprocess that launches mpio2vtk to convert the file to VTK
-                logger.info(
+                self.log(logging.INFO,
                     "ENV_ID %s: Env3D.execute: Starting subprocess to convert ALYA postprocessing files to VTK...",
                     self.ENV_ID,
                 )
@@ -1846,7 +1966,7 @@ class Environment(Environment):
                     host=self.nodelist,
                     slurm=USE_SLURM,
                 )
-                logger.info(
+                self.log(logging.INFO,
                     "ENV_ID %s: Env3D.execute: VTK files created for episode %d action %d",
                     self.ENV_ID,
                     self.episode_number,
@@ -1897,7 +2017,7 @@ class Environment(Environment):
                     f"--averaged_data_path {averaged_data_path} "
                     f"--output_file {output_file_path}"
                 )
-                logger.info(
+                self.log(logging.INFO,
                     "ENV_ID %s: Env3D.execute: Starting subprocess to activate `mesh_env` conda environment and calculate reward...",
                     self.ENV_ID,
                 )
@@ -1908,7 +2028,7 @@ class Environment(Environment):
                     use_new_env=True,
                 )
 
-                logger.info(
+                self.log(logging.INFO,
                     "ENV_ID %s: Env3D.execute: Reward calculation for EP_%d action %d complete!",
                     self.ENV_ID,
                     self.episode_number,
@@ -1920,10 +2040,18 @@ class Environment(Environment):
         # Start an alya run
         t0 = time.time()
 
-        logger.debug("ENV_ID %s: Env3D.execute: Calling `run` method! ...", self.ENV_ID)
+        self.log(
+            logging.DEBUG,
+            "ENV_ID %s: Env3D.execute: Calling `run` method! ...",
+            self.ENV_ID,
+        )
         self.run(which="execute")
-        logger.debug("ENV_ID %s: Env3D.execute: `run` method complete!", self.ENV_ID)
-        logger.info(
+        self.log(
+            logging.DEBUG,
+            "ENV_ID %s: Env3D.execute: `run` method complete!",
+            self.ENV_ID,
+        )
+        self.log(logging.INFO,
             "ENV_ID %s: Env3D.execute: Time elapsed for `run`: %f",
             self.ENV_ID,
             time.time() - t0,
@@ -1959,10 +2087,13 @@ class Environment(Environment):
         self.save_reward(
             reward
         )  # TODO: @pietero Is this still needed? All rewards are saved by `coco_calc_reward.py`- Pieter
-        logger.debug("ENV_ID %s: Env3D.execute: Reward: %f", self.ENV_ID, reward)
+        self.log(
+            logging.DEBUG, "ENV_ID %s: Env3D.execute: Reward: %f", self.ENV_ID, reward
+        )
         # print(f"reward: {reward}")
 
-        logger.debug(
+        self.log(
+            logging.DEBUG,
             "ENV_ID %s: Env3D.execute: The actual action is %d of %d",
             self.ENV_ID,
             self.action_count,
@@ -1984,7 +2115,7 @@ class Environment(Environment):
 
             # write the last rewards at each episode to see the improvement
             self.save_final_reward(reward)
-            logger.info(
+            self.log(logging.INFO,
                 "ENV_ID %s: Env3D.execute: Actual episode %d is finished and saved!",
                 self.ENV_ID,
                 self.episode_number,
@@ -1993,7 +2124,7 @@ class Environment(Environment):
             # print(f"Results : \n\tAverage drag : {average_drag}\n\tAverage lift : {average_lift})
 
         # print("\n\nTask : extract the probes")
-        logger.info("ENV_ID %s: Env3D.execute: Extracting probes...", self.ENV_ID)
+        self.log(logging.INFO, "ENV_ID %s: Env3D.execute: Extracting probes...", self.ENV_ID)
         # Read witness file from behind, last instant (FROM THE INVARIANT [*,1])
         NWIT_TO_READ = 1
         filename = os.path.join(
@@ -2016,24 +2147,30 @@ class Environment(Environment):
         # filter probes per jet (corresponding to the ENV.ID[])
         probes_values_2 = self.list_observation_updated()
 
-        logger.debug(
-            "ENV_ID %s: Env3D.execute: `execute` method complete!", self.ENV_ID
+        self.log(
+            logging.DEBUG,
+            "ENV_ID %s: Env3D.execute: `execute` method complete!",
+            self.ENV_ID,
         )
         return probes_values_2, terminal, reward
 
     # -----------------------------------------------------------------------------------------------------
 
     def compute_reward(self) -> float:
-        logger.debug("ENV_ID %s: Env3D.compute_reward: Starting `reward` method...")
+        self.log(
+            logging.DEBUG,
+            "ENV_ID %s: Env3D.compute_reward: Starting `reward` method...",
+        )
         # NOTE: reward should be computed over the whole number of iterations in each execute loop
         if (
             self.reward_function == "plain_drag"
         ):  # a bit dangerous, may be injecting some momentum
-            logger.debug(
-                "ENV_ID %s: Env3D.compute_reward: `plain_drag` reward function selected..."
+            self.log(
+                logging.DEBUG,
+                "ENV_ID %s: Env3D.compute_reward: `plain_drag` reward function selected...",
             )
             values_drag_in_last_execute = self.history_parameters["drag"][-1:]
-            logger.info(
+            self.log(logging.INFO,
                 "ENV_ID %s: Env3D.compute_reward: Reward computed!", self.ENV_ID
             )
             return (
@@ -2043,12 +2180,13 @@ class Environment(Environment):
         elif (
             self.reward_function == "drag_plain_lift_2"
         ):  # a bit dangerous, may be injecting some momentum
-            logger.debug(
-                "ENV_ID %s: Env3D.compute_reward: `drag_plain_lift_2` reward function selected..."
+            self.log(
+                logging.DEBUG,
+                "ENV_ID %s: Env3D.compute_reward: `drag_plain_lift_2` reward function selected...",
             )
             avg_drag = np.mean(self.history_parameters["drag"])
             avg_lift = np.mean(self.history_parameters["lift"])
-            logger.info(
+            self.log(logging.INFO,
                 "ENV_ID %s: Env3D.compute_reward: Reward computed!", self.ENV_ID
             )
             return -avg_drag - 0.2 * abs(avg_lift)
@@ -2056,10 +2194,11 @@ class Environment(Environment):
         elif (
             self.reward_function == "drag"
         ):  # a bit dangerous, may be injecting some momentum
-            logger.debug(
-                "ENV_ID %s: Env3D.compute_reward: `drag` reward function selected..."
+            self.log(
+                logging.DEBUG,
+                "ENV_ID %s: Env3D.compute_reward: `drag` reward function selected...",
             )
-            logger.info(
+            self.log(logging.INFO,
                 "ENV_ID %s: Env3D.compute_reward: Reward computed!", self.ENV_ID
             )
             return self.history_parameters["drag"][-1] + 0.159
@@ -2067,8 +2206,9 @@ class Environment(Environment):
         elif (
             self.reward_function == "drag_plain_lift"
         ):  # a bit dangerous, may be injecting some momentum
-            logger.debug(
-                "ENV_ID %s: Env3D.compute_reward: `drag_plain_lift` reward function selected..."
+            self.log(
+                logging.DEBUG,
+                "ENV_ID %s: Env3D.compute_reward: `drag_plain_lift` reward function selected...",
             )
             ## get the last mean cd or cl value of the last Tk
             avg_drag_2 = np.mean(self.history_parameters["drag"][-1:])
@@ -2086,36 +2226,42 @@ class Environment(Environment):
                 - self.optimization_params["penal_cl"] * abs(avg_lift_2_global)
                 + self.optimization_params["offset_reward"]
             )
-            logger.debug(
+            self.log(
+                logging.DEBUG,
                 "ENV_ID %s: Env3D.compute_reward: POOOOOOOL ---> reward_local: %f",
                 self.ENV_ID,
                 reward_local,
             )
-            logger.debug(
+            self.log(
+                logging.DEBUG,
                 "ENV_ID %s: Env3D.compute_reward: POOOOOOOL ---> reward_global: %f",
                 self.ENV_ID,
                 reward_global,
             )
             # print("POOOOOOOOL ---> reward_global: ", reward_global)
-            logger.debug(
+            self.log(
+                logging.DEBUG,
                 "ENV_ID %s: Env3D.compute_reward: POOOOOOOL ---> cd_local: %f",
                 self.ENV_ID,
                 avg_drag_2,
             )
             # print("POOOOOOOOL ---> cd_local: ", avg_drag_2)
-            logger.debug(
+            self.log(
+                logging.DEBUG,
                 "ENV_ID %s: Env3D.compute_reward: POOOOOOOL ---> cd_lift: %f",
                 self.ENV_ID,
                 avg_lift_2,
             )
             # print("POOOOOOOOL ---> cd_lift: ", avg_lift_2)
-            logger.debug(
+            self.log(
+                logging.DEBUG,
                 "ENV_ID %s: Env3D.compute_reward: POOOOOOOL ---> cd_global: %f",
                 self.ENV_ID,
                 avg_drag_2_global,
             )
             # print("POOOOOOOOL ---> cd_local: ", avg_drag_2_global)
-            logger.debug(
+            self.log(
+                logging.DEBUG,
                 "ENV_ID %s: Env3D.compute_reward: POOOOOOOL ---> cd_lift_global: %f",
                 self.ENV_ID,
                 avg_lift_2_global,
@@ -2126,7 +2272,7 @@ class Environment(Environment):
             reward_total = self.optimization_params["norm_reward"] * (
                 (alpha_rew) * reward_local + (1 - alpha_rew) * reward_global
             )
-            logger.info(
+            self.log(logging.INFO,
                 "ENV_ID %s: Env3D.compute_reward: Reward computed!", self.ENV_ID
             )
             ## le añadimos el offset de 3.21 para partir de reward nula y que solo vaya a (+)
@@ -2135,11 +2281,12 @@ class Environment(Environment):
         elif (
             self.reward_function == "max_plain_drag"
         ):  # a bit dangerous, may be injecting some momentum
-            logger.debug(
-                "ENV_ID %s: Env3D.compute_reward: `max_plain_drag` reward function selected..."
+            self.log(
+                logging.DEBUG,
+                "ENV_ID %s: Env3D.compute_reward: `max_plain_drag` reward function selected...",
             )
             values_drag_in_last_execute = self.history_parameters["drag"][-1:]
-            logger.info(
+            self.log(logging.INFO,
                 "ENV_ID %s: Env3D.compute_reward: Reward computed!", self.ENV_ID
             )
             return -(np.mean(values_drag_in_last_execute) + 0.159)
@@ -2147,12 +2294,13 @@ class Environment(Environment):
         elif (
             self.reward_function == "drag_avg_abs_lift"
         ):  # a bit dangerous, may be injecting some momentum
-            logger.debug(
-                "ENV_ID %s: Env3D.compute_reward: `drag_avg_abs_lift` reward function selected..."
+            self.log(
+                logging.DEBUG,
+                "ENV_ID %s: Env3D.compute_reward: `drag_avg_abs_lift` reward function selected...",
             )
             avg_abs_lift = np.absolute(self.history_parameters["lift"][-1:])
             avg_drag = self.history_parameters["drag"][-1:]
-            logger.info(
+            self.log(logging.INFO,
                 "ENV_ID %s: Env3D.compute_reward: Reward computed!", self.ENV_ID
             )
             return avg_drag + 0.159 - 0.2 * avg_abs_lift
@@ -2160,14 +2308,15 @@ class Environment(Environment):
         elif (
             self.reward_function == "lift_vs_drag"
         ):  # a bit dangerous, may be injecting some momentum
-            logger.debug(
-                "ENV_ID %s: Env3D.compute_reward: `lift_vs_drag` reward function selected..."
+            self.log(
+                logging.DEBUG,
+                "ENV_ID %s: Env3D.compute_reward: `lift_vs_drag` reward function selected...",
             )
             ## get the last mean cd or cl value of the last Tk
             avg_lift = np.mean(self.history_parameters["lift"][-1:])
             avg_drag = np.mean(self.history_parameters["drag"][-1:])
 
-            logger.info(
+            self.log(logging.INFO,
                 "ENV_ID %s: Env3D.compute_reward: Reward computed!", self.ENV_ID
             )
             return self.optimization_params["norm_reward"] * (
@@ -2175,8 +2324,9 @@ class Environment(Environment):
             )
 
         elif self.reward_function == "q_event_volume":
-            logger.debug(
-                "ENV_ID %s: Env3D.compute_reward: `q_event_volume` reward function selected..."
+            self.log(
+                logging.DEBUG,
+                "ENV_ID %s: Env3D.compute_reward: `q_event_volume` reward function selected...",
             )
             # TODO: @pietero implement q-event volume reward function - Pieter
             output_file_path = os.path.join(
@@ -2187,7 +2337,8 @@ class Environment(Environment):
                 "rewards",
                 f"rewards_{self.host}_EP_{self.episode_number}.csv",
             )
-            logger.debug(
+            self.log(
+                logging.DEBUG,
                 "ENV_ID %s: Env3D.compute_reward: Reading reward file at %s...",
                 self.ENV_ID,
                 output_file_path,
@@ -2203,7 +2354,7 @@ class Environment(Environment):
                 )
 
             reward_value: float = float(matching_row["reward"][0])
-            logger.info(
+            primary_logger.info(
                 "ENV_ID %s: Env3D.compute_reward: Reward value: %f",
                 self.ENV_ID,
                 reward_value,
