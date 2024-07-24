@@ -125,9 +125,9 @@ def configure_logger(module_name: str, default_level: str = "INFO") -> logging.L
         logger.addHandler(ch)
 
         # File handler
-        if not os.path.exists("pythonlogs"):
-            os.makedirs("pythonlogs")
-        fh = logging.FileHandler(f"pythonlogs/{module_name}.log")
+        if not os.path.exists("logsPYTHON"):
+            os.makedirs("logsPYTHON")
+        fh = logging.FileHandler(f"logsPYTHON/{module_name}.log")
         fh.setLevel(file_level)
         formatter_fh = logging.Formatter(
             "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
