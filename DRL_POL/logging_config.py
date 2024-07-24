@@ -174,22 +174,23 @@ def configure_env_logger() -> (logging.Logger, logging.Logger):
         os.makedirs("logsPYTHON")
     primary_fh = logging.FileHandler("logsPYTHON/Env3D_MARL_channel.log")
     primary_fh.setLevel(file_level)
-    primary_formatter = logging.Formatter(
+    primary_formatter_fh = logging.Formatter(
         "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     )
-    primary_fh.setFormatter(primary_formatter)
+    primary_fh.setFormatter(primary_formatter_fh)
     primary_logger.addHandler(primary_fh)
 
     # Create console handler
     primary_ch = logging.StreamHandler()
     primary_ch.setLevel(console_level)
-    primary_ch.setFormatter(primary_formatter)
+    primary_formatter_ch = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
+    primary_ch.setFormatter(primary_formatter_ch)
     primary_logger.addHandler(primary_ch)
 
     # Create global file handler
     global_fh = logging.FileHandler("logsPYTHON/all.log")
     global_fh.setLevel(file_level)  # Set to the lowest level to capture all messages
-    global_fh.setFormatter(primary_formatter)
+    global_fh.setFormatter(primary_formatter_fh)
     primary_logger.addHandler(global_fh)
 
     # Create file-only logger
