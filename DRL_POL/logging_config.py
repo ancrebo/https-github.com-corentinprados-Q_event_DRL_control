@@ -57,9 +57,9 @@ logging_config_dict: Dict[str, Dict[str, Any]] = {
         "override": True,
     },
     "env_utils": {
-        "console_level": "DEBUG",
-        "file_level": "DEBUG",
-        "override": False,
+        "console_level": "WARNING",
+        "file_level": "WARNING",
+        "override": True,
     },
     "extract_forces": {
         "console_level": "DEBUG",
