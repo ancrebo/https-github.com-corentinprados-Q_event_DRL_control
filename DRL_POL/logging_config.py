@@ -198,4 +198,7 @@ def configure_env_logger() -> (logging.Logger, logging.Logger):
     file_only_logger.addHandler(primary_fh)
     file_only_logger.addHandler(global_fh)
 
+    primary_logger.propagate = False
+    file_only_logger.propagate = False
+
     return primary_logger, file_only_logger
