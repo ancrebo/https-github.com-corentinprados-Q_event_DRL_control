@@ -1783,7 +1783,7 @@ class Environment(Environment):
         if case == "cylinder":
             self.log(
                 logging.INFO,
-                "ENV_ID %s: Env3D.execute: New action computed!",
+                "ENV_ID %s: Env3D.execute: New action computed!\n",
                 self.ENV_ID,
             )
         elif case == "airfoil":
@@ -1791,7 +1791,7 @@ class Environment(Environment):
         elif case == "channel":
             self.log(
                 logging.INFO,
-                "ENV_ID %s: Env3D.execute: New action computed!",
+                "ENV_ID %s: Env3D.execute: New action computed!\n",
                 self.ENV_ID,
             )
 
@@ -2071,7 +2071,7 @@ class Environment(Environment):
 
                 self.log(
                     logging.INFO,
-                    "ENV_ID %s: Env3D.execute: Reward calculation for EP_%d action %d complete!",
+                    "ENV_ID %s: Env3D.execute: Reward calculation for EP_%d action %d complete!\n",
                     self.ENV_ID,
                     self.episode_number,
                     self.action_count,
@@ -2095,7 +2095,7 @@ class Environment(Environment):
         )
         self.log(
             logging.INFO,
-            "ENV_ID %s: Env3D.execute: Time elapsed for `run`: %f",
+            "ENV_ID %s: Env3D.execute: Time elapsed for `run`: %f\n",
             self.ENV_ID,
             time.time() - t0,
         )
