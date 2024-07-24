@@ -379,7 +379,7 @@ class Environment(Environment):
             )
         # Run alya
         logger.info(
-            "ENV_ID %s: Env3D.run_baseline: STARTING ALYA FOR BASELINE...",
+            "ENV_ID %s: Env3D.run_baseline: \n\n----STARTING ALYA FOR BASELINE...----",
             self.ENV_ID,
         )
 
@@ -461,7 +461,7 @@ class Environment(Environment):
                     run_subprocess(casepath, "mkdir -p", "logs")  # Create logs folder
 
                     logger.info(
-                        "ENV_ID %s: Env3D.run: 2D: STARTING ALYA BASELINE RUN!!!...",
+                        "ENV_ID %s: Env3D.run: 2D: \n\n----STARTING ALYA BASELINE RUN!!!...----",
                         self.ENV_ID,
                     )
                     run_subprocess(
@@ -495,7 +495,7 @@ class Environment(Environment):
                     )  # Create logs folder
 
                     logger.info(
-                        "ENV_ID %s: Env3D.run: 3D: STARTING ALYA BASELINE RUN!!!...",
+                        "ENV_ID %s: Env3D.run: 3D: \n\n----STARTING ALYA BASELINE RUN!!!...----",
                         self.ENV_ID,
                     )
                     run_subprocess(
@@ -597,7 +597,7 @@ class Environment(Environment):
                     run_subprocess(casepath, "mkdir -p", "logs")  # Create logs folder
 
                     logger.info(
-                        "ENV_ID %s: Env3D.run: 2D: STARTING ALYA RUN WITH UPDATED ACTIONS!!!",
+                        "ENV_ID %s: Env3D.run: 2D: \n\n----STARTING ALYA RUN WITH UPDATED ACTIONS!!!----",
                         self.ENV_ID,
                     )
                     run_subprocess(
@@ -631,7 +631,7 @@ class Environment(Environment):
                     )  # Create logs folder
 
                     logger.info(
-                        "ENV_ID %s: Env3D.run: 3D: STARTING ALYA RUN WITH UPDATED ACTIONS!!!",
+                        "ENV_ID %s: Env3D.run: 3D: \n\n----STARTING ALYA RUN WITH UPDATED ACTIONS!!!----",
                         self.ENV_ID,
                     )
                     run_subprocess(
