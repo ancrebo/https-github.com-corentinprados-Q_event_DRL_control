@@ -1432,8 +1432,6 @@ class Environment(Environment):
         #     "\n \n Reset to initalize each episode (copy baseline, clean action count...)! (Env3D_MARL_channel-->reset)\n \n"
         # )
         # Create a folder for each environment
-        logger.debug("ENV_ID %s: Env3D.reset: POOOOOOL --> CHECK_ID = %s", self.ENV_ID)
-        logger.debug("ENV_ID %s: Env3D.reset: POOOOOOL --> ENV_ID = %s", self.ENV_ID[1])
         # print("POOOOL --> CHECK_ID = ", self.check_id)
         # print("POOOOL --> ENV_ID   = ", self.ENV_ID[1])
         if self.check_id == True and self.ENV_ID[1] == 1:
