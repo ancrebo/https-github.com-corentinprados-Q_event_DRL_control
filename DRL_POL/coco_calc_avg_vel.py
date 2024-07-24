@@ -11,9 +11,9 @@ from pathlib import Path
 from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
 
 # Set up logger
-logger = configure_logger(__name__, default_level=DEFAULT_LOGGING_LEVEL)
+logger = configure_logger("coco_calc_avg_vel", default_level=DEFAULT_LOGGING_LEVEL)
 
-logger.info("%s.py: Logging level set to %s", __name__, logger.level)
+logger.info("coco_calc_avg_vel.py: Logging level set to %s", logger.level)
 
 
 def load_data_and_convert_to_dataframe(directory, file_name):
