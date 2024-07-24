@@ -22,19 +22,19 @@ DEFAULT_LOGGING_LEVEL = "INFO"
 
 logging_config_dict: Dict[str, Dict[str, Any]] = {
     "PARALLEL_TRAINING_3D_CHANNEL_MARL": {
-        "console_level": "DEBUG",
+        "console_level": "INFO",
         "file_level": "DEBUG",
-        "override": False,
+        "override": True,
     },
     "Env3D_MARL_channel": {
-        "console_level": "DEBUG",
+        "console_level": "INFO",
         "file_level": "DEBUG",
-        "override": False,
+        "override": True,
     },
     "parameters": {
-        "console_level": "DEBUG",
+        "console_level": "INFO",
         "file_level": "DEBUG",
-        "override": False,
+        "override": True,
     },
     "alya": {
         "console_level": "DEBUG",
@@ -58,7 +58,7 @@ logging_config_dict: Dict[str, Dict[str, Any]] = {
     },
     "env_utils": {
         "console_level": "WARNING",
-        "file_level": "WARNING",
+        "file_level": "INFO",
         "override": True,
     },
     "extract_forces": {
@@ -67,13 +67,13 @@ logging_config_dict: Dict[str, Dict[str, Any]] = {
         "override": False,
     },
     "jets": {
-        "console_level": "DEBUG",
+        "console_level": "INFO",
         "file_level": "DEBUG",
-        "override": False,
+        "override": True,
     },
     "witness": {
         "console_level": "WARNING",
-        "file_level": "WARNING",
+        "file_level": "INFO",
         "override": True,
     },
 }
