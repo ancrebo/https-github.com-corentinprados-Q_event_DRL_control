@@ -120,9 +120,7 @@ def configure_logger(module_name: str, default_level: str = "INFO") -> logging.L
         # Console handler
         ch = logging.StreamHandler()
         ch.setLevel(console_level)
-        formatter_ch = logging.Formatter(
-            "%(name)s - %(levelname)s - %(message)s"
-        )
+        formatter_ch = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
         ch.setFormatter(formatter_ch)
         logger.addHandler(ch)
 
