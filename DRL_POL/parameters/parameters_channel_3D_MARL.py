@@ -432,7 +432,7 @@ if os.path.exists(witness_file_path):
         logger.debug("parameters: nx_Qs: %s", nx_Qs)
         logger.debug("parameters: nz_Qs: %s", nz_Qs)
 
-        logger.info("parameters: Witness creation override parameter set to False")
+        logger.info("parameters: Witness creation override parameter set to False\n")
 
         # print(f"\nNew witness.dat has been created in {case_folder}\n")
         # print(
@@ -448,7 +448,7 @@ if os.path.exists(witness_file_path):
         # print("\nWitness creation override parameter set to False.\n")
     else:
         logger.info(
-            "parameters: witness.dat already exists in %s - No creation needed.",
+            "parameters: witness.dat already exists in %s - No creation needed.\n",
             case_folder,
         )
         # print(
@@ -458,7 +458,7 @@ else:
     # Create and write the witness.dat file if it does not exist
     logger.info("paramters: No existing witness.dat found in %s", case_folder)
     write_witness_file(case_folder, output_params["locations"])
-    logger.info("parameters: New witness.dat has been created in %s", case_folder)
+    logger.info("parameters: New witness.dat has been created in %s\n", case_folder)
     logger.debug("parameters: witness.dat creation parameters:")
     logger.debug("parameters: Probe Type: %s", output_params["probe_type"])
     logger.debug("parameters: Pattern: %s", pattern)
@@ -466,7 +466,7 @@ else:
     logger.debug("parameters: Y Skipping: %s", y_skipping)
     logger.debug("parameters: Y Skip Values: %s", y_skip_values)
     logger.debug("parameters: nx_Qs: %s", nx_Qs)
-    logger.debug("parameters: nz_Qs: %s", nz_Qs)
+    logger.debug("parameters: nz_Qs: %s\n", nz_Qs)
 
     # print(
     #     f"CREATING NEW WITNESS FILE: No existing witness.dat found in {case_folder}"
