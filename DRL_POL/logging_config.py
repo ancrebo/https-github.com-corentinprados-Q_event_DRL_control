@@ -183,7 +183,9 @@ def configure_env_logger() -> (logging.Logger, logging.Logger):
     # Create console handler
     primary_ch = logging.StreamHandler()
     primary_ch.setLevel(console_level)
-    primary_formatter_ch = logging.Formatter("Env3D_MARL_channel - %(levelname)s - %(message)s")
+    primary_formatter_ch = logging.Formatter(
+        "Env3D_MARL_channel - %(levelname)s - %(message)s"
+    )
     primary_ch.setFormatter(primary_formatter_ch)
     primary_logger.addHandler(primary_ch)
 
