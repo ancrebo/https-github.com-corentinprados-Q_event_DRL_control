@@ -20,7 +20,7 @@ from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
 # Set up logger
 logger = configure_logger(__name__, default_level=DEFAULT_LOGGING_LEVEL)
 
-logger.info("%s.py: Logging level set to %s", __name__, logger.level)
+logger.info("%s.py: Logging level set to %s\n", __name__, logger.level)
 
 
 def run_mesh(runpath, casename, ndim, ini_vel=None):
