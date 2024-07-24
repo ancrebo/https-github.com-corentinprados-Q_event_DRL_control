@@ -39,7 +39,7 @@ logger = configure_logger(
 )
 
 logger.info(
-    "PARALLEL_TRAINING_3D_CHANNEL_MARL.py: Logging level set to %s", logger.level
+    "PARALLEL_TRAINING_3D_CHANNEL_MARL.py: Logging level set to %s\n", logger.level
 )
 
 # Parser for command line arguments
