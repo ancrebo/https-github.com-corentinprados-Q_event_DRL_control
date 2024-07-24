@@ -1075,7 +1075,8 @@ class Environment(Environment):
 
         cr_start("ENV.save_reward", 0)
         primary_logger.info(
-            "ENV_ID %s: Env3D.save_reward: Saving reward N° %d: %f ...",
+            "ENV_ID %s: Env3D.save_reward: ENV_ID %s Saving reward N° %d: %f ...",
+            self.ENV_ID,
             self.ENV_ID,
             self.action_count,
             reward,
@@ -1112,7 +1113,11 @@ class Environment(Environment):
                 spam_writer = csv.writer(csv_file, delimiter=";", lineterminator="\n")
                 spam_writer.writerow([self.action_count, reward])
 
-        primary_logger.info("ENV_ID %s: Env3D.save_reward: Done!\n", self.ENV_ID)
+        primary_logger.info(
+            "ENV_ID %s: Env3D.save_reward: ENV_ID %s reward saved!\n",
+            self.ENV_ID,
+            self.ENV_ID,
+        )
         # print("Done.")
 
         cr_stop("ENV.save_reward", 0)
@@ -1839,7 +1844,7 @@ class Environment(Environment):
 
             self.log(
                 logging.INFO,
-                "ENV_ID %s: Env3D.execute: !!!ALL ACTIONS ARE READY TO APPLY TO BOUNDARY CONDITIONS!!!\n",
+                "ENV_ID %s: Env3D.execute: \n\n!!!ALL ACTIONS ARE READY TO APPLY TO BOUNDARY CONDITIONS!!!\n",
                 self.ENV_ID,
             )
             # print(
