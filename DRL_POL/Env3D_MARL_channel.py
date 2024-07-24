@@ -561,7 +561,6 @@ class Environment(Environment):
                 logger.debug(
                     "ENV_ID %s: Env3D.run: Writing run_type.dat file...",
                     self.ENV_ID,
-                    self.case,
                 )
                 write_run_type(filepath, "CONTI", freq=1000)
 
