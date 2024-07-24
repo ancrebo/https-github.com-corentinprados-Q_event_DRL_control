@@ -94,10 +94,10 @@ from logging_config import configure_env_logger
 primary_logger, file_only_logger = configure_env_logger()
 
 primary_logger.info(
-    "%s.py: Primary logging level set to %s", __name__, primary_logger.level
+    "%s.py: Primary logging level set to %s\n", __name__, primary_logger.level
 )
 file_only_logger.info(
-    "%s.py: File-only logging level set to %s", __name__, file_only_logger.level
+    "%s.py: File-only logging level set to %s\n", __name__, file_only_logger.level
 )
 
 ###-------------------------------------------------------------------------###
@@ -231,7 +231,7 @@ class Environment(Environment):
         # Call parent class constructor
         super().__init__()
         primary_logger.debug(
-            "ENV_ID %s: Env3D.init: Parent class constructor called (TENSORFORCE)",
+            "ENV_ID %s: Env3D.init: Parent class constructor called (TENSORFORCE)\n",
             ENV_ID,
         )
         cr_stop("ENV.init", 0)
@@ -327,7 +327,7 @@ class Environment(Environment):
         self.check_id = True  # check if the folder with cpuid number is created
         self.log(
             logging.DEBUG,
-            "ENV_ID %s: Env3D.start: Finished `start` method",
+            "ENV_ID %s: Env3D.start: Finished `start` method!\n",
             self.ENV_ID,
         )
         cr_stop("ENV.start", 0)
@@ -351,7 +351,7 @@ class Environment(Environment):
         self.action_count = 1
         self.log(
             logging.DEBUG,
-            "ENV_ID %s: Env3D.clean: Finished `clean` method.",
+            "ENV_ID %s: Env3D.clean: Finished `clean` method.\n",
             self.ENV_ID,
         )
         cr_stop("ENV.clean", 0)
@@ -380,7 +380,7 @@ class Environment(Environment):
             run_subprocess("alya_files/case", ALYA_CLEAN, "")
         self.log(
             logging.DEBUG,
-            "ENV_ID %s: Env3D.create_mesh: Finished `create_mesh`",
+            "ENV_ID %s: Env3D.create_mesh: Finished `create_mesh`\n",
             self.ENV_ID,
         )
         cr_stop("ENV.mesh", 0)
@@ -422,7 +422,7 @@ class Environment(Environment):
 
         self.log(
             logging.DEBUG,
-            "ENV_ID %s: Env3D.run_baseline: Finished `run_baseline`",
+            "ENV_ID %s: Env3D.run_baseline: Finished `run_baseline`\n",
             self.ENV_ID,
         )
         cr_stop("ENV.run_baseline", 0)
@@ -747,8 +747,8 @@ class Environment(Environment):
 
             else:
                 self.log(
-                    logging.DEBUG,
-                    "ENV_ID %s: Env3D.run: Waiting for 'main' environment to finish tasks...",
+                    logging.INFO,
+                    "ENV_ID %s: Env3D.run: Waiting for 'main' environment to finish tasks...\n",
                     self.ENV_ID,
                 )
                 count_wait = 1
@@ -771,14 +771,14 @@ class Environment(Environment):
                 time.sleep(1)
                 self.log(
                     logging.INFO,
-                    "ENV_ID %s: Env3D.run: Actions are in sync!",
+                    "ENV_ID %s: Env3D.run: Actions are in sync!\n",
                     self.ENV_ID,
                 )
                 # print(f"Actions in {self.ENV_ID} are sync")
 
             self.log(
                 logging.DEBUG,
-                "ENV_ID %s: Env3D.run: Finished `run` method.",
+                "ENV_ID %s: Env3D.run: Finished `run` method.\n",
                 self.ENV_ID,
             )
             cr_stop("ENV.run_actions", 0)
@@ -893,7 +893,7 @@ class Environment(Environment):
             # print("Done.")
             self.log(
                 logging.DEBUG,
-                "ENV_ID %s: Env3D.save_history_parameters_all: Done!",
+                "ENV_ID %s: Env3D.save_history_parameters_all: Done!\n",
                 self.ENV_ID,
             )
         cr_stop("ENV.save_history_parameters", 0)
@@ -1004,7 +1004,7 @@ class Environment(Environment):
             # print("Done.")
             self.log(
                 logging.DEBUG,
-                "ENV_ID %s: Env3D.save_history_parameters: Done!",
+                "ENV_ID %s: Env3D.save_history_parameters: Done!\n",
                 self.ENV_ID,
             )
         cr_stop("ENV.save_cd_cl", 0)
@@ -1061,7 +1061,9 @@ class Environment(Environment):
                 spam_writer = csv.writer(csv_file, lineterminator="\n")
                 spam_writer.writerow([action_line])
 
-        self.log(logging.INFO, "ENV_ID %s: Env3D.save_this_action: Done!", self.ENV_ID)
+        self.log(
+            logging.INFO, "ENV_ID %s: Env3D.save_this_action: Done!\n", self.ENV_ID
+        )
         # print("Done.")
         cr_stop("ENV.save_action", 0)
 
@@ -1110,7 +1112,7 @@ class Environment(Environment):
                 spam_writer = csv.writer(csv_file, delimiter=";", lineterminator="\n")
                 spam_writer.writerow([self.action_count, reward])
 
-        primary_logger.info("ENV_ID %s: Env3D.save_reward: Done!", self.ENV_ID)
+        primary_logger.info("ENV_ID %s: Env3D.save_reward: Done!\n", self.ENV_ID)
         # print("Done.")
 
         cr_stop("ENV.save_reward", 0)
@@ -1153,7 +1155,7 @@ class Environment(Environment):
                 spam_writer = csv.writer(csv_file, delimiter=";", lineterminator="\n")
                 spam_writer.writerow([self.episode_number, reward])
 
-        primary_logger.info("ENV_ID %s: Env3D.save_final_reward: Done!", self.ENV_ID)
+        primary_logger.info("ENV_ID %s: Env3D.save_final_reward: Done!\n", self.ENV_ID)
         # print("Done.")
 
     # -----------------------------------------------------------------------------------------------------
@@ -1191,7 +1193,7 @@ class Environment(Environment):
                 spam_writer = csv.writer(csv_file, delimiter=";", lineterminator="\n")
                 spam_writer.writerow([self.action_count, self.probes_values])
 
-        primary_logger.info("ENV_ID %s: Env3D.save_comms_probes: Done!", self.ENV_ID)
+        primary_logger.info("ENV_ID %s: Env3D.save_comms_probes: Done!\n", self.ENV_ID)
         # print("Done.")
 
     # -----------------------------------------------------------------------------------------------------
@@ -1258,7 +1260,7 @@ class Environment(Environment):
 
         self.log(
             logging.DEBUG,
-            "ENV_ID %s: Env3D.recover_start: Finished `recover_start` method.",
+            "ENV_ID %s: Env3D.recover_start: Finished `recover_start` method.\n",
             self.ENV_ID,
         )
         cr_stop("ENV.recover_start", 0)
@@ -1314,7 +1316,7 @@ class Environment(Environment):
         )
         self.log(
             logging.DEBUG,
-            "ENV_ID %s: Env3D.create_cpuID: Finished `create_cpuID` method.",
+            "ENV_ID %s: Env3D.create_cpuID: Finished `create_cpuID` method.\n",
         )
         # print(f"Folder created for CPU ID: {self.host}/{self.ENV_ID[1]}")
 
@@ -1325,7 +1327,7 @@ class Environment(Environment):
         )
         super().close()
         self.log(
-            logging.DEBUG, "ENV_ID %s: Env3D.close: Environment closed!", self.ENV_ID
+            logging.DEBUG, "ENV_ID %s: Env3D.close: Environment closed!\n", self.ENV_ID
         )
 
     # -----------------------------------------------------------------------------------------------------
@@ -1395,7 +1397,7 @@ class Environment(Environment):
 
         self.log(
             logging.DEBUG,
-            "ENV_ID %s: Env3D.list_observation_updated: Probes filtered for this specific environment!",
+            "ENV_ID %s: Env3D.list_observation_updated: Probes filtered for this specific environment!\n",
         )
         return probes_values_2
 
@@ -1501,7 +1503,7 @@ class Environment(Environment):
 
         self.log(
             logging.DEBUG,
-            "ENV_ID %s: Env3D.states: State space calculated!",
+            "ENV_ID %s: Env3D.states: State space calculated!\n",
             self.ENV_ID,
         )
         return dict(type="float", shape=(state_size,))
@@ -1521,7 +1523,7 @@ class Environment(Environment):
         )
         self.log(
             logging.DEBUG,
-            "ENV_ID %s: Env3D.actions: Action space defined!",
+            "ENV_ID %s: Env3D.actions: Action space defined!\n",
             self.ENV_ID,
         )
         return dict(
@@ -1738,10 +1740,12 @@ class Environment(Environment):
         # print(
         #     "\n\n\nEnv3D_MARL_channel.Env3D.reset: probes_values_2 being returned to Tensorforce!!!\n\n\n"
         # )
-        self.log(logging.INFO, "ENV_ID %s: Env3D.reset: Probes extracted!", self.ENV_ID)
+        self.log(
+            logging.INFO, "ENV_ID %s: Env3D.reset: Probes extracted!\n", self.ENV_ID
+        )
         self.log(
             logging.DEBUG,
-            "ENV_ID %s: Env3D.reset: `reset` method complete!",
+            "ENV_ID %s: Env3D.reset: `reset` method complete!\n",
             self.ENV_ID,
         )
         return probes_values_2
@@ -1835,7 +1839,7 @@ class Environment(Environment):
 
             self.log(
                 logging.INFO,
-                "ENV_ID %s: Env3D.execute: !!!ALL ACTIONS ARE READY TO APPLY TO BOUNDARY CONDITIONS!!!",
+                "ENV_ID %s: Env3D.execute: !!!ALL ACTIONS ARE READY TO APPLY TO BOUNDARY CONDITIONS!!!\n",
                 self.ENV_ID,
             )
             # print(
@@ -2188,10 +2192,15 @@ class Environment(Environment):
 
         # filter probes per jet (corresponding to the ENV.ID[])
         probes_values_2 = self.list_observation_updated()
+        self.log(
+            logging.INFO,
+            "ENV_ID %s: Env3D.execute: Probes extracted and filtered!\n",
+            self.ENV_ID,
+        )
 
         self.log(
             logging.DEBUG,
-            "ENV_ID %s: Env3D.execute: `execute` method complete!",
+            "ENV_ID %s: Env3D.execute: `execute` method complete!\n",
             self.ENV_ID,
         )
         return probes_values_2, terminal, reward
@@ -2411,7 +2420,7 @@ class Environment(Environment):
 
             reward_value: float = float(matching_row["reward"][0])
             primary_logger.info(
-                "ENV_ID %s: Env3D.compute_reward: Reward value: %f",
+                "ENV_ID %s: Env3D.compute_reward: Reward value: %f\n",
                 self.ENV_ID,
                 reward_value,
             )
