@@ -12,10 +12,12 @@ from typing import List, Type, Any, Dict, Optional
 
 from alya import write_jet_file
 
-from logging_config import configure_logger
+from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
 
 # Set up logger
-logger = configure_logger(__name__, default_level="WARNING")
+logger = configure_logger(__name__, default_level=DEFAULT_LOGGING_LEVEL)
+
+logger.info("%s.py: Logging level set to %s", __name__, logger.level)
 
 
 # Function to build and return the jets

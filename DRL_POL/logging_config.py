@@ -14,6 +14,10 @@ possible_logging_levels = {
     "CRITICAL": 50,
 }
 
+# Set the DEFAULT logging level, passed to individual modules
+
+DEFAULT_LOGGING_LEVEL = "INFO"
+
 # Dictionary to define logging levels and bool for each module
 
 logging_config_dict: Dict[str, Dict[str, Any]] = {

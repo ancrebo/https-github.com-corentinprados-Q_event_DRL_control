@@ -8,11 +8,12 @@ from typing import Tuple, List
 from tqdm import tqdm
 from pathlib import Path
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
+
+# Set up logger
+logger = configure_logger(__name__, default_level=DEFAULT_LOGGING_LEVEL)
+
+logger.info("%s.py: Logging level set to %s", __name__, logger.level)
 
 
 def load_data_and_convert_to_dataframe(directory, file_name):

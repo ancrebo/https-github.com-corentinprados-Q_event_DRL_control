@@ -26,10 +26,12 @@ from env_utils import agent_index_2d_to_1d, agent_index_1d_to_2d
 from witness import calculate_channel_witness_coordinates
 from alya import write_witness_file
 
-from logging_config import configure_logger
+from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
 
 # Set up logger
-logger = configure_logger(__name__, default_level="WARNING")
+logger = configure_logger(__name__, default_level=DEFAULT_LOGGING_LEVEL)
+
+logger.info("%s.py: Logging level set to %s", __name__, logger.level)
 
 ### CASE NAME ************************************************
 

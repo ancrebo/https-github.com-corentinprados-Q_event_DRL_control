@@ -9,12 +9,12 @@ from __future__ import print_function, division
 
 import numpy as np, time as time_module
 
-from logging_config import configure_logger
+from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
 
 # Set up logger
-logger = configure_logger(__name__, default_level="WARNING")
+logger = configure_logger(__name__, default_level=DEFAULT_LOGGING_LEVEL)
 
-logger.info("cr.py: Logging level set to %s", logger.level)
+logger.info("%s.py: Logging level set to %s", __name__, logger.level)
 
 CHANNEL_DICT = {}
 
