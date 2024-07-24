@@ -280,7 +280,7 @@ environments = [
 for env in environments:
     env_id_2d = agent_index_1d_to_2d(env.ENV_ID[1], nz_Qs)
     logger.info(
-        "Verif:   Host: %s    ID: %s    Agent 1D Index: %s    2D Index: %s\n",
+        "Verif:   Host: %s    ID: %s    Agent 1D Index: %s    2D Index: %s",
         env.host,
         env.ENV_ID,
         env.ENV_ID[1],
