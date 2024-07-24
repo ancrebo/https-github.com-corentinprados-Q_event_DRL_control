@@ -35,6 +35,7 @@ def run_subprocess(
     """
     Use python to call a terminal command
     """
+    logger.debug("env_utils.run_subprocess: Starting run_subprocess...")
 
     # Auxilar function to build parallel command
     def _cmd_parallel(runbin: str, **kwargs) -> str:
@@ -100,29 +101,26 @@ def run_subprocess(
     # print('POOOOOOOOOOOOOL --> cmd: %s' % cmd)
 
     # DEBUG
-    logger.info(f"Running command: {cmd}")
-    # print(f"Running command: {cmd}")
-    logger.debug(f"Current working directory: {os.getcwd()}")
-    # print(f"Current working directory: {os.getcwd()}")
-    # print(f"Environment PATH: {os.environ['PATH']}")
-    # print(f"Environment variables: {os.environ}")
+    logger.debug("env_utils.run_subprocess: Running in PARALLEL: %s", parallel)
+    logger.info("env_utils.run_subprocess: Running command: %s", cmd)
+    logger.debug("env_utils.run_subprocess: Current working directory: %s", os.getcwd())
 
     # # Execute run
-    # retval = subprocess.call(cmd, shell=True)  # old version
+    # retval = subprocess.call(cmd, shell=True)  # old version - Pieter
 
-    # Execute run (alternate, updated version introduced in Python 3.5)
+    # Execute run (alternate, updated version introduced in Python 3.5 - Pieter)
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
 
-    # Print the stdout and stderr from the shell script
-    logger.info(result.stdout)
-    # print(result.stdout)
-    logger.debug(result.stderr)
-    # print(result.stderr)
+    # Print the stdout and stderr from the shell script if length is longer than 0
+    if len(result.stdout) > 0:
+        logger.info(result.stdout)
+    if len(result.stderr) > 0:
+        logger.error(result.stderr)
 
     # Check return
     if check_return and result.returncode != 0:
         raise ValueError(f"Error running command <{cmd}>!\n{result.stderr}")
-
+    logger.debug("env_utils.run_subprocess: Finished run_subprocess.")
     # Return value
     return result.returncode
 
@@ -131,6 +129,7 @@ def detect_system(override: str = None) -> str:
     """
     Test if we are in a cluster or on a local machine
     """
+    logger.debug("env_utils.detect_system: Starting detect_system...")
     # Override detect system and manually select the system
     if override is not None:
         return override
@@ -141,6 +140,8 @@ def detect_system(override: str = None) -> str:
     if run_subprocess("./", "which", "srun", check_return=False) == 0:
         out = "SLURM"
     # Return system value
+    logger.debug("env_utils.detect_system: %s system detected!" % out)
+    logger.debug("env_utils.detect_system: Finished detect_system.")
     return out
 
 
@@ -160,6 +161,9 @@ def _slurm_generate_node_list(
 
     SLURM_JOB_NODELIST does not give the exact list of nodes as we would want
     """
+    logger.debug(
+        "env_utils._slurm_generate_node_list: Starting _slurm_generate_node_list..."
+    )
     # print("POOOOOL --> SLURM_NNODES: %s" %os.getenv('SLURM_NNODES'))
     # print("POOOOOL --> SLURM_JOB_CPUS_PER_NODE: %s" %os.getenv('SLURM_JOB_CPUS_PER_NODE'))
 
@@ -213,18 +217,27 @@ def _slurm_generate_node_list(
             iserver += 1
         # Finish and jump line
         file.write("\n")
+    logger.debug(
+        "env_utils._slurm_generate_node_list: Finished _slurm_generate_node_list."
+    )
 
 
 def _localhost_generate_node_list(outfile, num_servers: int) -> None:
     """
     Generate the list of nodes for a local run
     """
+    logger.debug(
+        "env_utils._localhost_generate_node_list: Starting _localhost_generate_node_list..."
+    )
     hostlist = "localhost"
     for iserver in range(num_servers):
         hostlist += "\nlocalhost"
     # Basically write localhost as the list of nodes
     # Add n+1 nodes as required per the nodelist
     run_subprocess("./", "echo", f'"{hostlist}"', log=outfile)
+    logger.debug(
+        "env_utils._localhost_generate_node_list: Finished _localhost_generate_node_list."
+    )
 
 
 def generate_node_list(
@@ -236,20 +249,24 @@ def generate_node_list(
     """
     Detect the system and generate the node list
     """
+    logger.debug("env_utils.generate_node_list: Starting generate_node_list...")
     system = detect_system(override)
     if system == "LOCAL":
         _localhost_generate_node_list(outfile, num_servers)
     if system == "SLURM":
         _slurm_generate_node_list(outfile, num_servers, num_cores_server)
+    logger.debug("env_utils.generate_node_list: Finished generate_node_list.")
 
 
 def read_node_list(file: str = NODELIST) -> List[str]:
     """
     Read the list of nodes
     """
+    logger.debug("env_utils.read_node_list: Starting read_node_list...")
     fp = open(file, "r")
     nodelist = [h.strip() for h in fp.readlines()]
     fp.close()
+    logger.debug("env_utils.read_node_list: Finished read_node_list.")
     return nodelist
 
 
@@ -259,6 +276,8 @@ def agent_index_2d_to_1d(i: int, j: int, nz_Qs: int) -> int:
     Row-major order
     1D starts from 1 to align with `ENV_ID[1]` usage
     """
+    logger.debug("env_utils.agent_index_2d_to_1d: Starting agent_index_2d_to_1d...")
+    logger.debug("env_utils.agent_index_2d_to_1d: Finished agent_index_2d_to_1d.")
     return i * nz_Qs + j + 1
 
 
@@ -268,9 +287,11 @@ def agent_index_1d_to_2d(index: int, nz_Qs: int) -> List[int]:
     Row-major order
     1D starts from 1 to align with `ENV_ID[1]` usage
     """
+    logger.debug("env_utils.agent_index_1d_to_2d: Starting agent_index_1d_to_2d...")
     index -= 1
     i = index // nz_Qs
     j = index % nz_Qs
+    logger.debug("env_utils.agent_index_1d_to_2d: Finished agent_index_1d_to_2d.")
     return [i, j]
 
 
@@ -289,6 +310,9 @@ def find_highest_timestep_file(directory, case, parameter):
     Raises:
         FileNotFoundError: If no files matching the pattern are found.
     """
+    logger.debug(
+        "env_utils.find_highest_timestep_file: Starting find_highest_timestep_file..."
+    )
     pattern = re.compile(rf"{case}-{parameter}-(\d+)\.post\.mpio\.bin")
     highest_timestep = -1
     highest_file = None
@@ -301,6 +325,9 @@ def find_highest_timestep_file(directory, case, parameter):
                 highest_timestep = timestep
                 highest_file = filename
 
+    logger.debug(
+        "env_utils.find_highest_timestep_file: Finished find_highest_timestep_file."
+    )
     if highest_file:
         return os.path.join(directory, highest_file)
     else:
@@ -324,6 +351,9 @@ def copy_mpio2vtk_required_files(
     Raises:
         FileNotFoundError: If any of the required files are not found in the source directory.
     """
+    logger.debug(
+        "env_utils.copy_mpio2vtk_required_files: Starting copy_mpio2vtk_required_files..."
+    )
     if not os.path.exists(target_directory):
         os.makedirs(target_directory)
 
@@ -349,12 +379,17 @@ def copy_mpio2vtk_required_files(
             raise FileNotFoundError(
                 f"Required file {filename} not found in {source_directory}"
             )
+    logger.debug(
+        "env_utils.copy_mpio2vtk_required_files: Finished copy_mpio2vtk_required_files."
+    )
 
 
 def printDebug(*args) -> None:
     """
     ...
     """
+    logger.debug("env_utils.printDebug: Starting printDebug...")
     if DEBUG:
         logger.debug(*args)
         print(*args)
+    logger.debug("env_utils.printDebug: Finished printDebug.")
