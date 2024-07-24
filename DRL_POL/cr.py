@@ -14,6 +14,8 @@ from logging_config import configure_logger
 # Set up logger
 logger = configure_logger(__name__, default_level="WARNING")
 
+logger.info("cr.py: Logging level set to %s", logger.level)
+
 CHANNEL_DICT = {}
 
 
