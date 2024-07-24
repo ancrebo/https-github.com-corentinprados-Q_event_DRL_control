@@ -135,6 +135,13 @@ def configure_logger(module_name: str, default_level: str = "INFO") -> logging.L
         fh.setFormatter(formatter_fh)
         logger.addHandler(fh)
 
+        # Global file handler for all logs
+        global_log_path = "logsPYTHON/all.log"
+        fh_all = logging.FileHandler(global_log_path)
+        fh_all.setLevel(file_level)
+        fh_all.setFormatter(formatter_fh)
+        logger.addHandler(fh_all)
+
     # Disable propagation to prevent duplicate logs
     logger.propagate = False
 
