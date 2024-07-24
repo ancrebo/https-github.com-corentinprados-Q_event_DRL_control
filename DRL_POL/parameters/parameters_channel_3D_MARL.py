@@ -55,6 +55,9 @@ h_qevent_sensitivity: float = (
 n_agents_x: int = 2  # Number of agents along x direction
 n_agents_z: int = 2  # Number of agents along z direction
 
+quick_episodes: bool = True
+quick_episode_length: int = 3
+
 # THESE VALUES ARE CALCULATED FROM `coco_small_load_post_processing.py` and are specific to THIS BASELINE! - Pieter
 # Check `calculated_values.csv` in baseline folder for these values
 u_tau: float = 0.04871566388520865
@@ -110,6 +113,9 @@ if Re_case != 5:
     nb_actuations = 120  # Number of actuation of the neural network for each episode (ACTIONS/EPISODE)
 else:
     nb_actuations = 200
+
+if quick_episodes:
+    nb_actuations = quick_episode_length
 
 nb_actuations_deterministic = nb_actuations * 10
 
