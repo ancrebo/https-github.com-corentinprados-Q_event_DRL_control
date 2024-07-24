@@ -258,7 +258,7 @@ jet_coordinates: np.ndarray = np.array(
     [(x, z) for x in Qs_position_x for z in Qs_position_z]
 ).reshape(nx_Qs, nz_Qs, 2)
 
-logger.info("parameters: Jet coordinates calculated successfully!")
+logger.info("parameters: Jet coordinates calculated successfully!\n")
 logger.debug(
     "parameters: Jets are placed in the following X, Z coordinates with their indices:"
 )
