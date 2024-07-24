@@ -660,7 +660,7 @@ class Environment(Environment):
                     self.log(
                         logging.INFO,
                         "ENV_ID %s: Env3D.run: 2D: \n\n----STARTING ALYA RUN WITH UPDATED ACTIONS!!!----\n"
-                        "--------------------Action #%d\n",
+                        "-----------------Action #%d\n",
                         self.ENV_ID,
                         self.action_count,
                     )
@@ -699,7 +699,7 @@ class Environment(Environment):
                     self.log(
                         logging.INFO,
                         "ENV_ID %s: Env3D.run: 3D: \n\n----STARTING ALYA RUN WITH UPDATED ACTIONS!!!----\n"
-                        "--------------------Action #%d\n",
+                        "-----------------Action #%d\n",
                         self.ENV_ID,
                         self.action_count,
                     )
