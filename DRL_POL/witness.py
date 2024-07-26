@@ -12,7 +12,9 @@ from typing import Tuple, TextIO, Dict, Union, List, Any
 
 import logging
 
-import os, numpy as np
+import os
+import numpy as np
+
 from cr import cr_start, cr_stop
 
 from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
