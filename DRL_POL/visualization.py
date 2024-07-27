@@ -72,6 +72,11 @@ def plot_witness_points(
     ax.set_zlabel("Y Layer Index")
     ax.set_title("3D Plot of Witness Points")
 
+    # Set limits to ensure the ticks are correctly displayed
+    ax.set_xlim(0, nx_Qs)
+    ax.set_ylim(0, nz_Qs)
+    ax.set_zlim(0, y_value_density)
+
     # Set the major locator for grid lines
     ax.xaxis.set_major_locator(MultipleLocator(1))
     ax.yaxis.set_major_locator(MultipleLocator(1))
@@ -88,17 +93,12 @@ def plot_witness_points(
     ax.set_zticks([i for i in z_tick_indices])
     ax.set_zticklabels([str(i) for i in z_tick_indices])
 
-    # Set limits to ensure the ticks are correctly displayed
-    ax.set_xlim(0, nx_Qs)
-    ax.set_ylim(0, nz_Qs)
-    ax.set_zlim(0, y_value_density)
-
     ax.grid(True, which="major", color="black", linestyle="--")
 
     # Set minor grid lines for better visualization
-    # ax.minorticks_on()
-    ax.xaxis.set_minor_locator(MultipleLocator(1.5))
-    ax.yaxis.set_minor_locator(MultipleLocator(1.5))
+    ax.minorticks_on()
+    ax.xaxis.set_minor_locator(MultipleLocator(1))
+    ax.yaxis.set_minor_locator(MultipleLocator(1))
     ax.zaxis.set_minor_locator(MultipleLocator(1))
 
     ax.legend(loc="upper right")
