@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 from typing import List, Tuple
+from matplotlib.ticker import MultipleLocator
 
 from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
 
@@ -70,6 +71,11 @@ def plot_witness_points(
     ax.set_ylabel("Z Agent Index")
     ax.set_zlabel("Y Layer Index")
     ax.set_title("3D Plot of Witness Points")
+
+    # Set the major locator for grid lines
+    ax.xaxis.set_major_locator(MultipleLocator(1))
+    ax.yaxis.set_major_locator(MultipleLocator(1))
+    ax.zaxis.set_major_locator(MultipleLocator(1))
 
     # Setting the tick values based on the number of agents but labeled in between grid lines
     ax.set_xticks([i + 0.5 for i in range(nx_Qs)])
