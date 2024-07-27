@@ -97,8 +97,8 @@ def plot_witness_points(
 
     # Set minor grid lines for better visualization
     # ax.minorticks_on()
-    ax.xaxis.set_minor_locator(MultipleLocator(0.5))
-    ax.yaxis.set_minor_locator(MultipleLocator(0.5))
+    ax.xaxis.set_minor_locator(MultipleLocator(1.5))
+    ax.yaxis.set_minor_locator(MultipleLocator(1.5))
     ax.zaxis.set_minor_locator(MultipleLocator(1))
 
     ax.legend(loc="upper right")
