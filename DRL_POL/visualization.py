@@ -200,4 +200,4 @@ def plot_witness_points(
 
     plt.savefig(filename)
     plt.close(fig)
-    logger.info("3D plot saved as %s", filename)
+    logger.info("3D plot saved as %s\n", filename)

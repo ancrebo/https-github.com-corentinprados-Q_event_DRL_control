@@ -424,7 +424,7 @@ if os.path.exists(witness_file_path):
             shutil.copyfile(witness_version_file_path, backup_version_file_path)
             os.remove(witness_version_file_path)
             logger.info(
-                "Existing witness.dat and witness_version.txt files backed up in %s",
+                "Existing witness.dat and witness_version.txt files backed up in %s\n",
                 case_folder,
             )
 
