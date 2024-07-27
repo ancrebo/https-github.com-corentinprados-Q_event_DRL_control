@@ -77,30 +77,40 @@ def plot_witness_points(
     ax.set_ylim(0, nz_Qs)
     ax.set_zlim(0, y_value_density)
 
-    # Set the major locator for grid lines
-    ax.xaxis.set_major_locator(MultipleLocator(1))
-    ax.yaxis.set_major_locator(MultipleLocator(1))
-    ax.zaxis.set_major_locator(MultipleLocator(y_skip_values))
-
     # Setting the tick values based on the number of agents but labeled in between grid lines
     ax.set_xticks([i + 0.5 for i in range(nx_Qs)])
-    ax.set_xticklabels([str(i + 1) for i in range(nx_Qs)])
+    ax.set_xticklabels([str(i) for i in range(nx_Qs)])
     ax.set_yticks([i + 0.5 for i in range(nz_Qs)])
-    ax.set_yticklabels([str(i + 1) for i in range(nz_Qs)])
+    ax.set_yticklabels([str(i) for i in range(nz_Qs)])
 
     # Show "z" ticks based on y_value_density, but only show every y_skip_values
     z_tick_indices = [i for i in range(1, y_value_density + 1, y_skip_values)]
     ax.set_zticks([i for i in z_tick_indices])
     ax.set_zticklabels([str(i) for i in z_tick_indices])
 
-    # Ensure grid lines are displayed
-    ax.grid(True, which="both")
+    # Draw custom grid lines for X and Z axes
+    for i in range(1, nx_Qs):
+        ax.plot([i, i], [0, nz_Qs], [0, 0], color="grey", linestyle="--", linewidth=0.5)
+        ax.plot(
+            [i, i],
+            [0, 0],
+            [0, y_value_density],
+            color="grey",
+            linestyle="--",
+            linewidth=0.5,
+        )
+    for j in range(1, nz_Qs):
+        ax.plot([0, nx_Qs], [j, j], [0, 0], color="grey", linestyle="--", linewidth=0.5)
+        ax.plot(
+            [0, 0],
+            [j, j],
+            [0, y_value_density],
+            color="grey",
+            linestyle="--",
+            linewidth=0.5,
+        )
 
-    # Set minor grid lines for better visualization
-    ax.minorticks_on()
-    ax.xaxis.set_minor_locator(MultipleLocator(1))
-    ax.yaxis.set_minor_locator(MultipleLocator(1))
-    ax.zaxis.set_minor_locator(MultipleLocator(1))
+    ax.grid(False)  # Disable default grid to avoid overlap
 
     ax.legend(loc="upper right")
 
