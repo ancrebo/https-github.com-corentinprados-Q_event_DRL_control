@@ -248,8 +248,7 @@ def calculate_channel_witness_coordinates(
         y_value_density (int): Density of y values.
         pattern (str): Pattern type ('X' or '+'). Default is 'X'.
         y_skipping (bool): Whether to skip y values in between pattern layers. Default is False.
-        y_skipping_value (int): Number of layers with only the center point between each full
-            pattern layer if y_skipping is True. Default is 3.
+        y_skipping_value (int): Number of layers each full pattern layer if y_skipping is True. Default is 3.
 
     Returns:
         Dict[str, Any]: A dictionary containing the following keys:
@@ -299,18 +298,18 @@ def calculate_channel_witness_coordinates(
 
             for index, y in enumerate(y_values):
                 if 0 <= y <= Ly:  # Ensure y-values are within the global y limit
-                    if y_skipping and (index % y_skipping_value == 0):
-                        # Place the full "X" pattern
-                        for x, z in end_points:
-                            coordinates.append((x / Lx, y / Ly, z / Lz))
-                            indices2D.append((i, j))
-                        # Also place the center point
+                    if y_skipping and (index % y_skipping_value != 0):
+                        # Place only the center point
                         coordinates.append(
                             (center_point[0] / Lx, y / Ly, center_point[1] / Lz)
                         )
                         indices2D.append((i, j))
                     else:
-                        # Place only the center point
+                        # Place the full pattern
+                        for x, z in end_points:
+                            coordinates.append((x / Lx, y / Ly, z / Lz))
+                            indices2D.append((i, j))
+                        # Also place the center point
                         coordinates.append(
                             (center_point[0] / Lx, y / Ly, center_point[1] / Lz)
                         )
