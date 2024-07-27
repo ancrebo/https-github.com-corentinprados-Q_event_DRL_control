@@ -10,10 +10,7 @@ logger.info("%s.py: Logging level set to %s\n", __name__, logger.level)
 
 
 def plot_witness_points(
-        coordinates: List[Tuple[float, float, float]],
-        filename: str,
-        nx_Qs: int,
-        nz_Qs: int
+    coordinates: List[Tuple[float, float, float]], filename: str, nx_Qs: int, nz_Qs: int
 ) -> None:
     """
     Plot the witness points in 3D and save the plot as an image file.
@@ -40,9 +37,11 @@ def plot_witness_points(
     ax.set_title("3D Plot of Witness Points")
 
     # Setting the grid based on the number of agents
-    ax.set_xticks([i/nx_Qs for i in range(nx_Qs + 1)])
-    ax.set_zticks([i/nz_Qs for i in range(nz_Qs + 1)])
-    ax.set_yticks([i*0.2 for i in range(6)])  # Assuming y-axis (height) is normalized 0-1
+    ax.set_xticks([i / nx_Qs for i in range(nx_Qs + 1)])
+    ax.set_zticks([i / nz_Qs for i in range(nz_Qs + 1)])
+    ax.set_yticks(
+        [i * 0.2 for i in range(6)]
+    )  # Assuming y-axis (height) is normalized 0-1
 
     ax.grid(True)
 
