@@ -400,7 +400,7 @@ def write_witness_file_and_visualize(
     pattern: str = "X",
     y_value_density: int = 8,
     y_skipping: bool = False,
-    y_skip_values=None,
+    y_skip_values: int = 1,
     nx_Qs: int = 1,
     nz_Qs: int = 1,
 ) -> None:
@@ -418,8 +418,6 @@ def write_witness_file_and_visualize(
         nx_Qs (int, optional): Number of sections in the x direction. Default is 1.
         nz_Qs (int, optional): Number of sections in the z direction. Default is 1.
     """
-    if y_skip_values is None:
-        y_skip_values = []
 
     write_witness_file(
         case_folder,
@@ -433,6 +431,7 @@ def write_witness_file_and_visualize(
         nx_Qs=nx_Qs,
         nz_Qs=nz_Qs,
         y_value_density=y_value_density,
+        y_skip_values=y_skip_values,
     )
 
     logger.info(

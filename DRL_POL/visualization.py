@@ -15,6 +15,7 @@ def plot_witness_points(
     nx_Qs: int,
     nz_Qs: int,
     y_value_density: int,
+    y_skip_values: int,
 ) -> None:
     """
     Plot the witness points in 3D and save the plot as an image file.
@@ -44,7 +45,49 @@ def plot_witness_points(
     # Setting the grid based on the number of agents
     ax.set_xticks([i / nx_Qs for i in range(nx_Qs + 1)])
     ax.set_yticks([i / nz_Qs for i in range(nz_Qs + 1)])
-    ax.set_zticks([i / y_value_density for i in range(y_value_density + 1)])
+    # Show "z" ticks based on y_value_density, but only show every y_skip_values
+    ax.set_zticks([i / y_value_density for i in range(0, y_value_density + 1, y_skip_values)])
+
+    # Adjust tick labels to avoid overlapping
+    ax.set_xticklabels([str(i) for i in range(nx_Qs + 1)], rotation=45)
+    ax.set_yticklabels([str(i) for i in range(nz_Qs + 1)], rotation=45)
+    ax.set_zticklabels([str(i) for i in range(y_value_density + 1)], rotation=45)
+
+    # Highlighting the (0, 0) indexed volume
+    step_x = 1 / nx_Qs
+    step_z = 1 / nz_Qs
+    volume_outline = [
+        # Bottom face
+        [0, step_x, step_x, 0, 0, 0],
+        [0, 0, step_z, step_z, 0, 0],
+        [0, 0, 0, 0, 0, 0],  # y values for bottom face
+        # Top face
+        [0, step_x, step_x, 0, 0, 0],
+        [0, 0, step_z, step_z, 0, 0],
+        [1, 1, 1, 1, 1, 1],  # y values for top face
+        # Vertical lines
+        [0, 0, step_x, step_x, step_x, step_x, 0, 0],
+        [0, 0, 0, 0, step_z, step_z, step_z, step_z],
+        [0, 1, 0, 1, 0, 1, 0, 1],  # y values for vertical lines
+    ]
+
+    for i in range(0, len(volume_outline[0]), 2):
+        ax.plot(
+            volume_outline[0][i : i + 2],
+            volume_outline[1][i : i + 2],
+            volume_outline[2][i : i + 2],
+            color="blue",
+            linestyle="dotted",
+        )
+
+    for i in range(4, len(volume_outline[0]), 2):
+        ax.plot(
+            volume_outline[0][i : i + 2],
+            volume_outline[1][i : i + 2],
+            volume_outline[2][i : i + 2],
+            color="blue",
+            linestyle="dotted",
+        )
 
     ax.grid(True)
 
