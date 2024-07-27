@@ -96,20 +96,27 @@ def configure_logger(module_name: str, default_level: str = "INFO") -> logging.L
     """
     logger = logging.getLogger(module_name)
 
-    if module_name in logging_config_dict:
-        config = logging_config_dict[module_name]
-        if config.get("override", False):
-            console_level = config["console_level"].upper()
-            file_level = config["file_level"].upper()
-        else:
-            console_level = default_level.upper()
-            file_level = default_level.upper()
+    if module_name not in logging_config_dict:
+        raise ValueError(
+            f"Logger configuration for module '{module_name}' not found in logging_config_dict"
+        )
+
+    config = logging_config_dict[module_name]
+
+    if "override" not in config:
+        raise ValueError(
+            f"Missing 'override' key in logger configuration for module '{module_name}'"
+        )
+
+    if config["override"]:
+        console_level = config["console_level"].upper()
+        file_level = config["file_level"].upper()
     else:
         console_level = default_level.upper()
         file_level = default_level.upper()
 
     # Clear existing handlers if override is specified
-    if config.get("override", False):
+    if config["override"]:
         logger.handlers = []
 
     if not logger.hasHandlers():
