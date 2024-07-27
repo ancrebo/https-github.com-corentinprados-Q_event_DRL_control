@@ -400,7 +400,9 @@ witness_parameters["y_skipping"] = y_skipping
 witness_parameters["y_skip_values"] = y_skip_values
 
 # Save the witness coordinates to dictionary
-output_params: Dict[str, Any] = calculate_channel_witness_coordinates(witness_parameters)
+output_params: Dict[str, Any] = calculate_channel_witness_coordinates(
+    witness_parameters
+)
 
 
 ## CREATION OF WITNESS FILE
