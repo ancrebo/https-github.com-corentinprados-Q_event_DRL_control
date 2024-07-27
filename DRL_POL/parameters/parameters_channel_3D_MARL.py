@@ -357,7 +357,7 @@ positions_probes_for_grid_z = []
 #     )
 # print("Probes are placed in Z coordinates: ", positions_probes_for_grid_z)
 
-probes_location = 5
+probes_location = 6  # 5, 6, 7, 8
 
 list_position_probes = []
 
@@ -512,7 +512,7 @@ else:
 
 ## CREATION OF WITNESS FILE
 # Whether to overwrite the witness file if exists, True overwrites existing file
-need_witness_file_override: bool = False
+need_witness_file_override: bool = True
 logger.debug("Witness file override: %s", need_witness_file_override)
 
 case_folder = f"alya_files/case_{training_case}"
