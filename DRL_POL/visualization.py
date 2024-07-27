@@ -151,8 +151,13 @@ def plot_witness_points(
     y_vals = y_vals[volume_filter] * y_value_density
     z_vals = z_vals[volume_filter] * nz_Qs
 
-    # Plot filtered points
-    ax.scatter(x_vals, z_vals, y_vals, c="r", marker="o")
+    # Assign colors based on the layer index
+    color_map = plt.cm.get_cmap("viridis", y_value_density // y_skip_values + 1)
+    layer_indices = (y_vals // y_skip_values).astype(int)
+    colors = color_map(layer_indices)
+
+    # Plot filtered points with color-coded layers
+    scatter = ax.scatter(x_vals, z_vals, y_vals, c=colors, marker="o")
 
     ax.set_xlabel("Normalized X")
     ax.set_ylabel("Normalized Z")
@@ -177,6 +182,10 @@ def plot_witness_points(
 
     ax.grid(True)
     ax.legend(loc="upper right")
+
+    # Add a color bar to indicate layers
+    cbar = plt.colorbar(scatter, ax=ax, pad=0.1)
+    cbar.set_label("Layer Index")
 
     plt.savefig(filename)
     plt.close(fig)
