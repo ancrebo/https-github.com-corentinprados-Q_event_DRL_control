@@ -347,7 +347,7 @@ geometry_params = {  # Kept for legacy purposes but to be deleted when reworking
 ## TODO: explain criteria of ordering history points, to "call" them quickly - Pol
 
 
-probes_location = 6  # 5, 6, 7, 8
+probes_location = 7  # 5, 6, 7, 8
 
 list_position_probes = []
 
