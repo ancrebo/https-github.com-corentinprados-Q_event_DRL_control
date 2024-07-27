@@ -341,7 +341,10 @@ geometry_params = {  # Kept for legacy purposes but to be deleted when reworking
 ## 2-- S99 ETMM and NATURE MI //
 ## 4-- 5 probes experiment from jean //
 ## 3-- working on it with re3900 (at the same time witness to postprocess: fft, wake profiles, pressure distribution, etc)
-## 5-- 3D channel
+## 5-- 3D channel (PER LOCAL: X pattern, 8 layers, no skipping)
+## 6 -- 3D channel  (PER LOCAL: X pattern, 20 layers, X every 4 layers)
+## 7 -- 3D channel  (PER LOCAL: X pattern, 10 layers, X every 3 layers)
+## 8 -- 3D channel  (PER LOCAL: X pattern, 50 layers, X every 5 layers)
 ## TODO: explain criteria of ordering history points, to "call" them quickly - Pol
 
 # new setup observation state for it>30 --> f(slices_probes_per_jet)
@@ -358,14 +361,13 @@ probes_location = 5
 
 list_position_probes = []
 
-probe_type: str = "velocity"  # Probe type ('pressure' or 'velocity')
-
-pattern: str = "X"  # Pattern type ('X' or '+')
-y_value_density: int = 8  # Number of y values total
-y_skipping: bool = False  # Whether to skip full pattern placement on certain layers
-y_skip_values: int = 3  # Number of layers to skip if y_skipping is True
-
 if probes_location == 5:
+    probe_type: str = "velocity"  # Probe type ('pressure' or 'velocity')
+    pattern: str = "X"  # Pattern type ('X' or '+')
+    y_value_density: int = 8  # Number of y values total
+    y_skipping: bool = False  # Whether to skip full pattern placement on certain layers
+    y_skip_values: int = 3  # Number of layers to skip if y_skipping is True
+
     probe_dict = calculate_channel_witness_coordinates(
         nx_Qs,
         nz_Qs,
@@ -387,10 +389,41 @@ if probes_location == 5:
     logger.debug("parameters: 1D Witness Indices Saved!")
     logger.debug("parameters: Probe Type: %s", probe_type)
 
-    # print(f"\n\n{len(probes_coordinates)} witness points calculated!\n")
-    # print("2D Witness Indices Saved!")
-    # print("1D Witness Indices Saved!")
-    # print(f"Probe Type: {probe_type}\n\n")
+    output_params: Dict[str, Any] = {
+        "locations": probes_coordinates,
+        "tag_probes": probe_tags,
+        "probe_type": probe_type,
+        "probe_indices2D": probe_indices2D,
+        "probe_indices1D": probe_indices1D,
+    }
+
+elif probes_location == 6:
+    probe_type: str = "velocity"  # Probe type ('pressure' or 'velocity')
+    pattern: str = "X"  # Pattern type ('X' or '+')
+    y_value_density: int = 20  # Number of y values total
+    y_skipping: bool = True  # Whether to skip full pattern placement on certain layers
+    y_skip_values: int = 4  # Number of layers to skip if y_skipping is True
+
+    probe_dict = calculate_channel_witness_coordinates(
+        nx_Qs,
+        nz_Qs,
+        Lx,
+        Ly,
+        Lz,
+        y_value_density,
+        pattern,
+        y_skipping,
+        y_skip_values,
+    )
+    probes_coordinates: List[Tuple[float, float, float]] = probe_dict["locations"]
+    probe_indices2D: List[Tuple[float, float]] = probe_dict["indices2D"]
+    probe_indices1D: List[float] = probe_dict["indices1D"]
+    probe_tags: Dict[str, List[int]] = probe_dict["tag_probs"]
+
+    logger.debug("parameters: %d witness points calculated!", len(probes_coordinates))
+    logger.debug("parameters: 2D Witness Indices Saved!")
+    logger.debug("parameters: 1D Witness Indices Saved!")
+    logger.debug("parameters: Probe Type: %s", probe_type)
 
     output_params: Dict[str, Any] = {
         "locations": probes_coordinates,
@@ -400,12 +433,87 @@ if probes_location == 5:
         "probe_indices1D": probe_indices1D,
     }
 
+elif probes_location == 7:
+    probe_type: str = "velocity"  # Probe type ('pressure' or 'velocity')
+    pattern: str = "X"  # Pattern type ('X' or '+')
+    y_value_density: int = 10  # Number of y values total
+    y_skipping: bool = True  # Whether to skip full pattern placement on certain layers
+    y_skip_values: int = 3  # Number of layers to skip if y_skipping is True
+
+    probe_dict = calculate_channel_witness_coordinates(
+        nx_Qs,
+        nz_Qs,
+        Lx,
+        Ly,
+        Lz,
+        y_value_density,
+        pattern,
+        y_skipping,
+        y_skip_values,
+    )
+    probes_coordinates: List[Tuple[float, float, float]] = probe_dict["locations"]
+    probe_indices2D: List[Tuple[float, float]] = probe_dict["indices2D"]
+    probe_indices1D: List[float] = probe_dict["indices1D"]
+    probe_tags: Dict[str, List[int]] = probe_dict["tag_probs"]
+
+    logger.debug("parameters: %d witness points calculated!", len(probes_coordinates))
+    logger.debug("parameters: 2D Witness Indices Saved!")
+    logger.debug("parameters: 1D Witness Indices Saved!")
+    logger.debug("parameters: Probe Type: %s", probe_type)
+
+    output_params: Dict[str, Any] = {
+        "locations": probes_coordinates,
+        "tag_probes": probe_tags,
+        "probe_type": probe_type,
+        "probe_indices2D": probe_indices2D,
+        "probe_indices1D": probe_indices1D,
+    }
+
+elif probes_location == 8:
+    probe_type: str = "velocity"  # Probe type ('pressure' or 'velocity')
+    pattern: str = "X"  # Pattern type ('X' or '+')
+    y_value_density: int = 50  # Number of y values total
+    y_skipping: bool = True  # Whether to skip full pattern placement on certain layers
+    y_skip_values: int = 5  # Number of layers to skip if y_skipping is True
+
+    probe_dict = calculate_channel_witness_coordinates(
+        nx_Qs,
+        nz_Qs,
+        Lx,
+        Ly,
+        Lz,
+        y_value_density,
+        pattern,
+        y_skipping,
+        y_skip_values,
+    )
+    probes_coordinates: List[Tuple[float, float, float]] = probe_dict["locations"]
+    probe_indices2D: List[Tuple[float, float]] = probe_dict["indices2D"]
+    probe_indices1D: List[float] = probe_dict["indices1D"]
+    probe_tags: Dict[str, List[int]] = probe_dict["tag_probs"]
+
+    logger.debug("parameters: %d witness points calculated!", len(probes_coordinates))
+    logger.debug("parameters: 2D Witness Indices Saved!")
+    logger.debug("parameters: 1D Witness Indices Saved!")
+    logger.debug("parameters: Probe Type: %s", probe_type)
+
+    output_params: Dict[str, Any] = {
+        "locations": probes_coordinates,
+        "tag_probes": probe_tags,
+        "probe_type": probe_type,
+        "probe_indices2D": probe_indices2D,
+        "probe_indices1D": probe_indices1D,
+    }
+
+else:
+    raise ValueError(
+        "Invalid probes_location value! Must be 5, 6, 7, or 8, NOT %s", probes_location
+    )
 
 ## CREATION OF WITNESS FILE
-need_witness_file_override: bool = (
-    False  # Whether to overwrite the witness file if exists, True overwrites existing file
-)
-logger.debug("parameters: Witness file override: %s", need_witness_file_override)
+# Whether to overwrite the witness file if exists, True overwrites existing file
+need_witness_file_override: bool = False
+logger.debug("Witness file override: %s", need_witness_file_override)
 
 case_folder = f"alya_files/case_{training_case}"
 witness_file_path = os.path.join(case_folder, "witness.dat")
@@ -417,74 +525,51 @@ if os.path.exists(witness_file_path):
         shutil.copyfile(witness_file_path, backup_file_path)
         # Remove existing witness.dat file
         os.remove(witness_file_path)
-        logger.info(
-            "parameters: Existing witness.dat file backed up in %s", backup_file_path
-        )
-        # print(
-        #     f"CREATING NEW WITNESS FILE:\nBackup of old witness.dat created in {backup_file_path}"
-        # )
+        logger.info("Existing witness.dat file backed up in %s", backup_file_path)
 
-        # Write the new witness.dat file
-        write_witness_file(case_folder, output_params["locations"])
+        # Import only when needed!
+        from witness import write_witness_file_and_visualize
+
+        # Write the new witness.dat file and visualize
+        write_witness_file_and_visualize(
+            case_folder,
+            output_params,
+            probes_location=probes_location,
+            pattern=pattern,
+            y_value_density=y_value_density,
+            y_skipping=y_skipping,
+            y_skip_values=y_skip_values,
+            nx_Qs=nx_Qs,
+            nz_Qs=nz_Qs,
+        )
         need_witness_file_override = False
 
-        logger.info("parameters: New witness.dat has been created in %s", case_folder)
-        logger.debug("parameters: witness.dat creation parameters:")
-        logger.debug("parameters: Probe Type: %s", output_params["probe_type"])
-        logger.debug("parameters: Pattern: %s", pattern)
-        logger.debug("parameters: Y Value Density: %s", y_value_density)
-        logger.debug("parameters: Y Skipping: %s", y_skipping)
-        logger.debug("parameters: Y Skip Values: %s", y_skip_values)
-        logger.debug("parameters: nx_Qs: %s", nx_Qs)
-        logger.debug("parameters: nz_Qs: %s", nz_Qs)
-
-        logger.info("parameters: Witness creation override parameter set to False\n")
-
-        # print(f"\nNew witness.dat has been created in {case_folder}\n")
-        # print(
-        #     f"\nwitness.dat creation parameters:"
-        #     f"\nprobe_type: {output_params['probe_type']}"
-        #     f"\npattern: {pattern}"
-        #     f"\ny_value_density: {y_value_density}"
-        #     f"\ny_skipping: {y_skipping}"
-        #     f"\ny_skip_values: {y_skip_values}"
-        #     f"\nnx_Qs: {nx_Qs}"
-        #     f"\nnz_Qs: {nz_Qs}"
-        # )
-        # print("\nWitness creation override parameter set to False.\n")
+        logger.info("Witness creation override parameter set to False\n")
     else:
         logger.info(
-            "parameters: witness.dat already exists in %s - No creation needed.\n",
+            "witness.dat already exists in %s - No creation needed.\n",
             case_folder,
         )
-        # print(
-        #     f"CREATING NEW WITNESS FILE:\nwitness.dat already exists in {case_folder} - No override needed.\n"
-        # )
+
 else:
     # Create and write the witness.dat file if it does not exist
-    logger.info("paramters: No existing witness.dat found in %s", case_folder)
-    write_witness_file(case_folder, output_params["locations"])
-    logger.info("parameters: New witness.dat has been created in %s\n", case_folder)
-    logger.debug("parameters: witness.dat creation parameters:")
-    logger.debug("parameters: Probe Type: %s", output_params["probe_type"])
-    logger.debug("parameters: Pattern: %s", pattern)
-    logger.debug("parameters: Y Value Density: %s", y_value_density)
-    logger.debug("parameters: Y Skipping: %s", y_skipping)
-    logger.debug("parameters: Y Skip Values: %s", y_skip_values)
-    logger.debug("parameters: nx_Qs: %s", nx_Qs)
-    logger.debug("parameters: nz_Qs: %s\n", nz_Qs)
+    logger.info("No existing witness.dat found in %s", case_folder)
 
-    # print(
-    #     f"CREATING NEW WITNESS FILE: No existing witness.dat found in {case_folder}"
-    #     f"\n\nNew witness.dat created with parameters:"
-    #     f"\nprobe_type: {output_params['probe_type']}"
-    #     f"\npattern: {pattern}"
-    #     f"\ny_value_density: {y_value_density}"
-    #     f"\ny_skipping: {y_skipping}"
-    #     f"\ny_skip_values: {y_skip_values}"
-    #     f"\nnx_Qs: {nx_Qs}"
-    #     f"\nnz_Qs: {nz_Qs}\n\n"
-    # )
+    # Import only when needed!
+    from witness import write_witness_file_and_visualize
+
+    write_witness_file_and_visualize(
+        case_folder,
+        output_params,
+        probes_location=probes_location,
+        pattern=pattern,
+        y_value_density=y_value_density,
+        y_skipping=y_skipping,
+        y_skip_values=y_skip_values,
+        nx_Qs=nx_Qs,
+        nz_Qs=nz_Qs,
+    )
+    logger.info("New witness.dat has been created in %s\n", case_folder)
 
 ############################################################################################
 ####    These are the probe positions for S85   ####

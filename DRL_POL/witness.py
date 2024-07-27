@@ -15,6 +15,7 @@ import logging
 import os
 import numpy as np
 
+from DRL_POL.alya import logger
 from cr import cr_start, cr_stop
 
 from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
@@ -342,3 +343,117 @@ def calculate_channel_witness_coordinates(
     }
 
     return probe_dict
+
+
+def write_witness_file(
+    filepath: str, probes_positions: List[Tuple[float, float, float]]
+) -> None:
+    """
+    UPDATED FUNCTION AS OF JULY 27, 2024 - @pietero
+
+    Writes the witness file that needs to be included in the .ker.dat file.
+
+    Parameters:
+        filepath (str): The path where the witness.dat file will be written.
+        probes_positions (np.ndarray): An array of probe positions.
+    """
+    logger.debug(
+        "write_witness_file: Writing witness file to %s with %int witness points",
+        filepath,
+        len(probes_positions),
+    )
+    # Ensure the directory exists
+    os.makedirs(filepath, exist_ok=True)
+
+    nprobes = len(probes_positions)
+    ndim = len(probes_positions[0]) if probes_positions else 0
+
+    # Open file for writing
+    with open(os.path.join(filepath, "witness.dat"), "w") as file:
+        # Write header
+        file.write(f"WITNESS_POINTS, NUMBER={nprobes}\n")
+
+        # Write probes
+        if ndim == 2:
+            for pos in probes_positions:
+                file.write(f"{pos[0]:.4f},{pos[1]:.4f}\n")
+        elif ndim == 3:
+            for pos in probes_positions:
+                file.write(f"{pos[0]:.4f},{pos[1]:.4f},{pos[2]:.4f}\n")
+        else:
+            raise ValueError(
+                f"write_witness_file: Unsupported number of dimensions: {ndim}"
+            )
+
+        # Write end
+        file.write("END_WITNESS_POINTS\n")
+        logger.debug(
+            "write_witness_file: Finished writing witness file to %s with %int witness points",
+            filepath,
+            len(probes_positions),
+        )
+
+
+def write_witness_file_and_visualize(
+    case_folder: str,
+    output_params: Dict[str, Any],
+    probes_location: int = 5,
+    pattern: str = "X",
+    y_value_density: int = 8,
+    y_skipping: bool = False,
+    y_skip_values=None,
+    nx_Qs: int = 1,
+    nz_Qs: int = 1,
+) -> None:
+    """
+    Create the witness.dat file and visualize the witness points, saving a plot to the case folder.
+
+    Parameters:
+        case_folder (str): The case folder path.
+        output_params (Dict[str, Any]): The output parameters containing witness point locations.
+        probes_location (int, optional): Identifier for the probe location type. Default is 5.
+        pattern (str, optional): Pattern type ('X' or '+'). Default is 'X'.
+        y_value_density (int, optional): Number of y values total. Default is 8.
+        y_skipping (bool, optional): Whether to skip full pattern placement on certain layers. Default is False.
+        y_skip_values (List[int], optional): Number of layers to skip if y_skipping is True. Default is None.
+        nx_Qs (int, optional): Number of sections in the x direction. Default is 1.
+        nz_Qs (int, optional): Number of sections in the z direction. Default is 1.
+    """
+    if y_skip_values is None:
+        y_skip_values = []
+
+    write_witness_file(
+        case_folder,
+        output_params["locations"],
+    )
+    from visualization import plot_witness_points
+
+    plot_witness_points(
+        output_params["locations"],
+        filename=os.path.join(case_folder, f"witnessv{probes_location}_plot.png"),
+    )
+
+    logger.info(
+        "write_witness_file_and_visualize: New witness.dat has been created in %s",
+        case_folder,
+    )
+    logger.debug("write_witness_file_and_visualize: witness.dat creation parameters:")
+    logger.debug(
+        "write_witness_file_and_visualize: Witness Probes Location Type: %s",
+        probes_location,
+    )
+    logger.debug(
+        "write_witness_file_and_visualize: Probe Type: %s", output_params["probe_type"]
+    )
+    logger.debug("write_witness_file_and_visualize: Pattern: %s", pattern)
+    logger.debug(
+        "write_witness_file_and_visualize: Y Value Density: %s", y_value_density
+    )
+    logger.debug("write_witness_file_and_visualize: Y Skipping: %s", y_skipping)
+    logger.debug("write_witness_file_and_visualize: Y Skip Values: %s", y_skip_values)
+    logger.debug("write_witness_file_and_visualize: nx_Qs: %s", nx_Qs)
+    logger.debug("write_witness_file_and_visualize: nz_Qs: %s", nz_Qs)
+    logger.info(
+        "write_witness_file_and_visualize: Witness point visualization has been saved at %s",
+        os.path.join(case_folder, f"witnessv{probes_location}_plot.png"),
+    )

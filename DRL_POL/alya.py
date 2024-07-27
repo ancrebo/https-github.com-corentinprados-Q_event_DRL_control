@@ -6,11 +6,9 @@
 # 07/07/2022
 from __future__ import print_function, division
 
-import os, subprocess
-import logging
+import os
 
-from typing import Union, List, Tuple
-import numpy as np
+from typing import Union, List
 
 from configuration import ALYA_GMSH, ALYA_INCON
 from env_utils import run_subprocess
@@ -356,54 +354,6 @@ def write_jet_file(filepath: str, name: str, functions: List[str]) -> None:
     logger.debug(
         "alya.write_jet_file: Finished writing jet file %s to %s" % name, filepath
     )
-
-
-def write_witness_file(
-    filepath: str, probes_positions: List[Tuple[float, float, float]]
-) -> None:
-    """
-    UPDATED FUNCTION AS OF JULY 19, 2024 - @pietero
-    Writes the witness file that is included in the .ker.dat file.
-
-    Parameters:
-        filepath (str): The path where the witness.dat file will be written.
-        probes_positions (np.ndarray): An array of probe positions.
-    """
-    logger.debug(
-        "alya.write_witness_file: Writing witness file to %s with %int witness points",
-        filepath,
-        len(probes_positions),
-    )
-    # Ensure the directory exists
-    os.makedirs(filepath, exist_ok=True)
-
-    nprobes = len(probes_positions)
-    ndim = len(probes_positions[0]) if probes_positions else 0
-
-    # Open file for writing
-    with open(os.path.join(filepath, "witness.dat"), "w") as file:
-        # Write header
-        file.write(f"WITNESS_POINTS, NUMBER={nprobes}\n")
-
-        # Write probes
-        if ndim == 2:
-            for pos in probes_positions:
-                file.write(f"{pos[0]:.4f},{pos[1]:.4f}\n")
-        elif ndim == 3:
-            for pos in probes_positions:
-                file.write(f"{pos[0]:.4f},{pos[1]:.4f},{pos[2]:.4f}\n")
-        else:
-            raise ValueError(
-                f"alya.py: write_witness_file: write_witness_file: Unsupported number of dimensions: {ndim}"
-            )
-
-        # Write end
-        file.write("END_WITNESS_POINTS\n")
-        logger.debug(
-            "alya.write_witness_file: Finished writing witness file to %s with %int witness points",
-            filepath,
-            len(probes_positions),
-        )
 
 
 def write_nsi_file(

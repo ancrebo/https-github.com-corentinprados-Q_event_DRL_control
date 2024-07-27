@@ -48,12 +48,12 @@ from parameters import (
 from env_utils import run_subprocess, printDebug
 from alya import (
     write_case_file,
-    write_witness_file,
     write_physical_properties,
     write_time_interval,
     write_run_type,
     detect_last_timeinterval,
 )
+from DRL_POL.witness import write_witness_file
 from extract_forces import compute_avg_lift_drag
 from witness import read_last_wit
 from cr import cr_start, cr_stop
