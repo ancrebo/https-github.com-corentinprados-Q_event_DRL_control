@@ -506,18 +506,19 @@ witness_version_file_path = os.path.join(case_folder, "witness_version.txt")
 
 if os.path.exists(witness_file_path):
     if need_witness_file_override:
-        # Create a backup of the existing witness.dat AND witness_version.txt file
-        backup_file_path = witness_file_path + ".backup"
-        shutil.copyfile(witness_file_path, backup_file_path)
-        backup_version_file_path = witness_version_file_path + ".backup"
-        shutil.copyfile(witness_version_file_path, backup_version_file_path)
-        # Remove existing witness.dat AND version file
-        os.remove(witness_file_path)
-        os.remove(witness_version_file_path)
-        logger.info(
-            "Existing witness.dat and witness_version.txt files backed up in %s",
-            case_folder,
-        )
+        # Create a backup of the existing witness.dat AND witness_version.txt file IF IT EXISTS
+        if os.path.exists(witness_version_file_path):
+            backup_file_path = witness_file_path + ".backup"
+            shutil.copyfile(witness_file_path, backup_file_path)
+            os.remove(witness_file_path)
+        if os.path.exists(witness_version_file_path):
+            backup_version_file_path = witness_version_file_path + ".backup"
+            shutil.copyfile(witness_version_file_path, backup_version_file_path)
+            os.remove(witness_version_file_path)
+            logger.info(
+                "Existing witness.dat and witness_version.txt files backed up in %s",
+                case_folder,
+            )
 
         # Import only when needed!
         from witness import write_witness_file_and_visualize
