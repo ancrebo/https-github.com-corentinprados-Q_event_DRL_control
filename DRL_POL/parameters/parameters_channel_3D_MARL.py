@@ -356,7 +356,7 @@ positions_probes_for_grid_z = []
 #     )
 # print("Probes are placed in Z coordinates: ", positions_probes_for_grid_z)
 
-probes_location = 7  # 5, 6, 7, 8
+probes_location = 8  # 5, 6, 7, 8
 
 list_position_probes = []
 
