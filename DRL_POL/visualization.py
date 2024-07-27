@@ -26,6 +26,7 @@ def plot_witness_points(
         nx_Qs (int): Number of agents in the x direction.
         nz_Qs (int): Number of agents in the z direction.
         y_value_density (int): Number of y layers in witness points.
+        y_skip_values (int): Number of layers to skip for displaying ticks on the y-axis.
     """
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")
@@ -45,15 +46,11 @@ def plot_witness_points(
     # Setting the grid based on the number of agents
     ax.set_xticks([i / nx_Qs for i in range(nx_Qs + 1)])
     ax.set_yticks([i / nz_Qs for i in range(nz_Qs + 1)])
-    # Show "z" ticks based on y_value_density, but only show every y_skip_values
-    ax.set_zticks(
-        [i / y_value_density for i in range(0, y_value_density + 1, y_skip_values)]
-    )
 
-    # Adjust tick labels to avoid overlapping
-    ax.set_xticklabels([str(i) for i in range(nx_Qs + 1)], rotation=45)
-    ax.set_yticklabels([str(i) for i in range(nz_Qs + 1)], rotation=45)
-    ax.set_zticklabels([str(i) for i in range(y_value_density + 1)], rotation=45)
+    # Show "z" ticks based on y_value_density, but only show every y_skip_values
+    z_tick_indices = [i for i in range(0, y_value_density + 1, y_skip_values)]
+    ax.set_zticks([i / y_value_density for i in z_tick_indices])
+    ax.set_zticklabels([str(i) for i in z_tick_indices])
 
     # Highlighting the (0, 0) indexed volume
     step_x = 1 / nx_Qs
