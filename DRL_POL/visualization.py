@@ -138,6 +138,8 @@ def plot_witness_points(
         y_value_density (int): Number of y layers in witness points.
         y_skip_values (int): Number of layers to skip for displaying ticks on the y-axis.
     """
+    logger.debug("Plotting witness points of local volume (0, 0) in 3D and saving...")
+
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")
 
@@ -198,4 +200,4 @@ def plot_witness_points(
 
     plt.savefig(filename)
     plt.close(fig)
-    print(f"3D plot saved as {filename}")
+    logger.info("3D plot saved as %s", filename)
