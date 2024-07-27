@@ -12,7 +12,7 @@ logger = configure_logger(__name__, default_level=DEFAULT_LOGGING_LEVEL)
 logger.info("%s.py: Logging level set to %s\n", __name__, logger.level)
 
 
-def plot_witness_points(
+def plot_witness_points_broken(
     coordinates: List[Tuple[float, float, float]],
     filename: str,
     nx_Qs: int,
@@ -119,7 +119,7 @@ def plot_witness_points(
     print(f"3D plot saved as {filename}")
 
 
-def plot_witness_points_single(
+def plot_witness_points(
     coordinates: List[Tuple[float, float, float]],
     filename: str,
     nx_Qs: int,
