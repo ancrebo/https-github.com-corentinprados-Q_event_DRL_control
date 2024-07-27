@@ -33,7 +33,7 @@ def build_jets(
     For that one has to give the kind of jet class (directly the class object)
     as well as the jet names and jet geometric parameters.
     """
-    logger.info("build_jets: Initializing jets of class %s...", jet_class.__name__)
+    logger.info("build_jets: Initializing jets of class %s...\n", jet_class.__name__)
     names = list(jets_definition.keys())
     # Build jets dictionary
     jets = {}
