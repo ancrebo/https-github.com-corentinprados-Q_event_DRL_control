@@ -430,6 +430,8 @@ def write_witness_file_and_visualize(
     plot_witness_points(
         output_params["locations"],
         filename=os.path.join(case_folder, f"witnessv{probes_location}_plot.png"),
+        nx_Qs=nx_Qs,
+        nz_Qs=nz_Qs,
     )
 
     logger.info(
