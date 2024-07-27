@@ -32,10 +32,11 @@ def plot_witness_points(
     ax = fig.add_subplot(111, projection="3d")
 
     # Adjust orientation so that X-Z plane is horizontal and Y is vertical
-    x_vals = [coord[0] for coord in coordinates]
+    x_vals = [coord[0] * nx_Qs for coord in coordinates]
     y_vals = [coord[1] for coord in coordinates]
-    z_vals = [coord[2] for coord in coordinates]
+    z_vals = [coord[2] * nz_Qs for coord in coordinates]
 
+    # FOR VISUALIZATION ONLY, Y AND Z ARE SWAPPED - Pieter
     ax.scatter(x_vals, z_vals, y_vals, c="r", marker="o")
 
     ax.set_xlabel("X")
@@ -44,8 +45,8 @@ def plot_witness_points(
     ax.set_title("3D Plot of Witness Points")
 
     # Setting the grid based on the number of agents
-    ax.set_xticks([i / nx_Qs for i in range(nx_Qs + 1)])
-    ax.set_yticks([i / nz_Qs for i in range(nz_Qs + 1)])
+    ax.set_xticks([i for i in range(nx_Qs + 1)])
+    ax.set_yticks([i for i in range(nz_Qs + 1)])
 
     # Show "z" ticks based on y_value_density, but only show every y_skip_values
     z_tick_indices = [i for i in range(1, y_value_density + 1, y_skip_values)]
