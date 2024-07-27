@@ -37,18 +37,18 @@ def plot_witness_points(
     colors = plt.cm.get_cmap("tab20", nx_Qs * nz_Qs)
 
     # Adjust orientation so that X-Z plane is horizontal and Y is vertical
-    x_vals = np.array([coord[0] for coord in coordinates])
-    y_vals = np.array([coord[1] for coord in coordinates])
-    z_vals = np.array([coord[2] for coord in coordinates])
+    x_vals = np.array([coord[0] * nx_Qs for coord in coordinates])
+    y_vals = np.array([coord[1] * y_value_density for coord in coordinates])
+    z_vals = np.array([coord[2] * nz_Qs for coord in coordinates])
 
     # Plot points for each local volume separately
     for i in range(nx_Qs):
         for j in range(nz_Qs):
             # Define the local volume boundaries
-            x_min = i / nx_Qs
-            x_max = (i + 1) / nx_Qs
-            z_min = j / nz_Qs
-            z_max = (j + 1) / nz_Qs
+            x_min = i
+            x_max = i + 1
+            z_min = j
+            z_max = j + 1
 
             # Filter points within this local volume
             volume_filter = (
