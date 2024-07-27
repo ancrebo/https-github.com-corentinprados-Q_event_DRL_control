@@ -151,10 +151,14 @@ def plot_witness_points(
     y_vals = y_vals[volume_filter] * y_value_density
     z_vals = z_vals[volume_filter] * nz_Qs
 
+    # Pick a color map for the layers
+    color_map_name = "plasma"
+
     # Assign colors based on the layer index
-    color_map = plt.cm.get_cmap("plasma", y_value_density // y_skip_values + 1)
+    num_layers = y_value_density // y_skip_values + 1
+    color_map = plt.cm.get_cmap(color_map_name, num_layers)
     layer_indices = (y_vals // y_skip_values).astype(int)
-    colors = color_map(layer_indices)
+    colors = color_map(layer_indices / num_layers)
 
     # Plot filtered points with color-coded layers
     scatter = ax.scatter(x_vals, z_vals, y_vals, c=colors, marker="o")
@@ -186,10 +190,8 @@ def plot_witness_points(
     # Add a color bar to indicate layers
     cbar = plt.colorbar(scatter, ax=ax, pad=0.1)
     cbar.set_label("Layer Index")
-    cbar.set_ticks(np.linspace(0, 1, y_value_density // y_skip_values + 1))
-    cbar.set_ticklabels(
-        [str(i * y_skip_values) for i in range(y_value_density // y_skip_values + 1)]
-    )
+    cbar.set_ticks(np.linspace(0, 1, num_layers))
+    cbar.set_ticklabels([str(i * y_skip_values) for i in range(num_layers)])
 
     plt.savefig(filename)
     plt.close(fig)
