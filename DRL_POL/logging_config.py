@@ -69,6 +69,11 @@ logging_config_dict: Dict[str, Dict[str, Any]] = {
         "file_level": "DEBUG",
         "override": True,
     },
+    "visualization": {
+        "console_level": "INFO",
+        "file_level": "DEBUG",
+        "override": True,
+    },
     "witness": {
         "console_level": "WARNING",
         "file_level": "INFO",
