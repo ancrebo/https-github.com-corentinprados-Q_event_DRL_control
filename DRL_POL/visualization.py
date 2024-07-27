@@ -188,12 +188,12 @@ def plot_witness_points(
     ax.legend(loc="upper right")
 
     # Add a color bar to indicate layers
-    norm = plt.Normalize(vmin=1, vmax=num_layers-1)
+    norm = plt.Normalize(vmin=0, vmax=num_layers - 1)
     cbar = plt.colorbar(
         plt.cm.ScalarMappable(norm=norm, cmap=color_map), ax=ax, pad=0.1
     )
     cbar.set_label("Layer Index")
-    cbar.set_ticks(np.linspace(0, num_layers - 1, num_layers))
+    cbar.set_ticks(np.linspace(1, num_layers - 1, num_layers))
     cbar.set_ticklabels([str(i * y_skip_values) for i in range(num_layers)])
 
     plt.savefig(filename)
