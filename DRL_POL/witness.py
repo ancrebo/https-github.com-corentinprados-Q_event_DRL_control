@@ -258,8 +258,8 @@ def calculate_channel_witness_coordinates(params: Dict[str, Any]) -> Dict[str, A
     )
 
     probe_type = params["probe_type"]
-    n = params["n"]
-    m = params["m"]
+    n = params["nx_Qs"]
+    m = params["nz_Qs"]
     Lx = params["Lx"]
     Ly = params["Ly"]
     Lz = params["Lz"]
