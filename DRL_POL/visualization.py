@@ -193,8 +193,19 @@ def plot_witness_points(
         plt.cm.ScalarMappable(norm=norm, cmap=color_map), ax=ax, pad=0.1
     )
     cbar.set_label("Layer Index")
-    cbar.set_ticks(np.linspace(0, y_value_density, num_layers))
-    cbar.set_ticklabels([str(i * y_skip_values) for i in range(num_layers)])
+
+    # Define custom tick locations and labels
+    tick_locations = (
+        [0] + [i * y_skip_values for i in range(1, num_layers)] + [y_value_density]
+    )
+    tick_labels = (
+        ["0"]
+        + [str(i * y_skip_values + 1) for i in range(num_layers - 1)]
+        + [str(y_value_density)]
+    )
+
+    cbar.set_ticks(tick_locations)
+    cbar.set_ticklabels(tick_labels)
 
     plt.savefig(filename)
     plt.close(fig)
