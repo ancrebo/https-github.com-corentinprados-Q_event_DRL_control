@@ -46,7 +46,9 @@ def plot_witness_points(
     ax.set_xticks([i / nx_Qs for i in range(nx_Qs + 1)])
     ax.set_yticks([i / nz_Qs for i in range(nz_Qs + 1)])
     # Show "z" ticks based on y_value_density, but only show every y_skip_values
-    ax.set_zticks([i / y_value_density for i in range(0, y_value_density + 1, y_skip_values)])
+    ax.set_zticks(
+        [i / y_value_density for i in range(0, y_value_density + 1, y_skip_values)]
+    )
 
     # Adjust tick labels to avoid overlapping
     ax.set_xticklabels([str(i) for i in range(nx_Qs + 1)], rotation=45)
