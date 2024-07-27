@@ -93,7 +93,14 @@ def plot_witness_points(
     ax.set_ylim(0, nz_Qs)
     ax.set_zlim(0, y_value_density)
 
-    ax.grid(True)
+    ax.grid(True, which="major", color="black", linestyle="--")
+
+    # Set minor grid lines for better visualization
+    ax.minorticks_on()
+    ax.xaxis.set_minor_locator(MultipleLocator(1))
+    ax.yaxis.set_minor_locator(MultipleLocator(1))
+    ax.zaxis.set_minor_locator(MultipleLocator(1))
+
     ax.legend(loc="upper right")
 
     plt.savefig(filename)
