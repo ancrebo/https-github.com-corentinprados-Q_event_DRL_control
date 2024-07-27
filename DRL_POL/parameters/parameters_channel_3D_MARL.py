@@ -360,12 +360,27 @@ probes_location = 6  # 5, 6, 7, 8
 
 list_position_probes = []
 
+witness_parameters: Dict[str, Any] = {
+    "nx_Qs": nx_Qs,
+    "nz_Qs": nz_Qs,
+    "Lx": Lx,
+    "Ly": Ly,
+    "Lz": Lz,
+}
+
 if probes_location == 5:
     probe_type: str = "velocity"  # Probe type ('pressure' or 'velocity')
     pattern: str = "X"  # Pattern type ('X' or '+')
     y_value_density: int = 8  # Number of y values total
     y_skipping: bool = False  # Whether to skip full pattern placement on certain layers
     y_skip_values: int = 3  # Number of layers to skip if y_skipping is True
+
+    # Add to witness parameter dictionary for specific version parameters
+    witness_parameters["probe_type"] = probe_type
+    witness_parameters["pattern"] = pattern
+    witness_parameters["y_value_density"] = y_value_density
+    witness_parameters["y_skipping"] = y_skipping
+    witness_parameters["y_skip_values"] = y_skip_values
 
     probe_dict = calculate_channel_witness_coordinates(
         nx_Qs,
@@ -378,23 +393,6 @@ if probes_location == 5:
         y_skipping,
         y_skip_values,
     )
-    probes_coordinates: List[Tuple[float, float, float]] = probe_dict["locations"]
-    probe_indices2D: List[Tuple[float, float]] = probe_dict["indices2D"]
-    probe_indices1D: List[float] = probe_dict["indices1D"]
-    probe_tags: Dict[str, List[int]] = probe_dict["tag_probs"]
-
-    logger.debug("parameters: %d witness points calculated!", len(probes_coordinates))
-    logger.debug("parameters: 2D Witness Indices Saved!")
-    logger.debug("parameters: 1D Witness Indices Saved!")
-    logger.debug("parameters: Probe Type: %s", probe_type)
-
-    output_params: Dict[str, Any] = {
-        "locations": probes_coordinates,
-        "tag_probes": probe_tags,
-        "probe_type": probe_type,
-        "probe_indices2D": probe_indices2D,
-        "probe_indices1D": probe_indices1D,
-    }
 
 elif probes_location == 6:
     probe_type: str = "velocity"  # Probe type ('pressure' or 'velocity')
@@ -403,6 +401,13 @@ elif probes_location == 6:
     y_skipping: bool = True  # Whether to skip full pattern placement on certain layers
     y_skip_values: int = 4  # Number of layers to skip if y_skipping is True
 
+    # Add to witness parameter dictionary for specific version parameters
+    witness_parameters["probe_type"] = probe_type
+    witness_parameters["pattern"] = pattern
+    witness_parameters["y_value_density"] = y_value_density
+    witness_parameters["y_skipping"] = y_skipping
+    witness_parameters["y_skip_values"] = y_skip_values
+
     probe_dict = calculate_channel_witness_coordinates(
         nx_Qs,
         nz_Qs,
@@ -414,23 +419,6 @@ elif probes_location == 6:
         y_skipping,
         y_skip_values,
     )
-    probes_coordinates: List[Tuple[float, float, float]] = probe_dict["locations"]
-    probe_indices2D: List[Tuple[float, float]] = probe_dict["indices2D"]
-    probe_indices1D: List[float] = probe_dict["indices1D"]
-    probe_tags: Dict[str, List[int]] = probe_dict["tag_probs"]
-
-    logger.debug("parameters: %d witness points calculated!", len(probes_coordinates))
-    logger.debug("parameters: 2D Witness Indices Saved!")
-    logger.debug("parameters: 1D Witness Indices Saved!")
-    logger.debug("parameters: Probe Type: %s", probe_type)
-
-    output_params: Dict[str, Any] = {
-        "locations": probes_coordinates,
-        "tag_probes": probe_tags,
-        "probe_type": probe_type,
-        "probe_indices2D": probe_indices2D,
-        "probe_indices1D": probe_indices1D,
-    }
 
 elif probes_location == 7:
     probe_type: str = "velocity"  # Probe type ('pressure' or 'velocity')
@@ -439,6 +427,13 @@ elif probes_location == 7:
     y_skipping: bool = True  # Whether to skip full pattern placement on certain layers
     y_skip_values: int = 3  # Number of layers to skip if y_skipping is True
 
+    # Add to witness parameter dictionary for specific version parameters
+    witness_parameters["probe_type"] = probe_type
+    witness_parameters["pattern"] = pattern
+    witness_parameters["y_value_density"] = y_value_density
+    witness_parameters["y_skipping"] = y_skipping
+    witness_parameters["y_skip_values"] = y_skip_values
+
     probe_dict = calculate_channel_witness_coordinates(
         nx_Qs,
         nz_Qs,
@@ -450,23 +445,6 @@ elif probes_location == 7:
         y_skipping,
         y_skip_values,
     )
-    probes_coordinates: List[Tuple[float, float, float]] = probe_dict["locations"]
-    probe_indices2D: List[Tuple[float, float]] = probe_dict["indices2D"]
-    probe_indices1D: List[float] = probe_dict["indices1D"]
-    probe_tags: Dict[str, List[int]] = probe_dict["tag_probs"]
-
-    logger.debug("parameters: %d witness points calculated!", len(probes_coordinates))
-    logger.debug("parameters: 2D Witness Indices Saved!")
-    logger.debug("parameters: 1D Witness Indices Saved!")
-    logger.debug("parameters: Probe Type: %s", probe_type)
-
-    output_params: Dict[str, Any] = {
-        "locations": probes_coordinates,
-        "tag_probes": probe_tags,
-        "probe_type": probe_type,
-        "probe_indices2D": probe_indices2D,
-        "probe_indices1D": probe_indices1D,
-    }
 
 elif probes_location == 8:
     probe_type: str = "velocity"  # Probe type ('pressure' or 'velocity')
@@ -475,6 +453,13 @@ elif probes_location == 8:
     y_skipping: bool = True  # Whether to skip full pattern placement on certain layers
     y_skip_values: int = 5  # Number of layers to skip if y_skipping is True
 
+    # Add to witness parameter dictionary for specific version parameters
+    witness_parameters["probe_type"] = probe_type
+    witness_parameters["pattern"] = pattern
+    witness_parameters["y_value_density"] = y_value_density
+    witness_parameters["y_skipping"] = y_skipping
+    witness_parameters["y_skip_values"] = y_skip_values
+
     probe_dict = calculate_channel_witness_coordinates(
         nx_Qs,
         nz_Qs,
@@ -486,28 +471,29 @@ elif probes_location == 8:
         y_skipping,
         y_skip_values,
     )
-    probes_coordinates: List[Tuple[float, float, float]] = probe_dict["locations"]
-    probe_indices2D: List[Tuple[float, float]] = probe_dict["indices2D"]
-    probe_indices1D: List[float] = probe_dict["indices1D"]
-    probe_tags: Dict[str, List[int]] = probe_dict["tag_probs"]
-
-    logger.debug("parameters: %d witness points calculated!", len(probes_coordinates))
-    logger.debug("parameters: 2D Witness Indices Saved!")
-    logger.debug("parameters: 1D Witness Indices Saved!")
-    logger.debug("parameters: Probe Type: %s", probe_type)
-
-    output_params: Dict[str, Any] = {
-        "locations": probes_coordinates,
-        "tag_probes": probe_tags,
-        "probe_type": probe_type,
-        "probe_indices2D": probe_indices2D,
-        "probe_indices1D": probe_indices1D,
-    }
 
 else:
     raise ValueError(
         "Invalid probes_location value! Must be 5, 6, 7, or 8, NOT %s", probes_location
     )
+
+probes_coordinates: List[Tuple[float, float, float]] = probe_dict["locations"]
+probe_indices2D: List[Tuple[float, float]] = probe_dict["indices2D"]
+probe_indices1D: List[float] = probe_dict["indices1D"]
+probe_tags: Dict[str, List[int]] = probe_dict["tag_probs"]
+
+logger.debug("parameters: %d witness points calculated!", len(probes_coordinates))
+logger.debug("parameters: 2D Witness Indices Saved!")
+logger.debug("parameters: 1D Witness Indices Saved!")
+logger.debug("parameters: Probe Type: %s", probe_type)
+
+output_params: Dict[str, Any] = {
+    "locations": probes_coordinates,
+    "tag_probes": probe_tags,
+    "probe_type": probe_type,
+    "probe_indices2D": probe_indices2D,
+    "probe_indices1D": probe_indices1D,
+}
 
 ## CREATION OF WITNESS FILE
 # Whether to overwrite the witness file if exists, True overwrites existing file
@@ -516,15 +502,22 @@ logger.debug("Witness file override: %s", need_witness_file_override)
 
 case_folder = f"alya_files/case_{training_case}"
 witness_file_path = os.path.join(case_folder, "witness.dat")
+witness_version_file_path = os.path.join(case_folder, "witness_version.txt")
 
 if os.path.exists(witness_file_path):
     if need_witness_file_override:
-        # Create a backup of the existing witness.dat file
+        # Create a backup of the existing witness.dat AND witness_version.txt file
         backup_file_path = witness_file_path + ".backup"
         shutil.copyfile(witness_file_path, backup_file_path)
-        # Remove existing witness.dat file
+        backup_version_file_path = witness_version_file_path + ".backup"
+        shutil.copyfile(witness_version_file_path, backup_version_file_path)
+        # Remove existing witness.dat AND version file
         os.remove(witness_file_path)
-        logger.info("Existing witness.dat file backed up in %s", backup_file_path)
+        os.remove(witness_version_file_path)
+        logger.info(
+            "Existing witness.dat and witness_version.txt files backed up in %s",
+            case_folder,
+        )
 
         # Import only when needed!
         from witness import write_witness_file_and_visualize

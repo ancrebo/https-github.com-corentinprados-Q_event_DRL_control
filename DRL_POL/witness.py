@@ -385,11 +385,57 @@ def write_witness_file(
 
         # Write end
         file.write("END_WITNESS_POINTS\n")
-        logger.debug(
-            "write_witness_file: Finished writing witness file to %s with %int witness points",
-            filepath,
-            len(probes_positions),
-        )
+
+    logger.debug(
+        "write_witness_file: Finished writing witness file to %s with %int witness points",
+        filepath,
+        len(probes_positions),
+    )
+
+
+def write_witness_version_file(
+    filepath: str,
+    probes_location: int,
+    probe_type: str,
+    pattern: str,
+    y_value_density: int,
+    y_skipping: bool,
+    y_skip_values: int,
+    nx_Qs: int,
+    nz_Qs: int,
+) -> None:
+    """
+    Write a text file to indicate what version of witness file is being used.
+
+    Parameters:
+        filepath (str): The path where the witness version file will be written.
+        probes_location (int): Identifier for the probe location type.
+        probe_type (str): The type of probes to be used.
+        pattern (str): Pattern type ('X' or '+').
+        y_value_density (int): Number of y values total.
+        y_skipping (bool): Whether to skip full pattern placement on certain layers.
+        y_skip_values (int): Number of layers to skip if y_skipping is True.
+        nx_Qs (int): Number of sections in the x direction.
+        nz_Qs (int): Number of sections in the z direction.
+    """
+    logger.debug(
+        "write_witness_version_file: Writing witness version file to %s", filepath
+    )
+
+    with open(os.path.join(filepath, "witness_version.txt"), "w") as file:
+        file.write(f"Current Witness Probes Location Version: v{probes_location}\n")
+        file.write(f"Probe Type: {probe_type}\n")
+        file.write(f"Pattern: {pattern}\n")
+        file.write(f"Y Value Density: {y_value_density}\n")
+        file.write(f"Y Skipping: {y_skipping}\n")
+        file.write(f"Y Skip Values: {y_skip_values}\n")
+        file.write(f"nx_Qs: {nx_Qs}\n")
+        file.write(f"nz_Qs: {nz_Qs}\n")
+
+    logger.debug(
+        "write_witness_version_file: Witness version file has been written to %s",
+        filepath,
+    )
 
 
 def write_witness_file_and_visualize(
@@ -422,6 +468,19 @@ def write_witness_file_and_visualize(
         case_folder,
         output_params["locations"],
     )
+
+    write_witness_version_file(
+        case_folder,
+        probes_location,
+        output_params["probe_type"],
+        pattern,
+        y_value_density,
+        y_skipping,
+        y_skip_values,
+        nx_Qs,
+        nz_Qs,
+    )
+
     from visualization import plot_witness_points
 
     plot_witness_points(
