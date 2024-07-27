@@ -152,7 +152,7 @@ def plot_witness_points(
     z_vals = z_vals[volume_filter] * nz_Qs
 
     # Pick a color map for the layers
-    color_map_name = "plasma"
+    color_map_name = "inferno"
 
     # Assign colors based on the layer index
     num_layers = y_value_density // y_skip_values + 1
@@ -193,19 +193,8 @@ def plot_witness_points(
         plt.cm.ScalarMappable(norm=norm, cmap=color_map), ax=ax, pad=0.1
     )
     cbar.set_label("Layer Index")
-
-    # Define custom tick locations and labels
-    tick_locations = (
-        [0] + [i * y_skip_values for i in range(1, num_layers)] + [y_value_density]
-    )
-    tick_labels = (
-        ["0"]
-        + [str(i * y_skip_values + 1) for i in range(num_layers - 1)]
-        + [str(y_value_density)]
-    )
-
-    cbar.set_ticks(tick_locations)
-    cbar.set_ticklabels(tick_labels)
+    cbar.set_ticks(np.linspace(0, y_value_density, num_layers))
+    cbar.set_ticklabels([str(i * y_skip_values) for i in range(num_layers)])
 
     plt.savefig(filename)
     plt.close(fig)
