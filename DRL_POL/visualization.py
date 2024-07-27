@@ -29,17 +29,17 @@ def plot_witness_points(
     y_vals = [coord[1] for coord in coordinates]
     z_vals = [coord[2] for coord in coordinates]
 
-    ax.scatter(x_vals, y_vals, z_vals, c="r", marker="o")
+    ax.scatter(x_vals, z_vals, y_vals, c="r", marker="o")
 
     ax.set_xlabel("X")
-    ax.set_ylabel("Y")
-    ax.set_zlabel("Z")
+    ax.set_ylabel("Z")
+    ax.set_zlabel("Y")
     ax.set_title("3D Plot of Witness Points")
 
     # Setting the grid based on the number of agents
     ax.set_xticks([i / nx_Qs for i in range(nx_Qs + 1)])
-    ax.set_zticks([i / nz_Qs for i in range(nz_Qs + 1)])
-    ax.set_yticks(
+    ax.set_yticks([i / nz_Qs for i in range(nz_Qs + 1)])
+    ax.set_zticks(
         [i * 0.2 for i in range(6)]
     )  # Assuming y-axis (height) is normalized 0-1
 
