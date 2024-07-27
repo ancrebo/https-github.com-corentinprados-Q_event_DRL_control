@@ -346,15 +346,6 @@ geometry_params = {  # Kept for legacy purposes but to be deleted when reworking
 ## 8 -- 3D channel  (PER LOCAL: X pattern, 50 layers, X every 5 layers)
 ## TODO: explain criteria of ordering history points, to "call" them quickly - Pol
 
-# new setup observation state for it>30 --> f(slices_probes_per_jet)
-## 3 slices of probes per jet
-
-positions_probes_for_grid_z = []
-# for nq in range(nz_Qs * slices_probes_per_jet):
-#     positions_probes_for_grid_z.append(
-#         (Lz / (nz_Qs * slices_probes_per_jet)) * (0.5 + nq)
-#     )
-# print("Probes are placed in Z coordinates: ", positions_probes_for_grid_z)
 
 probes_location = 6  # 5, 6, 7, 8
 
@@ -375,50 +366,12 @@ if probes_location == 5:
     y_skipping: bool = False  # Whether to skip full pattern placement on certain layers
     y_skip_values: int = 3  # Number of layers to skip if y_skipping is True
 
-    # Add to witness parameter dictionary for specific version parameters
-    witness_parameters["probe_type"] = probe_type
-    witness_parameters["pattern"] = pattern
-    witness_parameters["y_value_density"] = y_value_density
-    witness_parameters["y_skipping"] = y_skipping
-    witness_parameters["y_skip_values"] = y_skip_values
-
-    probe_dict = calculate_channel_witness_coordinates(
-        nx_Qs,
-        nz_Qs,
-        Lx,
-        Ly,
-        Lz,
-        y_value_density,
-        pattern,
-        y_skipping,
-        y_skip_values,
-    )
-
 elif probes_location == 6:
     probe_type: str = "velocity"  # Probe type ('pressure' or 'velocity')
     pattern: str = "X"  # Pattern type ('X' or '+')
     y_value_density: int = 20  # Number of y values total
     y_skipping: bool = True  # Whether to skip full pattern placement on certain layers
     y_skip_values: int = 4  # Number of layers to skip if y_skipping is True
-
-    # Add to witness parameter dictionary for specific version parameters
-    witness_parameters["probe_type"] = probe_type
-    witness_parameters["pattern"] = pattern
-    witness_parameters["y_value_density"] = y_value_density
-    witness_parameters["y_skipping"] = y_skipping
-    witness_parameters["y_skip_values"] = y_skip_values
-
-    probe_dict = calculate_channel_witness_coordinates(
-        nx_Qs,
-        nz_Qs,
-        Lx,
-        Ly,
-        Lz,
-        y_value_density,
-        pattern,
-        y_skipping,
-        y_skip_values,
-    )
 
 elif probes_location == 7:
     probe_type: str = "velocity"  # Probe type ('pressure' or 'velocity')
@@ -427,25 +380,6 @@ elif probes_location == 7:
     y_skipping: bool = True  # Whether to skip full pattern placement on certain layers
     y_skip_values: int = 3  # Number of layers to skip if y_skipping is True
 
-    # Add to witness parameter dictionary for specific version parameters
-    witness_parameters["probe_type"] = probe_type
-    witness_parameters["pattern"] = pattern
-    witness_parameters["y_value_density"] = y_value_density
-    witness_parameters["y_skipping"] = y_skipping
-    witness_parameters["y_skip_values"] = y_skip_values
-
-    probe_dict = calculate_channel_witness_coordinates(
-        nx_Qs,
-        nz_Qs,
-        Lx,
-        Ly,
-        Lz,
-        y_value_density,
-        pattern,
-        y_skipping,
-        y_skip_values,
-    )
-
 elif probes_location == 8:
     probe_type: str = "velocity"  # Probe type ('pressure' or 'velocity')
     pattern: str = "X"  # Pattern type ('X' or '+')
@@ -453,47 +387,21 @@ elif probes_location == 8:
     y_skipping: bool = True  # Whether to skip full pattern placement on certain layers
     y_skip_values: int = 5  # Number of layers to skip if y_skipping is True
 
-    # Add to witness parameter dictionary for specific version parameters
-    witness_parameters["probe_type"] = probe_type
-    witness_parameters["pattern"] = pattern
-    witness_parameters["y_value_density"] = y_value_density
-    witness_parameters["y_skipping"] = y_skipping
-    witness_parameters["y_skip_values"] = y_skip_values
-
-    probe_dict = calculate_channel_witness_coordinates(
-        nx_Qs,
-        nz_Qs,
-        Lx,
-        Ly,
-        Lz,
-        y_value_density,
-        pattern,
-        y_skipping,
-        y_skip_values,
-    )
-
 else:
     raise ValueError(
         "Invalid probes_location value! Must be 5, 6, 7, or 8, NOT %s", probes_location
     )
 
-probes_coordinates: List[Tuple[float, float, float]] = probe_dict["locations"]
-probe_indices2D: List[Tuple[float, float]] = probe_dict["indices2D"]
-probe_indices1D: List[float] = probe_dict["indices1D"]
-probe_tags: Dict[str, List[int]] = probe_dict["tag_probs"]
+# Add to witness parameter dictionary for specific version parameters
+witness_parameters["probe_type"] = probe_type
+witness_parameters["pattern"] = pattern
+witness_parameters["y_value_density"] = y_value_density
+witness_parameters["y_skipping"] = y_skipping
+witness_parameters["y_skip_values"] = y_skip_values
 
-logger.debug("parameters: %d witness points calculated!", len(probes_coordinates))
-logger.debug("parameters: 2D Witness Indices Saved!")
-logger.debug("parameters: 1D Witness Indices Saved!")
-logger.debug("parameters: Probe Type: %s", probe_type)
+# Calculate the witness coordinates
+output_params = calculate_channel_witness_coordinates(witness_parameters)
 
-output_params: Dict[str, Any] = {
-    "locations": probes_coordinates,
-    "tag_probes": probe_tags,
-    "probe_type": probe_type,
-    "probe_indices2D": probe_indices2D,
-    "probe_indices1D": probe_indices1D,
-}
 
 ## CREATION OF WITNESS FILE
 # Whether to overwrite the witness file if exists, True overwrites existing file

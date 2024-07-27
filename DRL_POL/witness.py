@@ -225,41 +225,49 @@ def read_last_wit(
     return result_data
 
 
-def calculate_channel_witness_coordinates(
-    n: int,  # nx_Qs
-    m: int,  # nz_Qs
-    Lx: float,
-    Ly: float,
-    Lz: float,
-    y_value_density: int,
-    pattern: str = "X",
-    y_skipping: bool = False,
-    y_skipping_value: int = 3,
-) -> Dict[str, Any]:
+def calculate_channel_witness_coordinates(params: Dict[str, Any]) -> Dict[str, Any]:
     """
     Calculate witness coordinates and indices for a channel pattern.
 
     Parameters:
-        n (int): Number of sections in the x direction.
-        m (int): Number of sections in the z direction.
-        Lx (float): Length in the x direction.
-        Ly (float): Length in the y direction.
-        Lz (float): Length in the z direction.
-        y_value_density (int): Density of y values.
-        pattern (str): Pattern type ('X' or '+'). Default is 'X'.
-        y_skipping (bool): Whether to skip y values in between pattern layers. Default is False.
-        y_skipping_value (int): Number of layers each full pattern layer if y_skipping is True. Default is 3.
+        params (Dict[str, Any]): Dictionary containing the parameters:
+            - probe_type (str): Type of probes used, either velocity or pressure.
+            - n (int): Number of sections in the x direction.
+            - m (int): Number of sections in the z direction.
+            - Lx (float): Length in the x direction.
+            - Ly (float): Length in the y direction.
+            - Lz (float): Length in the z direction.
+            - y_value_density (int): Density of y values.
+            - pattern (str): Pattern type ('X' or '+').
+            - y_skipping (bool): Whether to skip y values in between pattern layers.
+            - y_skipping_value (int): Number of layers between each full pattern layer if y_skipping is True.
 
     Returns:
         Dict[str, Any]: A dictionary containing the following keys:
             'locations' (List[Tuple[float, float, float]]): Coordinates of the probes.
+            'tag_probs' (Dict[str, List[int]]): Tag ranges for different patterns.
+            'probe_type' (str): Type of probes used, either velocity or pressure.
             'indices2D' (List[Tuple[int, int]]): 2D indices of the probes.
             'indices1D' (List[int]): 1D indices of the probes.
-            'tag_probs' (Dict[str, List[int]]): Tag ranges for different patterns.
 
     Raises:
         ValueError: If an invalid pattern is specified or if y-values are out of range.
     """
+    logger.debug(
+        "calculate_channel_witness_coordinates: Starting to calculate witness coordinates..."
+    )
+
+    probe_type = params["probe_type"]
+    n = params["n"]
+    m = params["m"]
+    Lx = params["Lx"]
+    Ly = params["Ly"]
+    Lz = params["Lz"]
+    y_value_density = params["y_value_density"]
+    pattern = params["pattern"]
+    y_skipping = params["y_skipping"]
+    y_skipping_value = params["y_skipping_value"]
+
     # Create list of y values to place pattern - Exclude the first term (0)
     y_values: List[float] = np.linspace(0, Ly, y_value_density + 1).tolist()[1:]
 
@@ -335,11 +343,14 @@ def calculate_channel_witness_coordinates(
 
     probe_dict = {
         "locations": coordinates,
+        "tag_probs": tag_probs,
+        "probe_type": probe_type,
         "indices2D": indices2D,
         "indices1D": indices1D,
-        "tag_probs": tag_probs,
     }
-
+    logger.debug(
+        "calculate_channel_witness_coordinates: Finished calculating witness coordinates!\n"
+    )
     return probe_dict
 
 
