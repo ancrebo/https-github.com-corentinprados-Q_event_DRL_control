@@ -15,11 +15,9 @@ possible_logging_levels = {
 }
 
 # Set the DEFAULT logging level, passed to individual modules
-
 DEFAULT_LOGGING_LEVEL = "INFO"
 
-# Dictionary to define logging levels and bool for each module
-
+# Dictionary to set logging levels and override for default values for each module
 logging_config_dict: Dict[str, Dict[str, Any]] = {
     "PARALLEL_TRAINING_3D_CHANNEL_MARL": {
         "console_level": "INFO",
@@ -151,6 +149,10 @@ def configure_logger(module_name: str, default_level: str = "INFO") -> logging.L
 def configure_env_logger() -> (logging.Logger, logging.Logger):
     """
     Configure loggers specifically for the Environment class.
+
+    One logger (primary_logger) logs to both console and file, while the other (file_only_logger) logs to file only.
+    This is to separate the console output for multiple instances of the Environment class, only logging to the console
+    instances with ENV_ID [*, 1] and logging to file for all instances.
 
     Returns:
         tuple: A tuple containing the primary logger and file-only logger.
