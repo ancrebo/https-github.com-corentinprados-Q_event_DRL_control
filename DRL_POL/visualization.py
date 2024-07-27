@@ -73,8 +73,8 @@ def plot_witness_points(
     ax.set_title("3D Plot of Witness Points")
 
     # Set the major locator for grid lines
-    ax.xaxis.set_major_locator(MultipleLocator(1.5))
-    ax.yaxis.set_major_locator(MultipleLocator(1.5))
+    ax.xaxis.set_major_locator(MultipleLocator(1))
+    ax.yaxis.set_major_locator(MultipleLocator(1))
     ax.zaxis.set_major_locator(MultipleLocator(y_skip_values))
 
     # Setting the tick values based on the number of agents but labeled in between grid lines
