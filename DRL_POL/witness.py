@@ -15,7 +15,6 @@ import logging
 import os
 import numpy as np
 
-from DRL_POL.alya import logger
 from cr import cr_start, cr_stop
 
 from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
