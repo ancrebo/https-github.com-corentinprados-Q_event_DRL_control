@@ -399,8 +399,8 @@ witness_parameters["y_value_density"] = y_value_density
 witness_parameters["y_skipping"] = y_skipping
 witness_parameters["y_skip_values"] = y_skip_values
 
-# Calculate the witness coordinates
-output_params = calculate_channel_witness_coordinates(witness_parameters)
+# Save the witness coordinates to dictionary
+output_params: Dict[str, Any] = calculate_channel_witness_coordinates(witness_parameters)
 
 
 ## CREATION OF WITNESS FILE
