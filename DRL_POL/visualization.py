@@ -48,7 +48,7 @@ def plot_witness_points(
     ax.set_yticks([i / nz_Qs for i in range(nz_Qs + 1)])
 
     # Show "z" ticks based on y_value_density, but only show every y_skip_values
-    z_tick_indices = [i for i in range(0, y_value_density + 1, y_skip_values)]
+    z_tick_indices = [i for i in range(1, y_value_density + 1, y_skip_values)]
     ax.set_zticks([i / y_value_density for i in z_tick_indices])
     ax.set_zticklabels([str(i) for i in z_tick_indices])
 
