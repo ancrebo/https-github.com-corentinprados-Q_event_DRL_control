@@ -247,13 +247,19 @@ def calculate_channel_witness_coordinates(
         Lz (float): Length in the z direction.
         y_value_density (int): Density of y values.
         pattern (str): Pattern type ('X' or '+'). Default is 'X'.
-        y_skipping (bool): Whether to skip y values. Default is False.
-        y_skipping_value (int): Interval for skipping y values if y_skipping is True. Default is 3.
+        y_skipping (bool): Whether to skip y values in between pattern layers. Default is False.
+        y_skipping_value (int): Number of layers with only the center point between each full
+            pattern layer if y_skipping is True. Default is 3.
 
     Returns:
-        Dict[str, Any]: A dictionary containing 'locations' (probe coordinates),
-                        'indices2D' (2D indices of probes), 'indices1D' (1D indices of probes),
-                        and 'tag_probs' (tag ranges).
+        Dict[str, Any]: A dictionary containing the following keys:
+            'locations' (List[Tuple[float, float, float]]): Coordinates of the probes.
+            'indices2D' (List[Tuple[int, int]]): 2D indices of the probes.
+            'indices1D' (List[int]): 1D indices of the probes.
+            'tag_probs' (Dict[str, List[int]]): Tag ranges for different patterns.
+
+    Raises:
+        ValueError: If an invalid pattern is specified or if y-values are out of range.
     """
     # Create list of y values to place pattern - Exclude the first term (0)
     y_values: List[float] = np.linspace(0, Ly, y_value_density + 1).tolist()[1:]
@@ -284,20 +290,27 @@ def calculate_channel_witness_coordinates(
                     (center_x, center_z - 0.25 * step_z),
                     (center_x, center_z + 0.25 * step_z),
                 ]
+            else:
+                raise ValueError(
+                    f"calculate_channel_witness_coordinates: Invalid pattern: {pattern}"
+                )
 
             center_point: Tuple[float, float] = (center_x, center_z)
 
             for index, y in enumerate(y_values):
                 if 0 <= y <= Ly:  # Ensure y-values are within the global y limit
-                    if y_skipping and (index % y_skipping_value != 0):
+                    if y_skipping and (index % y_skipping_value == 0):
+                        # Place the full "X" pattern
+                        for x, z in end_points:
+                            coordinates.append((x / Lx, y / Ly, z / Lz))
+                            indices2D.append((i, j))
+                        # Also place the center point
                         coordinates.append(
                             (center_point[0] / Lx, y / Ly, center_point[1] / Lz)
                         )
                         indices2D.append((i, j))
                     else:
-                        for x, z in end_points:
-                            coordinates.append((x / Lx, y / Ly, z / Lz))
-                            indices2D.append((i, j))
+                        # Place only the center point
                         coordinates.append(
                             (center_point[0] / Lx, y / Ly, center_point[1] / Lz)
                         )
@@ -310,11 +323,6 @@ def calculate_channel_witness_coordinates(
     # Create 1D index from 2D index using row-major format
     for index2D in indices2D:
         indices1D.append(index2D[0] * m + index2D[1])
-
-    # Convert lists to numpy arrays
-    coordinates_array: np.ndarray = np.array(coordinates)
-    indices2D_array: np.ndarray = np.array(indices2D)
-    indices1D_array: np.ndarray = np.array(indices1D)
 
     # Define tag ranges similar to the first script
     len_left_positions_probes = 0
