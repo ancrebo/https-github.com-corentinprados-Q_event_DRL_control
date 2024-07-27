@@ -26,6 +26,13 @@ from env_utils import agent_index_2d_to_1d, agent_index_1d_to_2d
 from witness import calculate_channel_witness_coordinates
 from alya import write_witness_file
 
+from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
+
+# Set up logger
+logger = configure_logger(__name__, default_level=DEFAULT_LOGGING_LEVEL)
+
+logger.info("%s.py: Logging level set to %s", __name__, logger.level)
+
 ### CASE NAME ************************************************
 
 training_case: str = (
@@ -47,6 +54,9 @@ h_qevent_sensitivity: float = (
 
 n_agents_x: int = 2  # Number of agents along x direction
 n_agents_z: int = 2  # Number of agents along z direction
+
+quick_episodes: bool = True
+quick_episode_length: int = 3
 
 # THESE VALUES ARE CALCULATED FROM `coco_small_load_post_processing.py` and are specific to THIS BASELINE! - Pieter
 # Check `calculated_values.csv` in baseline folder for these values
@@ -103,6 +113,9 @@ if Re_case != 5:
     nb_actuations = 120  # Number of actuation of the neural network for each episode (ACTIONS/EPISODE)
 else:
     nb_actuations = 200
+
+if quick_episodes:
+    nb_actuations = quick_episode_length
 
 nb_actuations_deterministic = nb_actuations * 10
 
@@ -245,11 +258,16 @@ jet_coordinates: np.ndarray = np.array(
     [(x, z) for x in Qs_position_x for z in Qs_position_z]
 ).reshape(nx_Qs, nz_Qs, 2)
 
-print("Jets are placed in the following X, Z coordinates with their indices:\n")
+logger.info("parameters: Jet coordinates calculated successfully!\n")
+logger.debug(
+    "parameters: Jets are placed in the following X, Z coordinates with their indices:"
+)
+# print("Jets are placed in the following X, Z coordinates with their indices:\n")
 for i in range(nx_Qs):
     for j in range(nz_Qs):
         x, z = jet_coordinates[i, j]
-        print(f"Agent ({i}, {j}): X: {x:.2f}, Z: {z:.2f}")
+        logger.debug("Agent (%d, %d): X: %.2f, Z: %.2f", i, j, x, z)
+        # print(f"Agent ({i}, {j}): X: {x:.2f}, Z: {z:.2f}")
 
 
 # TODO: @canordq Update for channel parameters!! - Pieter
@@ -330,11 +348,11 @@ geometry_params = {  # Kept for legacy purposes but to be deleted when reworking
 ## 3 slices of probes per jet
 
 positions_probes_for_grid_z = []
-for nq in range(nz_Qs * slices_probes_per_jet):
-    positions_probes_for_grid_z.append(
-        (Lz / (nz_Qs * slices_probes_per_jet)) * (0.5 + nq)
-    )
-print("Probes are placed in Z coordinates: ", positions_probes_for_grid_z)
+# for nq in range(nz_Qs * slices_probes_per_jet):
+#     positions_probes_for_grid_z.append(
+#         (Lz / (nz_Qs * slices_probes_per_jet)) * (0.5 + nq)
+#     )
+# print("Probes are placed in Z coordinates: ", positions_probes_for_grid_z)
 
 probes_location = 5
 
@@ -364,10 +382,15 @@ if probes_location == 5:
     probe_indices1D: List[float] = probe_dict["indices1D"]
     probe_tags: Dict[str, List[int]] = probe_dict["tag_probs"]
 
-    print(f"\n\n{len(probes_coordinates)} witness points calculated!\n")
-    print("2D Witness Indices Saved!")
-    print("1D Witness Indices Saved!")
-    print(f"Probe Type: {probe_type}\n\n")
+    logger.debug("parameters: %d witness points calculated!", len(probes_coordinates))
+    logger.debug("parameters: 2D Witness Indices Saved!")
+    logger.debug("parameters: 1D Witness Indices Saved!")
+    logger.debug("parameters: Probe Type: %s", probe_type)
+
+    # print(f"\n\n{len(probes_coordinates)} witness points calculated!\n")
+    # print("2D Witness Indices Saved!")
+    # print("1D Witness Indices Saved!")
+    # print(f"Probe Type: {probe_type}\n\n")
 
     output_params: Dict[str, Any] = {
         "locations": probes_coordinates,
@@ -382,6 +405,7 @@ if probes_location == 5:
 need_witness_file_override: bool = (
     False  # Whether to overwrite the witness file if exists, True overwrites existing file
 )
+logger.debug("parameters: Witness file override: %s", need_witness_file_override)
 
 case_folder = f"alya_files/case_{training_case}"
 witness_file_path = os.path.join(case_folder, "witness.dat")
@@ -393,43 +417,74 @@ if os.path.exists(witness_file_path):
         shutil.copyfile(witness_file_path, backup_file_path)
         # Remove existing witness.dat file
         os.remove(witness_file_path)
-        print(
-            f"CREATING NEW WITNESS FILE:\nBackup of old witness.dat created in {backup_file_path}"
+        logger.info(
+            "parameters: Existing witness.dat file backed up in %s", backup_file_path
         )
+        # print(
+        #     f"CREATING NEW WITNESS FILE:\nBackup of old witness.dat created in {backup_file_path}"
+        # )
 
         # Write the new witness.dat file
         write_witness_file(case_folder, output_params["locations"])
         need_witness_file_override = False
-        print(f"\nNew witness.dat has been created in {case_folder}\n")
-        print(
-            f"\nwitness.dat creation parameters:"
-            f"\nprobe_type: {output_params['probe_type']}"
-            f"\npattern: {pattern}"
-            f"\ny_value_density: {y_value_density}"
-            f"\ny_skipping: {y_skipping}"
-            f"\ny_skip_values: {y_skip_values}"
-            f"\nnx_Qs: {nx_Qs}"
-            f"\nnz_Qs: {nz_Qs}"
-        )
-        print("\nWitness creation override parameter set to False.\n")
+
+        logger.info("parameters: New witness.dat has been created in %s", case_folder)
+        logger.debug("parameters: witness.dat creation parameters:")
+        logger.debug("parameters: Probe Type: %s", output_params["probe_type"])
+        logger.debug("parameters: Pattern: %s", pattern)
+        logger.debug("parameters: Y Value Density: %s", y_value_density)
+        logger.debug("parameters: Y Skipping: %s", y_skipping)
+        logger.debug("parameters: Y Skip Values: %s", y_skip_values)
+        logger.debug("parameters: nx_Qs: %s", nx_Qs)
+        logger.debug("parameters: nz_Qs: %s", nz_Qs)
+
+        logger.info("parameters: Witness creation override parameter set to False\n")
+
+        # print(f"\nNew witness.dat has been created in {case_folder}\n")
+        # print(
+        #     f"\nwitness.dat creation parameters:"
+        #     f"\nprobe_type: {output_params['probe_type']}"
+        #     f"\npattern: {pattern}"
+        #     f"\ny_value_density: {y_value_density}"
+        #     f"\ny_skipping: {y_skipping}"
+        #     f"\ny_skip_values: {y_skip_values}"
+        #     f"\nnx_Qs: {nx_Qs}"
+        #     f"\nnz_Qs: {nz_Qs}"
+        # )
+        # print("\nWitness creation override parameter set to False.\n")
     else:
-        print(
-            f"CREATING NEW WITNESS FILE:\nwitness.dat already exists in {case_folder} - No override needed.\n"
+        logger.info(
+            "parameters: witness.dat already exists in %s - No creation needed.\n",
+            case_folder,
         )
+        # print(
+        #     f"CREATING NEW WITNESS FILE:\nwitness.dat already exists in {case_folder} - No override needed.\n"
+        # )
 else:
     # Create and write the witness.dat file if it does not exist
+    logger.info("paramters: No existing witness.dat found in %s", case_folder)
     write_witness_file(case_folder, output_params["locations"])
-    print(
-        f"CREATING NEW WITNESS FILE: No existing witness.dat found in {case_folder}"
-        f"\n\nNew witness.dat created with parameters:"
-        f"\nprobe_type: {output_params['probe_type']}"
-        f"\npattern: {pattern}"
-        f"\ny_value_density: {y_value_density}"
-        f"\ny_skipping: {y_skipping}"
-        f"\ny_skip_values: {y_skip_values}"
-        f"\nnx_Qs: {nx_Qs}"
-        f"\nnz_Qs: {nz_Qs}\n\n"
-    )
+    logger.info("parameters: New witness.dat has been created in %s\n", case_folder)
+    logger.debug("parameters: witness.dat creation parameters:")
+    logger.debug("parameters: Probe Type: %s", output_params["probe_type"])
+    logger.debug("parameters: Pattern: %s", pattern)
+    logger.debug("parameters: Y Value Density: %s", y_value_density)
+    logger.debug("parameters: Y Skipping: %s", y_skipping)
+    logger.debug("parameters: Y Skip Values: %s", y_skip_values)
+    logger.debug("parameters: nx_Qs: %s", nx_Qs)
+    logger.debug("parameters: nz_Qs: %s\n", nz_Qs)
+
+    # print(
+    #     f"CREATING NEW WITNESS FILE: No existing witness.dat found in {case_folder}"
+    #     f"\n\nNew witness.dat created with parameters:"
+    #     f"\nprobe_type: {output_params['probe_type']}"
+    #     f"\npattern: {pattern}"
+    #     f"\ny_value_density: {y_value_density}"
+    #     f"\ny_skipping: {y_skipping}"
+    #     f"\ny_skip_values: {y_skip_values}"
+    #     f"\nnx_Qs: {nx_Qs}"
+    #     f"\nnz_Qs: {nz_Qs}\n\n"
+    # )
 
 ############################################################################################
 ####    These are the probe positions for S85   ####

@@ -12,29 +12,17 @@ from typing import Tuple, TextIO, Dict, Union, List, Any
 
 import logging
 
-import os, numpy as np
+import os
+import numpy as np
+
 from cr import cr_start, cr_stop
 
-# Set up logging
-logger = logging.getLogger(__name__)
+from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
 
-# Set up console handler
-console_handler = logging.StreamHandler()
-formatter_console = logging.Formatter(
-    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-console_handler.setFormatter(formatter_console)
+# Set up logger
+logger = configure_logger(__name__, default_level=DEFAULT_LOGGING_LEVEL)
 
-# Set up file handler
-file_handler = logging.FileHandler("witness.log")
-formatter_file = logging.Formatter(
-    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-file_handler.setFormatter(formatter_file)
-
-# Add handlers to logger
-logger.addHandler(console_handler)
-logger.addHandler(file_handler)
+logger.info("%s.py: Logging level set to %s", __name__, logger.level)
 
 
 def readWitnessHeader(file: TextIO) -> Dict[str, Union[int, Dict[str, int]]]:

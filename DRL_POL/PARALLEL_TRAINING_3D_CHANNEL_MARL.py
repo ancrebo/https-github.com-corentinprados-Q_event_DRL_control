@@ -31,6 +31,17 @@ from env_utils import (
 )
 from configuration import ALYA_ULTCL
 
+from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
+
+# Set up logger
+logger = configure_logger(
+    "PARALLEL_TRAINING_3D_CHANNEL_MARL", default_level=DEFAULT_LOGGING_LEVEL
+)
+
+logger.info(
+    "PARALLEL_TRAINING_3D_CHANNEL_MARL.py: Logging level set to %s\n", logger.level
+)
+
 # Parser for command line arguments
 # example use: `python3 PARALLEL_TRAINING.py --case cylinder_2D`
 parser = argparse.ArgumentParser(
@@ -57,16 +68,19 @@ run_subprocess("./", ALYA_ULTCL, "", preprocess=True)
 
 # Set up which case to run
 training_case = args.case
-
+logger.info("Running case: %s\n", training_case)
+logger.debug("Cleaning up old files...\n")
 run_subprocess(
     "./", "rm -f", "parameters.py", preprocess=True
 )  # Ensure deleting old parameters
+logger.debug("Copying parameters for %s ...\n", training_case)
 run_subprocess(
     "./",
     "ln -s",
     f"parameters/parameters_{training_case}.py parameters.py",
     preprocess=True,
 )
+logger.debug("Copying case files for %s ...\n", training_case)
 run_subprocess("alya_files", "cp -r", f"case_{training_case} case", preprocess=True)
 
 from Env3D_MARL_channel import Environment
@@ -84,11 +98,13 @@ from parameters import (
 
 # Import system-specific parameters
 if detect_system() == "LOCAL":
+    logger.debug("Detected LOCAL system.\n")
     from parameters import (
         num_servers_ws as num_servers,
         nb_proc_ws as nb_proc,
     )
 else:
+    logger.debug("Detected SLURM system.\n")
     from parameters import (
         num_servers,
         nb_proc,
@@ -117,6 +133,7 @@ initial_time = time.time()
 
 # Generate the list of nodes
 # TODO --- ADD NUM_CFD (MARL)
+logger.debug("Generating node list...\n")
 generate_node_list(num_servers=num_servers, num_cores_server=nb_proc)
 # TODO: check if this works in MN!
 # TODO: Update to local nodelists with num_servers
@@ -125,15 +142,23 @@ generate_node_list(num_servers=num_servers, num_cores_server=nb_proc)
 nodelist = read_node_list()
 
 # IMPORTANT: this environment base is needed to do the baseline, the main one
+logger.debug("Creating base environment...\n")
 environment_base = Environment(simu_name=simu_name, node=nodelist[0])  # Baseline
-print(f"\nDEBUG: Environment Base ENV_ID: {environment_base.ENV_ID}\n")
+logger.debug(
+    "Created base environment with ENV_ID %s\n",
+    environment_base.ENV_ID,
+)
+# print(f"\nDEBUG: Environment Base ENV_ID: {environment_base.ENV_ID}\n")
 
 if run_baseline:
+    logger.info("`run_baseline` is TRUE, running baseline...\n")
     run_subprocess("alya_files", "rm -rf", "baseline")  # Ensure deleting old parameters
     environment_base.run_baseline(True)
+    logger.info("Baseline completed.\n")
 
 network = [dict(type="dense", size=512), dict(type="dense", size=512)]
 
+logger.debug("Creating agent...\n")
 agent = Agent.create(
     # Agent + Environment
     agent="ppo",
@@ -173,6 +198,7 @@ agent = Agent.create(
         summaries=["entropy", "kl-divergence", "loss", "reward", "update-norm"],
     ),
 )
+logger.debug("Created agent.\n")
 
 
 def split(
@@ -219,10 +245,15 @@ def split(
 #         list_inv_envs.append(env)
 #     return list_inv_envs
 
-
-print("Here is the nodelist: ", nodelist)
+logger.info("nodelist: %s\n", nodelist)
+# print("Here is the nodelist: ", nodelist)
 
 # here the array of environments is defined, will be n-1 host (the 1st one is MASTER) #TODO: assign more nodes to an environment
+logger.info(
+    "Creating %d parallel environments for %d separate CFD environments...\n",
+    num_servers,
+    num_servers,
+)
 parallel_environments = [
     Environment(
         simu_name=simu_name,
@@ -236,6 +267,10 @@ parallel_environments = [
 if "nx_Qs" not in globals():
     nx_Qs = 1
 
+logger.info(
+    "Splitting environments into %d local environments...\n",
+    nx_Qs * nz_Qs,
+)
 environments = [
     split(parallel_environments[i], i + 1, nx_Qs, nz_Qs)[j]
     for i in range(num_servers)
@@ -244,9 +279,16 @@ environments = [
 
 for env in environments:
     env_id_2d = agent_index_1d_to_2d(env.ENV_ID[1], nz_Qs)
-    print(
-        f"Verif : Host: {env.host:<20} ID: {str(env.ENV_ID):<10} Agent 1D Index: {env.ENV_ID[1]:<5} 2D Index: {str(env_id_2d):<10}"
+    logger.info(
+        "Verif:   Host: %s    ID: %s    Agent 1D Index: %s    2D Index: %s",
+        env.host,
+        env.ENV_ID,
+        env.ENV_ID[1],
+        env_id_2d,
     )
+    # print(
+    #     f"Verif : Host: {env.host:<20} ID: {str(env.ENV_ID):<10} Agent 1D Index: {env.ENV_ID[1]:<5} 2D Index: {str(env_id_2d):<10}"
+    # )
 
 time.sleep(1.0)
 
@@ -257,12 +299,16 @@ for e in environments:
 
 # start all environments at the same time
 # TODO: needs a toy case for the start class a 'light' baseline for everyone which is useless
+logger.info("Starting all environments at the same time...\n")
 runner = Runner(agent=agent, environments=environments, remote="multiprocessing")
 
+logger.info("Running training for %d episodes...\n", num_episodes)
 # now start the episodes and sync_episodes is very useful to update the DANN efficiently
 runner.run(num_episodes=num_episodes, sync_episodes=sync_episodes)
 runner.close()
+logger.info("Training completed!!!\n\n\n")
 
+logger.info("Saving model data in model-numpy format...\n")
 # saving all the model data in model-numpy format
 agent.save(
     directory=os.path.join(os.getcwd(), "model-numpy"),
@@ -270,14 +316,18 @@ agent.save(
     append="episodes",
 )
 
+logger.info("Closing agent...\n")
 agent.close()
 
 end_time = time.time()
 
-print(
-    f"DRL simulation :\nStart at : {initial_time}.\nEnd at {end_time}\nDone in : {end_time - initial_time}"
-)
+logger.info("Start at: %s", initial_time)
+logger.info("End at: %s", end_time)
+logger.info("Done in: %s", end_time - initial_time)
+# print(
+#     f"DRL simulation :\nStart at : {initial_time}.\nEnd at {end_time}\nDone in : {end_time - initial_time}"
+# )
 
-
+logger.info("Creating CR report...\n")
 cr_info()
 cr_report("DRL_TRAINING.csv")

@@ -10,11 +10,12 @@ from pathlib import Path
 import gc
 from env_utils import agent_index_2d_to_1d
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
+
+# Set up logger
+logger = configure_logger("coco_calc_reward", default_level=DEFAULT_LOGGING_LEVEL)
+
+logger.info("coco_calc_reward.py: Logging level set to %s", logger.level)
 
 
 def load_data_and_convert_to_dataframe_single(
