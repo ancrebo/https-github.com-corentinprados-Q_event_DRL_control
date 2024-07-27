@@ -84,16 +84,17 @@ def plot_witness_points(
 
     # Setting the tick values based on the number of agents but labeled in between grid lines
     ax.set_xticks([i + 0.5 for i in range(nx_Qs)])
-    ax.set_xticklabels([str(i) for i in range(nx_Qs)])
+    ax.set_xticklabels([str(i + 1) for i in range(nx_Qs)])
     ax.set_yticks([i + 0.5 for i in range(nz_Qs)])
-    ax.set_yticklabels([str(i) for i in range(nz_Qs)])
+    ax.set_yticklabels([str(i + 1) for i in range(nz_Qs)])
 
     # Show "z" ticks based on y_value_density, but only show every y_skip_values
     z_tick_indices = [i for i in range(1, y_value_density + 1, y_skip_values)]
     ax.set_zticks([i for i in z_tick_indices])
     ax.set_zticklabels([str(i) for i in z_tick_indices])
 
-    ax.grid(True, which="major", color="black", linestyle="--")
+    # Ensure grid lines are displayed
+    ax.grid(True, which="both")
 
     # Set minor grid lines for better visualization
     ax.minorticks_on()
