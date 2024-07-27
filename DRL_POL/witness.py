@@ -423,7 +423,7 @@ def write_witness_version_file(
     )
 
     with open(os.path.join(filepath, "witness_version.txt"), "w") as file:
-        file.write(f"Current Witness Probes Location Version: v{probes_location}\n")
+        file.write(f"Witness Probes Location Version: v{probes_location}\n")
         file.write(f"Probe Type: {probe_type}\n")
         file.write(f"Pattern: {pattern}\n")
         file.write(f"Y Value Density: {y_value_density}\n")
