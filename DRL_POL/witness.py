@@ -266,7 +266,7 @@ def calculate_channel_witness_coordinates(params: Dict[str, Any]) -> Dict[str, A
     y_value_density = params["y_value_density"]
     pattern = params["pattern"]
     y_skipping = params["y_skipping"]
-    y_skipping_value = params["y_skipping_value"]
+    y_skip_values = params["y_skip_values"]
 
     # Create list of y values to place pattern - Exclude the first term (0)
     y_values: List[float] = np.linspace(0, Ly, y_value_density + 1).tolist()[1:]
@@ -306,7 +306,7 @@ def calculate_channel_witness_coordinates(params: Dict[str, Any]) -> Dict[str, A
 
             for index, y in enumerate(y_values):
                 if 0 <= y <= Ly:  # Ensure y-values are within the global y limit
-                    if y_skipping and (index % y_skipping_value != 0):
+                    if y_skipping and (index % y_skip_values != 0):
                         # Place only the center point
                         coordinates.append(
                             (center_point[0] / Lx, y / Ly, center_point[1] / Lz)
