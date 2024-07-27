@@ -23,8 +23,7 @@ import shutil
 
 from jets import build_jets, JetChannel
 from env_utils import agent_index_2d_to_1d, agent_index_1d_to_2d
-from witness import calculate_channel_witness_coordinates
-from alya import write_witness_file
+from witness import calculate_channel_witness_coordinates, write_witness_file
 
 from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
 
