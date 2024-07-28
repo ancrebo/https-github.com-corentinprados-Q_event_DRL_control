@@ -168,6 +168,15 @@ def process_velocity_data_single(
     # logger.debug(f"y_means columns: {y_means.columns.tolist()}")
     # logger.debug(f"y_means index: {y_means.index}")
 
+    # Log unique 'y' values and their counts in the main DataFrame
+    unique_y_main = df["y"].value_counts().sort_index()
+    logger.debug("%s: Unique 'y' values in main DataFrame:\n %s\n", timestep, unique_y_main.head(20))
+
+    # Log unique 'y' values and their counts in the averaged data
+    unique_y_averaged = averaged_data["y"].value_counts().sort_index()
+    logger.debug("%s: Unique 'y' values in averaged data:\n %s\n", timestep, unique_y_averaged.head(20))
+
+
     df_merged = pd.merge(df, averaged_data, on="y", how="left")
 
     # Log the result of the merge
