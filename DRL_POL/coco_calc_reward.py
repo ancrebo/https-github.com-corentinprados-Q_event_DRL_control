@@ -151,6 +151,12 @@ def process_velocity_data_single(
     df["y"] = df["y"].astype("float64")
     averaged_data["y"] = averaged_data["y"].astype("float64")
 
+    # Verify the rounding operation
+    logger.debug("Rounded 'y' values in main DataFrame: \n%s\n", df["y"].unique())
+    logger.debug(
+        "Rounded 'y' values in averaged data: \n%s\n", averaged_data["y"].unique()
+    )
+
     # Check and log data types of 'y' columns
     logger.debug(
         "Data type of 'y' in main DataFrame AFTER converting: %s", df["y"].dtype
