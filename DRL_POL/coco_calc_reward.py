@@ -179,6 +179,12 @@ def detect_Q_events_single(
     logger.info("Detecting Q events...")
     timestep, df = timestep_df
 
+    # Check for NaN values in u and v columns
+    nan_u_count = df["u"].isna().sum()
+    nan_v_count = df["v"].isna().sum()
+    logger.debug("%s: Number of NaNs in 'u': %d", timestep, nan_u_count)
+    logger.debug("%s: Number of NaNs in 'v': %d", timestep, nan_v_count)
+
     # Fetch the rms values for 'u' and 'v' based on y-coordinate
     rms_values = (
         averaged_data.set_index("y")[["u_prime", "v_prime"]].reindex(df["y"]).values
