@@ -147,12 +147,17 @@ def process_velocity_data_single(
 
     # Print 'y' values before rounding
     logger.debug(
-        "Original 'y' values in main DataFrame before rounding:\n%s", df["y"].unique()
+        "Original 'y' values in main DataFrame before rounding:\n%s",
+        sorted(df["y"].unique()),
     )
     logger.debug(
         "Original 'y' values in averaged data before rounding:\n%s",
-        averaged_data["y"].unique(),
+        sorted(averaged_data["y"].unique()),
     )
+
+    # Convert 'y' values to float64 to ensure consistency
+    df["y"] = df["y"].astype("float64")
+    averaged_data["y"] = averaged_data["y"].astype("float64")
 
     # iterate through each row of main dataframe and manually assign the rounded value to the 'y' column
     df_altered_copy = df.copy()
@@ -195,10 +200,6 @@ def process_velocity_data_single(
     #
     # df["y"] = df.round({"y": precision})
     # averaged_data["y"] = averaged_data.round({"y": precision})
-
-    # Convert 'y' values to float64 to ensure consistency
-    df["y"] = df["y"].astype("float64")
-    averaged_data["y"] = averaged_data["y"].astype("float64")
 
     # Check and log data types of 'y' columns
     logger.debug(
