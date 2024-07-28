@@ -412,7 +412,7 @@ def calculate_reward_full(
     delta_tau = precalc_values.iloc[1, 1]
 
     # Load global Q event average ratio and standard deviation
-    q_event_summary_filename = "q_event_summary.csv"
+    q_event_summary_filename = "q_event_ratio_summary.csv"
     q_event_summary_filepath = os.path.join(
         averaged_data_path, q_event_summary_filename
     )
