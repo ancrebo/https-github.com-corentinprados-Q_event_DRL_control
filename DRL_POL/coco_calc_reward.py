@@ -171,32 +171,6 @@ def process_velocity_data_single(
         "Adjusted 'y' values in averaged data:\n%s", averaged_data["y"].unique()
     )
 
-    # Check if altered 'y' values are equal to the original 'y' values
-    logger.debug(
-        "Are 'y' values in main DataFrame equal to altered 'y' values? %s",
-        df["y"].equals(df_altered_copy["y"]),
-    )
-    logger.debug(
-        "Are 'y' values in averaged data equal to altered 'y' values? %s",
-        averaged_data["y"].equals(averaged_data_copy["y"]),
-    )
-
-    # Ensure y values are rounded to the same precision in both DataFrames
-    # df["y"] = np.round(df["y"], precision)
-    # averaged_data["y"] = np.round(averaged_data["y"], precision)
-    #
-    # df["y"] = df.round({"y": precision})
-    # averaged_data["y"] = averaged_data.round({"y": precision})
-
-    # Check and log data types of 'y' columns
-    logger.debug(
-        "Data type of 'y' in main DataFrame AFTER converting: %s", df["y"].dtype
-    )
-    logger.debug(
-        "Data type of 'y' in averaged data AFTER converting: %s",
-        averaged_data["y"].dtype,
-    )
-
     # Check for NaN values in the initial dataframe
     nan_u_initial = df["u"].isna().sum()
     nan_v_initial = df["v"].isna().sum()
