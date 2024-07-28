@@ -35,7 +35,7 @@ def load_data_for_timestep(directory: str, file_name: str) -> pd.DataFrame:
     Returns:
     - df (pd.DataFrame): DataFrame with columns for spatial coordinates (x, y, z) and velocity components (u, v, w).
     """
-    logger.info("load_data_for_timestep: %s: Data Loading...", file_name)
+    logger.debug("load_data_for_timestep: %s: Data Loading...", file_name)
     path = os.path.join(directory, file_name)
     mesh = pv.read(path)  # Read the mesh data from the PVTU file
 
@@ -69,7 +69,7 @@ def load_data_for_timestep(directory: str, file_name: str) -> pd.DataFrame:
         nan_v_count,
     )
 
-    logger.info("load_data_for_timestep: %s: Data loaded!!!", file_name)
+    logger.debug("load_data_for_timestep: %s: Data loaded!!!", file_name)
     return df
 
 
@@ -127,27 +127,23 @@ def calculate_avg_qevent_ratio(
 
     for file_name, timestep in timesteps:
         df = load_data_for_timestep(directory, file_name)
-        logger.debug(
-            "calculate_avg_qevent_ratio: Loaded data for timestep %s", timestep
-        )
+        logger.info("calculate_avg_qevent_ratio: %s: Data Loaded!!!", timestep)
 
         normalized_df = normalize_all_single((timestep, df), u_tau, delta_tau)[1]
-        logger.debug(
-            "calculate_avg_qevent_ratio: Normalized data for timestep %s", timestep
-        )
+        logger.debug("calculate_avg_qevent_ratio: %s: Data Normalized!!!", timestep)
 
         processed_df = process_velocity_data_single(
             (timestep, normalized_df), averaged_data, tolerance
         )[1]
-        logger.debug(
-            "calculate_avg_qevent_ratio: Processed data for timestep %s", timestep
-        )
+        logger.debug("calculate_avg_qevent_ratio: %s: Data Processed!!!", timestep)
 
         q_event_df = detect_Q_events_single((timestep, processed_df), averaged_data, H)[
             1
         ]
-        logger.debug(
-            "calculate_avg_qevent_ratio: Detected Q events for timestep %s", timestep
+        logger.info(
+            "calculate_avg_qevent_ratio: %s: %d Q events Detected!!!",
+            timestep,
+            q_event_df["Q"].sum(),
         )
 
         # Calculate the global Q event volume ratio
@@ -156,6 +152,13 @@ def calculate_avg_qevent_ratio(
         q_event_ratio = q_event_count / total_points if total_points > 0 else 0
 
         q_event_ratios.append({"timestep": timestep, "q_event_ratio": q_event_ratio})
+        logger.info(
+            "calculate_avg_qevent_ratio: %s: Q event ratio: %f", timestep, q_event_ratio
+        )
+
+        logger.info(
+            "calculate_avg_qevent_ratio: %s: Finished Calculations!!!", timestep
+        )
 
         # Clear memory
         del df, normalized_df, processed_df, q_event_df
