@@ -143,6 +143,8 @@ def process_velocity_data_single(
     timestep, df = timestep_df
     logger.info("Processing velocity data using loaded averaged data...")
 
+    precision: int = 3
+
     # Ensure y values are rounded to the same precision in both DataFrames
     df["y"] = np.round(df["y"], precision)
     averaged_data["y"] = np.round(averaged_data["y"], precision)
