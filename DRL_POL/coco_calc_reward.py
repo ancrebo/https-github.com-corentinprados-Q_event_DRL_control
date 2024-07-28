@@ -447,7 +447,6 @@ def calculate_reward_full(
 
     result_df = calculate_local_Q_ratios(df, nx, nz, Lx_norm, Lz_norm)
     result_df["timestep"] = timestep
-    all_results.append(result_df)
 
     # Add ENV_ID column to result_df
     result_df["ENV_ID"] = result_df.apply(
