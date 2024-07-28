@@ -35,7 +35,7 @@ def load_data_for_timestep(directory: str, file_name: str) -> pd.DataFrame:
     Returns:
     - df (pd.DataFrame): DataFrame with columns for spatial coordinates (x, y, z) and velocity components (u, v, w).
     """
-    logger.info("load_data_for_timestep: %s: Loading data from PVTU file", file_name)
+    logger.info("load_data_for_timestep: %s: Data Loading...", file_name)
     path = os.path.join(directory, file_name)
     mesh = pv.read(path)  # Read the mesh data from the PVTU file
 
@@ -69,7 +69,7 @@ def load_data_for_timestep(directory: str, file_name: str) -> pd.DataFrame:
         nan_v_count,
     )
 
-    logger.info("load_data_for_timestep: %s: Data loaded into DataFrame", file_name)
+    logger.info("load_data_for_timestep: %s: Data loaded!!!", file_name)
     return df
 
 
