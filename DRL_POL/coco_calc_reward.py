@@ -121,7 +121,7 @@ def normalize_all_single(
 
 
 def process_velocity_data_single(
-    timestep_df: Tuple[float, pd.DataFrame], averaged_data: pd.DataFrame
+    timestep_df: Tuple[float, pd.DataFrame], averaged_data: pd.DataFrame, precision: int = 6
 ) -> Tuple[float, pd.DataFrame]:
     """
     Processes a tuple containing CFD simulation data to calculate fluctuating components of velocity fields.
@@ -132,6 +132,7 @@ def process_velocity_data_single(
       and velocity components (u, v, w). (NORMALIZED!)
     - averaged_data (DataFrame): Contains averaged velocities ($\overline{U}(y)$, $\overline{V}(y)$, $\overline{W}(y)$)
       and rms of velocity fluctuations ($u'(y)$, $v'(y)$, $w'(y)$) as columns, indexed by the y-coordinate. (NORMALIZED!)
+    - precision (int): The number of decimal places to round the 'y' values to. Ensures they are recognized as equal!
 
     Returns:
     - processed_data (tuple): A tuple containing a timestep and a DataFrame with original and fluctuating
@@ -139,6 +140,10 @@ def process_velocity_data_single(
     """
     timestep, df = timestep_df
     logger.info("Processing velocity data using loaded averaged data...")
+
+    # Ensure y values are rounded to the same precision in both DataFrames
+    df["y"] = df["y"].round(precision)
+    averaged_data["y"] = averaged_data["y"].round(precision)
 
     # Check for NaN values in the initial dataframe
     nan_u_initial = df["u"].isna().sum()
