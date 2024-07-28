@@ -167,7 +167,7 @@ def detect_Q_events_single(
     Parameters:
     - timestep_df (tuple): Data processed by `process_velocity_data_single`, containing:
       * A timestep (float)
-      * A DataFrame with spatial coordinates (x, y, z) and velocity components U, V, W, u, v, w (NORMALIZED!)
+      * A DataFrame with spatial coordinates (x, y, z) and velocity components u, v, w, U, V, W (NORMALIZED!)
     - averaged_data (DataFrame): Data containing the rms values for velocity components u and v for each y coordinate. ** u' and v' **
     - H (float): The sensitivity threshold for identifying Q events.
 
@@ -183,12 +183,17 @@ def detect_Q_events_single(
     rms_values = (
         averaged_data.set_index("y")[["u_prime", "v_prime"]].reindex(df["y"]).values
     )
+    logger.debug("%s: Number of RMS values: %d", timestep, len(rms_values))
 
     # Calculate the product of fluctuating components u and v
     uv_product = np.abs(df["u"] * df["v"])
+    logger.debug("%s: Number of uv products: %d", timestep, len(uv_product))
+    logger.debug("%s: uv_product: %s", timestep, uv_product)
 
     # Calculate the threshold product of rms values u' and v'
     threshold = H * rms_values[:, 0] * rms_values[:, 1]
+    logger.debug("%s: Number of threshold values: %d", timestep, len(threshold))
+    logger.debug("%s: Threshold: %s", timestep, threshold)
 
     # Determine where the Q event condition is met
     q_events = uv_product > threshold  # to avoid detection on 0
