@@ -123,7 +123,7 @@ def normalize_all_single(
 def process_velocity_data_single(
     timestep_df: Tuple[float, pd.DataFrame],
     averaged_data: pd.DataFrame,
-    precision: int = 4,
+    precision: int = 3,
 ) -> Tuple[float, pd.DataFrame]:
     """
     Processes a tuple containing CFD simulation data to calculate fluctuating components of velocity fields.
@@ -163,10 +163,12 @@ def process_velocity_data_single(
 
     # Check the structure of averaged_data
     logger.debug(
-        "process_velocity_data_single: averaged_data columns: \n%s\n", averaged_data.columns
+        "process_velocity_data_single: averaged_data columns: \n%s\n",
+        averaged_data.columns,
     )
     logger.debug(
-        "process_velocity_data_single: averaged_data sample: \n%s\n", averaged_data.head()
+        "process_velocity_data_single: averaged_data sample: \n%s\n",
+        averaged_data.head(),
     )
 
     # Process the dataset for detailed fluctuation analysis
