@@ -144,44 +144,31 @@ def process_velocity_data_single(
     logger.info("Processing velocity data using loaded averaged data...")
 
     precision: int = 3
+    tolerance: float = 1e-3
 
-    # Print 'y' values before rounding
+    # Print 'y' values before adjustment
+    logger.debug("Original 'y' values in main DataFrame:\n%s", df["y"].unique())
     logger.debug(
-        "Original 'y' values in main DataFrame before rounding:\n%s",
-        sorted(df["y"].unique()),
-    )
-    logger.debug(
-        "Original 'y' values in averaged data before rounding:\n%s",
-        sorted(averaged_data["y"].unique()),
+        "Original 'y' values in averaged data:\n%s", averaged_data["y"].unique()
     )
 
-    # Convert 'y' values to float64 to ensure consistency
-    df["y"] = df["y"].astype("float64")
-    averaged_data["y"] = averaged_data["y"].astype("float64")
+    # Adjust 'y' values in averaged data to match main data if within tolerance
+    main_y_unique = df["y"].unique()
+    averaged_y_unique = averaged_data["y"].unique()
 
-    # iterate through each row of main dataframe and manually assign the rounded value to the 'y' column
-    df_altered_copy = df.copy()
-    for index, row in df.iterrows():
-        df_altered_copy.at[index, "y"] = np.round(row["y"], 3)
+    for main_y in main_y_unique:
+        for i, avg_y in enumerate(averaged_y_unique):
+            if np.abs(main_y - avg_y) <= tolerance:
+                averaged_data.loc[averaged_data["y"] == avg_y, "y"] = main_y
+                averaged_y_unique[i] = (
+                    main_y  # Update the unique values list to reflect the change
+                )
+                break
 
-    averaged_data_copy = averaged_data.copy()
-    for index, row in averaged_data.iterrows():
-        averaged_data_copy.at[index, "y"] = np.round(row["y"], 3)
-
-    # # Apply rounding to 'y' values using pandas.DataFrame.round
-    # df_altered_copy = df.copy()
-    # df_altered_copy["y"] = df["y"].round(precision)
-    # averaged_data_copy = averaged_data.copy()
-    # averaged_data_copy["y"] = averaged_data["y"].round(precision)
-
-    # Print 'y' values after rounding
+    # Print 'y' values after adjustment
+    logger.debug("Adjusted 'y' values in main DataFrame:\n%s", df["y"].unique())
     logger.debug(
-        "Rounded 'y' values in main DataFrame after rounding:\n%s",
-        sorted(df["y"].unique()),
-    )
-    logger.debug(
-        "Rounded 'y' values in averaged data after rounding:\n%s",
-        sorted(averaged_data["y"].unique()),
+        "Adjusted 'y' values in averaged data:\n%s", averaged_data["y"].unique()
     )
 
     # Check if altered 'y' values are equal to the original 'y' values
