@@ -144,8 +144,8 @@ def process_velocity_data_single(
     logger.info("Processing velocity data using loaded averaged data...")
 
     # Ensure y values are rounded to the same precision in both DataFrames
-    df["y"] = df["y"].round(precision)
-    averaged_data["y"] = averaged_data["y"].round(precision)
+    df["y"] = np.round(df["y"], precision)
+    averaged_data["y"] = np.round(averaged_data["y"], precision)
 
     # Convert 'y' values to float64 to ensure consistency
     df["y"] = df["y"].astype("float64")
