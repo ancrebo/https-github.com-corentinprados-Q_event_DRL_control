@@ -163,10 +163,10 @@ def process_velocity_data_single(
 
     # Check the structure of averaged_data
     logger.debug(
-        "process_velocity_data_single: averaged_data columns: %s", averaged_data.columns
+        "process_velocity_data_single: averaged_data columns: \n%s\n", averaged_data.columns
     )
     logger.debug(
-        "process_velocity_data_single: averaged_data sample: %s", averaged_data.head()
+        "process_velocity_data_single: averaged_data sample: \n%s\n", averaged_data.head()
     )
 
     # Process the dataset for detailed fluctuation analysis
