@@ -106,10 +106,10 @@ def normalize_all_single(
     nan_u_count = df_copy["u"].isna().sum()
     nan_v_count = df_copy["v"].isna().sum()
     logger.debug(
-        "%s: Number of NaNs in 'u' after normalization: %d", timestep, nan_u_count
+        "normalize_all_single: %s: Number of NaNs in 'u' after normalization: %d", timestep, nan_u_count
     )
     logger.debug(
-        "%s: Number of NaNs in 'v' after normalization: %d", timestep, nan_v_count
+        "normalize_all_single: %s: Number of NaNs in 'v' after normalization: %d", timestep, nan_v_count
     )
 
     logger.info("Data normalization complete.")
@@ -169,16 +169,16 @@ def process_velocity_data_single(
     nan_U_count = df_processed["U"].isna().sum()
     nan_V_count = df_processed["V"].isna().sum()
     logger.debug(
-        "%s: Number of NaNs in 'u' after processing: %d", timestep, nan_u_count
+        "process_velocity_data_single: %s: Number of NaNs in 'u' after processing: %d", timestep, nan_u_count
     )
     logger.debug(
-        "%s: Number of NaNs in 'v' after processing: %d", timestep, nan_v_count
+        "process_velocity_data_single: %s: Number of NaNs in 'v' after processing: %d", timestep, nan_v_count
     )
     logger.debug(
-        "%s: Number of NaNs in 'U' after processing: %d", timestep, nan_U_count
+        "process_velocity_data_single: %s: Number of NaNs in 'U' after processing: %d", timestep, nan_U_count
     )
     logger.debug(
-        "%s: Number of NaNs in 'V' after processing: %d", timestep, nan_V_count
+        "process_velocity_data_single: %s: Number of NaNs in 'V' after processing: %d", timestep, nan_V_count
     )
 
     logger.info("Velocity data processing complete.")
