@@ -101,6 +101,11 @@ def calculate_avg_qevent_ratio(
 ) -> None:
     pvd_path = os.path.join(directory, "channel.pvd")
     timestep_file_map = create_timestep_file_map(pvd_path)
+    # Ensure we have at least num_timesteps timesteps
+    if len(timestep_file_map) < num_timesteps:
+        raise ValueError(
+            f"Number of timesteps in the dataset ({len(timestep_file_map)}) is less than the specified number of timesteps ({num_timesteps})."
+        )
 
     # Ensure we process only the specified number of timesteps from the end
     timesteps = list(timestep_file_map.items())[-num_timesteps:]
@@ -154,18 +159,33 @@ def calculate_avg_qevent_ratio(
     average_q_event_ratio = q_event_ratios_df["q_event_ratio"].mean()
     std_dev_q_event_ratio = q_event_ratios_df["q_event_ratio"].std()
 
-    # Save the results
-    q_event_ratios_df.to_csv("q_event_ratios.csv", index=False)
+    # Save the results to `averaged_data_path` as csv files
+    q_event_ratios_df.to_csv(
+        os.path.join(averaged_data_path, "q_event_ratio_history.csv"), index=False
+    )
+    logger.info(
+        "Q event ratio history saved to %s",
+        os.path.join(averaged_data_path, "q_event_ratio_history.csv"),
+    )
+
     summary_df = pd.DataFrame(
         {
             "average_q_event_ratio": [average_q_event_ratio],
             "std_dev_q_event_ratio": [std_dev_q_event_ratio],
+            "H_value": [H],  # Include the H value
         }
     )
-    summary_df.to_csv("q_event_summary.csv", index=False)
+    summary_df.to_csv(
+        os.path.join(averaged_data_path, "q_event_ratio_summary.csv"), index=False
+    )
+    logger.info(
+        "Q event ratio summary saved to %s",
+        os.path.join(averaged_data_path, "q_event_ratio_summary.csv"),
+    )
 
     logger.info(f"Average Q Event Volume Ratio: {average_q_event_ratio}")
     logger.info(f"Standard Deviation of Q Event Volume Ratio: {std_dev_q_event_ratio}")
+    logger.info(f"H value used: {H}\n")  # Log the H value used
 
 
 if __name__ == "__main__":
