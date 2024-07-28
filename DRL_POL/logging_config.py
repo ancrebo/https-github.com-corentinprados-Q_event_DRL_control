@@ -100,8 +100,12 @@ def configure_logger(module_name: str, default_level: str = "INFO") -> logging.L
             console_level = default_level.upper()
             file_level = default_level.upper()
     else:
+        config = None
         console_level = default_level.upper()
         file_level = default_level.upper()
+
+    if config is None:
+        raise ValueError(f"Module {module_name} not found in logging_config_dict")
 
     # Clear existing handlers if override is specified
     if config.get("override", False):
