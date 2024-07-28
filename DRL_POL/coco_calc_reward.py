@@ -15,7 +15,7 @@ from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
 # Set up logger
 logger = configure_logger("coco_calc_reward", default_level=DEFAULT_LOGGING_LEVEL)
 
-logger.info("coco_calc_reward.py: Logging level set to %s", logger.level)
+logger.info("coco_calc_reward.py: Logging level set to %s\n", logger.level)
 
 
 def load_data_and_convert_to_dataframe_single(
@@ -33,7 +33,7 @@ def load_data_and_convert_to_dataframe_single(
       * A timestep (float)
       * A DataFrame with columns for spatial coordinates (x, y, z) and velocity components (u, v, w)
     """
-    logger.info("Loading data from PVTU files...")
+    logger.debug("load_data_and_convert_to_dataframe: Loading data from PVTU files...")
     # Parse the PVD file to extract mappings of timesteps to their corresponding PVTU files
     pvd_path = os.path.join(directory, file_name)
     tree = ET.parse(pvd_path)
@@ -66,7 +66,11 @@ def load_data_and_convert_to_dataframe_single(
 
     data_frames: Tuple[float, pd.DataFrame] = (timestep, df)
 
-    logger.info(f"Data from {file} at timestep {timestep} loaded into DataFrame.")
+    logger.debug(
+        "load_data_and_convert_dataframe_single: Data from %s at timestep %s loaded into DataFrame.",
+        file,
+        timestep,
+    )
     return data_frames
 
 
@@ -87,7 +91,7 @@ def normalize_all_single(
     - normalized_data (tuple): A tuple containing the timestep and the updated DataFrame with normalized velocities and spatial coordinates.
     """
     timestep, df = timestep_df
-    logger.info("Normalizing data...")
+    logger.debug("normalize_all_single: Normalizing data...")
 
     # Copy the DataFrame to preserve original data
     df_copy = df.copy()
@@ -116,7 +120,7 @@ def normalize_all_single(
         nan_v_count,
     )
 
-    logger.info("Data normalization complete.")
+    logger.debug("noramlize_all_single: Data normalization complete!")
     return timestep, df_copy
 
 
@@ -141,7 +145,9 @@ def process_velocity_data_single(
       velocity components (U, V, W, u, v, w).
     """
     timestep, df = timestep_df
-    logger.info("Processing velocity data using loaded averaged data...")
+    logger.debug(
+        "process_velocity_data_single: Processing velocity data using loaded averaged data..."
+    )
 
     precision: int = 3
     tolerance: float = 1e-3
@@ -154,7 +160,9 @@ def process_velocity_data_single(
         for i, avg_y in enumerate(averaged_y_unique):
             if np.abs(main_y - avg_y) <= tolerance:
                 logger.debug(
-                    f"Overwriting averaged y value {avg_y} with main y value {main_y}"
+                    "process_velocity_data_single: Overwriting averaged y value %s with main y value %s",
+                    avg_y,
+                    main_y,
                 )
                 averaged_data.loc[averaged_data["y"] == avg_y, "y"] = main_y
                 averaged_y_unique[i] = (
@@ -203,7 +211,7 @@ def process_velocity_data_single(
         nan_V_count,
     )
 
-    logger.info("Velocity data processing complete.")
+    logger.debug("process_velocity_data_single: Velocity data processing complete!")
 
     return timestep, df_processed
 
@@ -226,39 +234,32 @@ def detect_Q_events_single(
       * A timestep (float)
       * A DataFrame with columns ['x', 'y', 'z', 'Q'], where 'Q' is a boolean indicating whether a Q event is detected.
     """
-    logger.info("Detecting Q events...")
+    logger.debug("detect_Q_events_single: Detecting Q events...")
     timestep, df = timestep_df
-
-    # Check for NaN values in u and v columns
-    nan_u_count = df["u"].isna().sum()
-    nan_v_count = df["v"].isna().sum()
-    logger.debug("%s: Number of NaNs in 'u': %d", timestep, nan_u_count)
-    logger.debug("%s: Number of NaNs in 'v': %d", timestep, nan_v_count)
 
     # Fetch the rms values for 'u' and 'v' based on y-coordinate
     rms_values = (
         averaged_data.set_index("y")[["u_prime", "v_prime"]].reindex(df["y"]).values
     )
-    logger.debug("%s: Number of RMS values: %d", timestep, len(rms_values))
 
     # Calculate the product of fluctuating components u and v
     uv_product = np.abs(df["u"] * df["v"])
-    logger.debug("%s: Number of uv products: %d", timestep, len(uv_product))
-    logger.debug("%s: uv_product: %s", timestep, uv_product)
 
     # Calculate the threshold product of rms values u' and v'
     threshold = H * rms_values[:, 0] * rms_values[:, 1]
-    logger.debug("%s: Number of threshold values: %d", timestep, len(threshold))
-    logger.debug("%s: Threshold: %s", timestep, threshold)
 
     # Determine where the Q event condition is met
     q_events = uv_product > threshold  # to avoid detection on 0
 
     # Create DataFrame with Q event boolean flag
     q_df = pd.DataFrame({"x": df["x"], "y": df["y"], "z": df["z"], "Q": q_events})
-    logger.debug("%s: number of Q events detected: %d", timestep, q_events.sum())
+    logger.debug(
+        "detect_Q_events_single: %s: number of Q events detected: %d",
+        timestep,
+        q_events.sum(),
+    )
 
-    logger.info("Q event detection complete.")
+    logger.debug("detect_Q_events_single: Q event detection complete!")
 
     return timestep, q_df
 
@@ -279,7 +280,7 @@ def calculate_local_Q_ratios(
     Returns:
     - pd.DataFrame: DataFrame with columns ['x_index', 'z_index', 'Q_event_count', 'total_points', 'Q_ratio'].
     """
-    logger.info("Calculating local Q ratios...")
+    logger.debug("calculate_local_Q_ratios: Calculating local Q ratios...")
     step_x = Lx_norm / nx
     step_z = Lz_norm / nz
     results = []
@@ -313,7 +314,7 @@ def calculate_local_Q_ratios(
 
     result_df = pd.DataFrame(results)
 
-    logger.info("Local Q ratio calculation complete.")
+    logger.debug("calculate_local_Q_ratios: Local Q ratio calculation complete!")
 
     return result_df
 
@@ -328,11 +329,13 @@ def calculate_reward(df: pd.DataFrame, nx: int, nz: int) -> float:
     Returns:
     - float: The calculated reward value.
     """
-    logger.debug(f"Calculating reward for a environment [{nx}, {nz}] ...")
+    logger.debug(
+        "calculate_reward: Calculating reward for a environment [%d, %d] ...", nx, nz
+    )
 
     q_ratio = df[(df["x_index"] == nx) & (df["z_index"] == nz)]["Q_ratio"].values[0]
     reward = 1 - q_ratio
-    logger.debug("Reward calculation complete.")
+    logger.debug("calculate_reward: Reward calculation complete!")
     return reward
 
 
@@ -359,7 +362,9 @@ def calculate_reward_full(
     - averaged_data_path (str): Path to the CSV file with averaged data.
     - output_file (str): Path to the output CSV file for rewards.
     """
-    logging.info("Starting to calculate rewards based on Q events...")
+    logging.info(
+        "calculate_reward_full: Starting to calculate rewards based on Q events..."
+    )
 
     # Load and process the data
     filename = "channel.pvd"
@@ -370,21 +375,7 @@ def calculate_reward_full(
     precalc_values = pd.read_csv(precalc_value_filepath)
 
     # List all precalculated values
-    logger.debug(f"Pre-calculated values: {precalc_values}")
-    # logger.debug(
-    #     f"u_tau: {precalc_values['u_tau'].values[0]}, delta_tau: {precalc_values['delta_tau'].values[0]}"
-    # )
-
-    # List all pre-calculated values
-    logger.debug(f"Pre-calculated values DataFrame:\n{precalc_values}")
-    logger.debug(
-        f"Columns in pre-calculated values DataFrame: {precalc_values.columns.tolist()}"
-    )
-
-    # Print first few rows of the pre-calculated values DataFrame
-    logger.debug(
-        f"First few rows of pre-calculated values DataFrame:\n{precalc_values.head()}"
-    )
+    logger.debug("calculate_reward_full: Pre-calculated values: \n%s", precalc_values)
 
     u_tau = precalc_values.iloc[
         0, 1
@@ -425,7 +416,7 @@ def calculate_reward_full(
     reward_df = pd.DataFrame(rewards)
 
     reward_df.to_csv(output_file, index=False)
-    logger.info(f"Rewards saved to {output_file}!")
+    logger.info("calculate_reward_full: Rewards saved to %s!", output_file)
 
     # Clean up
     del (
@@ -438,7 +429,7 @@ def calculate_reward_full(
         rewards,
     )
     gc.collect()
-    logger.debug("Memory cleaned up.")
+    logger.debug("calculate_reward_full: Memory cleaned up.")
 
 
 """
@@ -491,17 +482,8 @@ if __name__ == "__main__":
         required=True,
         help="Path to the output CSV file for rewards.",
     )
-    parser.add_argument(
-        "--loglvl",
-        type=str,
-        default="INFO",
-        help="Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL).",
-    )
 
     args = parser.parse_args()
-
-    # Set logging level
-    logger.setLevel(args.loglvl)
 
     calculate_reward_full(
         args.directory,
