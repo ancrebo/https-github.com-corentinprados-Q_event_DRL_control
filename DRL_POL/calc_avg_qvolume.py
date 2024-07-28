@@ -21,7 +21,7 @@ from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
 # Set up logger
 logger = configure_logger("calc_avg_qvolume", default_level=DEFAULT_LOGGING_LEVEL)
 
-logger.info("calc_avg_qvolume.py: Logging level set to %s", logger.level)
+logger.info("calc_avg_qvolume.py: Logging level set to %s\n", logger.level)
 
 
 def load_data_for_timestep(directory: str, file_name: str) -> pd.DataFrame:
