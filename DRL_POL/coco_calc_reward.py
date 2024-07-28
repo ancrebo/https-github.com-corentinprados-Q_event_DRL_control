@@ -135,6 +135,7 @@ def process_velocity_data_single(
     df_merged = pd.merge(df, averaged_data, on="y", how="left")
 
     df_processed = df.copy()
+
     logger.debug(f"df_processed columns: {df_processed.columns.tolist()}")
     logger.debug(f"df_processed index: {df_processed.index}")
     logger.debug(f"df_processed y values: {df_processed['y'].values}")
@@ -144,6 +145,10 @@ def process_velocity_data_single(
     df_processed["u"] = df["u"] - df_merged["U_bar"]
     df_processed["v"] = df["v"] - df_merged["V_bar"]
     df_processed["w"] = df["w"] - df_merged["W_bar"]
+
+    logger.debug(f"NEW df_processed columns: {df_processed.columns.tolist()}")
+    logger.debug(f"NEW df_processed index: {df_processed.index}")
+    logger.debug(f"NEW df_processed y values: {df_processed['y'].values}")
 
     # Ensure no 'timestep' column remains in the output data
     df_processed.drop(columns="timestep", inplace=True, errors="ignore")
