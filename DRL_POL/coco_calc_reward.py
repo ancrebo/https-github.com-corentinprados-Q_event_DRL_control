@@ -319,22 +319,44 @@ def calculate_local_Q_ratios(
     return result_df
 
 
-def calculate_reward(df: pd.DataFrame, nx: int, nz: int) -> float:
+def calculate_reward(df: pd.DataFrame, avg_qratio: float, nx: int, nz: int) -> float:
     """
     Calculate the reward based on the Q ratio in the local volume.
 
+    The reward is scaled to range from -1 to 1, where a lower local Q ratio compared
+    to the global average results in a positive reward and a higher local Q ratio
+    results in a negative reward. The goal is to minimize the Q ratio.
+
     Parameters:
-    - df (pd.DataFrame): DataFrame with columns ['x_index', 'z_index', 'Q_ratio'].
+    ----------
+    df : pd.DataFrame
+        DataFrame containing the columns ['x_index', 'z_index', 'Q_ratio'] which
+        represents the Q ratios at different grid points.
+    avg_qratio : float
+        The average global Q event volume ratio used for scaling the reward.
+    nx : int
+        The x-index of the local volume.
+    nz : int
+        The z-index of the local volume.
 
     Returns:
-    - float: The calculated reward value.
+    -------
+    float
+        The calculated reward value. A value of 1 indicates no Q events in the
+        local volume, a value of 0 indicates the local Q ratio equals the global
+        average, and negative values indicate the local Q ratio exceeds the global average.
     """
     logger.debug(
         "calculate_reward: Calculating reward for a environment [%d, %d] ...", nx, nz
     )
 
     q_ratio = df[(df["x_index"] == nx) & (df["z_index"] == nz)]["Q_ratio"].values[0]
-    reward = 1 - q_ratio
+    # reward = 1 - q_ratio
+    reward = 1 - (q_ratio / avg_qratio)
+
+    # clip the reward to [-1, 1] # TODO: Is this necessary??? - Pieter
+    reward = np.clip(reward, -1, 1)
+
     logger.debug("calculate_reward: Reward calculation complete!")
     return reward
 
@@ -347,20 +369,32 @@ def calculate_reward_full(
     nx: int,
     nz: int,
     averaged_data_path: str,
-    output_file: str,
+    output_qratio_file: str,
+    output_reward_file: str,
 ) -> None:
     """
     Calculate the rewards based on Q events for a single timestep, saving results to a CSV file.
 
     Parameters:
-    - directory (str): Directory containing the PVD and PVTU files.
-    - Lx (float): Length in the x direction.
-    - Lz (float): Length in the z direction.
-    - H (float): Sensitivity threshold for identifying Q events.
-    - nx (int): Number of sections in the x direction.
-    - nz (int): Number of sections in the z direction.
-    - averaged_data_path (str): Path to the CSV file with averaged data.
-    - output_file (str): Path to the output CSV file for rewards.
+    ----------
+    directory : str
+        Directory containing the PVD and PVTU files.
+    Lx : float
+        Length in the x direction.
+    Lz : float
+        Length in the z direction.
+    H : float
+        Sensitivity threshold for identifying Q events.
+    nx : int
+        Number of sections in the x direction.
+    nz : int
+        Number of sections in the z direction.
+    averaged_data_path : str
+        Path to the directory with averaged data CSV files.
+    output_qratio_file : str
+        Path to the output CSV file for saving calculated local Q event volume ratios.
+    output_reward_file : str
+        Path to the output CSV file for saving calculated rewards.
     """
     logging.info(
         "calculate_reward_full: Starting to calculate rewards based on Q events..."
@@ -370,19 +404,30 @@ def calculate_reward_full(
     filename = "channel.pvd"
     data = load_data_and_convert_to_dataframe_single(directory, filename)
 
+    # Load pre-calculated values
     precalc_value_filename = "calculated_values.csv"
     precalc_value_filepath = os.path.join(averaged_data_path, precalc_value_filename)
     precalc_values = pd.read_csv(precalc_value_filepath)
+    u_tau = precalc_values.iloc[0, 1]
+    delta_tau = precalc_values.iloc[1, 1]
 
-    # List all precalculated values
+    # Load global Q event average ratio and standard deviation
+    q_event_summary_filename = "q_event_summary.csv"
+    q_event_summary_filepath = os.path.join(
+        averaged_data_path, q_event_summary_filename
+    )
+    q_event_summary = pd.read_csv(q_event_summary_filepath)
+    avg_qratio = q_event_summary["average_q_event_ratio"].values[0]
+    std_dev_qratio = q_event_summary["std_dev_q_event_ratio"].values[0]
+
     logger.debug("calculate_reward_full: Pre-calculated values: \n%s", precalc_values)
-
-    u_tau = precalc_values.iloc[
-        0, 1
-    ]  # HARDCODED TO u_tau location in file saved by `coco_calc_avg_vel.py` - Pieter
-    delta_tau = precalc_values.iloc[
-        1, 1
-    ]  # HARDCODED TO delta_tau location in file saved by `coco_calc_avg_vel.py` - Pieter
+    logger.debug(
+        "calculate_reward_full: Loaded Global Q event average ratio: %f", avg_qratio
+    )
+    logger.debug(
+        "calculate_reward_full: Loaded Global Q event standard deviation: %f",
+        std_dev_qratio,
+    )
 
     data_normalized = normalize_all_single(data, u_tau, delta_tau)
 
@@ -404,19 +449,33 @@ def calculate_reward_full(
     result_df["timestep"] = timestep
     all_results.append(result_df)
 
+    # Add ENV_ID column to result_df
+    result_df["ENV_ID"] = result_df.apply(
+        lambda row: agent_index_2d_to_1d(row["x_index"], row["z_index"], nz), axis=1
+    )
+
+    all_results.append(result_df)
+
     final_result_df = pd.concat(all_results, ignore_index=True)
 
-    rewards = []
-    for i in range(nx):
-        for j in range(nz):
-            reward = calculate_reward(final_result_df, i, j)
-            env_id = agent_index_2d_to_1d(i, j, nz)  # Converted 2D index to 1D
-            rewards.append({"ENV_ID": env_id, "reward": reward})
+    # Save the local Q event ratios to a CSV file
+    final_result_df.to_csv(output_qratio_file, index=False)
+    logger.info(
+        "calculate_reward_full: Local Q event ratios saved to %s!", output_qratio_file
+    )
 
-    reward_df = pd.DataFrame(rewards)
+    # Calculate and save rewards
+    final_result_df["reward"] = final_result_df.apply(
+        lambda row: calculate_reward(
+            final_result_df, avg_qratio, row["x_index"], row["z_index"]
+        ),
+        axis=1,
+    )
 
-    reward_df.to_csv(output_file, index=False)
-    logger.info("calculate_reward_full: Rewards saved to %s!", output_file)
+    reward_df = final_result_df[["ENV_ID", "reward"]]
+
+    reward_df.to_csv(output_reward_file, index=False)
+    logger.info("calculate_reward_full: Rewards saved to %s!", output_reward_file)
 
     # Clean up
     del (
@@ -426,7 +485,6 @@ def calculate_reward_full(
         processed_data,
         Q_event_frames,
         final_result_df,
-        rewards,
     )
     gc.collect()
     logger.debug("calculate_reward_full: Memory cleaned up.")
@@ -477,10 +535,16 @@ if __name__ == "__main__":
         help="Path to DIRECTORY containing csv file with averaged data AND csv file with pre-calculated values for u_tau and delta_tau.",
     )
     parser.add_argument(
-        "--output_file",
+        "--output_qratio_file",
         type=str,
         required=True,
-        help="Path to the output CSV file for rewards.",
+        help="Path to the output CSV file for saving calculated local Q event volume ratio.",
+    )
+    parser.add_argument(
+        "--output_reward_file",
+        type=str,
+        required=True,
+        help="Path to the output CSV file for saving calculated rewards.",
     )
 
     args = parser.parse_args()
@@ -493,5 +557,6 @@ if __name__ == "__main__":
         args.nx,
         args.nz,
         args.averaged_data_path,
-        args.output_file,
+        args.output_qratio_file,
+        args.output_reward_file,
     )

@@ -2031,9 +2031,17 @@ class Environment(Environment):
                     directory_post,
                     "rewards",
                 )
-                output_file_name = f"rewards_{self.host}_EP_{self.episode_number}.csv"
-                output_file_path = os.path.join(
-                    output_folder_path_reward, output_file_name
+                qratio_output_file_name = (
+                    f"qratios_{self.host}_EP_{self.episode_number}.csv"
+                )
+                qratio_output_file_path = os.path.join(
+                    output_folder_path_reward, qratio_output_file_name
+                )
+                reward_output_file_name = (
+                    f"rewards_{self.host}_EP_{self.episode_number}.csv"
+                )
+                reward_output_file_path = os.path.join(
+                    output_folder_path_reward, reward_output_file_name
                 )
 
                 if not os.path.exists(directory_vtk):
@@ -2042,7 +2050,7 @@ class Environment(Environment):
                     )
                 if not os.path.exists(averaged_data_path):
                     raise ValueError(
-                        f"{self.ENV_ID}: execute: File {averaged_data_path} does not exist for pre-calculated data!!!"
+                        f"{self.ENV_ID}: execute: Directory {averaged_data_path} does not exist for pre-calculated data!!!"
                     )
                 if not os.path.exists(output_folder_path_reward):
                     os.makedirs(output_folder_path_reward)
@@ -2060,7 +2068,8 @@ class Environment(Environment):
                     f"--nx {reward_params['nx_Qs']} "
                     f"--nz {reward_params['nz_Qs']} "
                     f"--averaged_data_path {averaged_data_path} "
-                    f"--output_file {output_file_path}"
+                    f"--output_qratio_file {qratio_output_file_path} "
+                    f"--output_reward_file {reward_output_file_path} "
                 )
                 self.log(
                     logging.INFO,
