@@ -55,6 +55,12 @@ def load_data_for_timestep(directory: str, file_name: str) -> pd.DataFrame:
         }
     )
 
+    # Log NaN counts
+    nan_u_count = df["u"].isna().sum()
+    nan_v_count = df["v"].isna().sum()
+    logger.debug("%s: Number of NaNs in 'u' after loading: %d", file_name, nan_u_count)
+    logger.debug("%s: Number of NaNs in 'v' after loading: %d", file_name, nan_v_count)
+
     logger.info(f"Data from {file_name} loaded into DataFrame.")
     return df
 
