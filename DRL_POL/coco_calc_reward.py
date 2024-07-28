@@ -190,6 +190,7 @@ def detect_Q_events_single(
 
     # Create DataFrame with Q event boolean flag
     q_df = pd.DataFrame({"x": df["x"], "y": df["y"], "z": df["z"], "Q": q_events})
+    logger.debug("%s: number of Q events detected: %d", timestep, q_events.sum())
 
     logger.info("Q event detection complete.")
 

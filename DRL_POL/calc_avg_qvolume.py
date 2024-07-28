@@ -98,13 +98,28 @@ def calculate_avg_qevent_ratio(
 
     for file_name, timestep in timesteps:
         df = load_data_for_timestep(directory, file_name)
+        logger.debug(
+            "calculate_avg_qevent_ratio: Loaded data for timestep %s", timestep
+        )
+
         normalized_df = normalize_all_single((timestep, df), u_tau, delta_tau)[1]
+        logger.debug(
+            "calculate_avg_qevent_ratio: Normalized data for timestep %s", timestep
+        )
+
         processed_df = process_velocity_data_single(
             (timestep, normalized_df), averaged_data
         )[1]
+        logger.debug(
+            "calculate_avg_qevent_ratio: Processed data for timestep %s", timestep
+        )
+
         q_event_df = detect_Q_events_single((timestep, processed_df), averaged_data, H)[
             1
         ]
+        logger.debug(
+            "calculate_avg_qevent_ratio: Detected Q events for timestep %s", timestep
+        )
 
         # Calculate the global Q event volume ratio
         total_points = len(q_event_df)
