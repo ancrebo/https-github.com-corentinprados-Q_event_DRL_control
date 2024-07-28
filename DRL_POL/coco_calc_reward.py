@@ -156,9 +156,9 @@ def process_velocity_data_single(
     df["y"] = df["y"].round(precision)
     averaged_data["y"] = averaged_data["y"].round(precision)
 
-    # Convert 'y' values to numeric types to ensure consistency
-    df["y"] = pd.to_numeric(df["y"])
-    averaged_data["y"] = pd.to_numeric(averaged_data["y"])
+    # Convert 'y' values to float64 to ensure consistency
+    df["y"] = df["y"].astype('float64')
+    averaged_data["y"] = averaged_data["y"].astype('float64')
 
     # Check and log data types of 'y' columns
     logger.debug(
