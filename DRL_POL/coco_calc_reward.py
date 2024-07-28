@@ -146,8 +146,11 @@ def process_velocity_data_single(
     precision: int = 3
 
     # Ensure y values are rounded to the same precision in both DataFrames
-    df["y"] = np.round(df["y"], precision)
-    averaged_data["y"] = np.round(averaged_data["y"], precision)
+    # df["y"] = np.round(df["y"], precision)
+    # averaged_data["y"] = np.round(averaged_data["y"], precision)
+
+    df["y"] = df.round({"y": precision})
+    averaged_data["y"] = averaged_data.round({"y": precision})
 
     # Convert 'y' values to float64 to ensure consistency
     df["y"] = df["y"].astype("float64")
