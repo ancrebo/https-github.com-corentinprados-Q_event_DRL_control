@@ -184,6 +184,12 @@ def process_velocity_data_single(
     #     unique_y_averaged.head(20),
     # )
 
+    # print whether the unique y values are EXACTLY the same
+    logger.debug(
+        "Are the unique y values the same?\n\n%s!!!\n\n",
+        unique_y_main.equals(unique_y_averaged),
+    )
+
     # Select 5 rows with a specific y value before the merge
     sample_y_value = unique_y_main.index[5]  # Taking the first y value as sample
     df_sample_before_merge = df[df["y"] == sample_y_value].head(10)
