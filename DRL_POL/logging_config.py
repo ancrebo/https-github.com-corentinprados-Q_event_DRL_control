@@ -52,7 +52,7 @@ logging_config_dict: Dict[str, Dict[str, Any]] = {
     "coco_calc_reward": {
         "console_level": "DEBUG",
         "file_level": "DEBUG",
-        "override": True,
+        "override": False,
     },
     "cr": {
         "console_level": "WARNING",

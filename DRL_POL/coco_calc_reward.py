@@ -123,7 +123,7 @@ def normalize_all_single(
 def process_velocity_data_single(
     timestep_df: Tuple[float, pd.DataFrame],
     averaged_data: pd.DataFrame,
-    precision: int = 3,
+    tolerance: float = 1e-4,
 ) -> Tuple[float, pd.DataFrame]:
     """
     Processes a tuple containing CFD simulation data to calculate fluctuating components of velocity fields.
@@ -134,7 +134,7 @@ def process_velocity_data_single(
       and velocity components (u, v, w). (NORMALIZED!)
     - averaged_data (DataFrame): Contains averaged velocities ($\overline{U}(y)$, $\overline{V}(y)$, $\overline{W}(y)$)
       and rms of velocity fluctuations ($u'(y)$, $v'(y)$, $w'(y)$) as columns, indexed by the y-coordinate. (NORMALIZED!)
-    - precision (int): The number of decimal places to round the 'y' values to. Ensures they are recognized as equal!
+    - tolerance (float): The tolerance for matching 'y' values between the main and averaged data. ENSURES THEY ARE THE SAME!
 
     Returns:
     - processed_data (tuple): A tuple containing a timestep and a DataFrame with original and fluctuating
@@ -162,49 +162,10 @@ def process_velocity_data_single(
                 )
                 break
 
-    # Log unique 'y' values and their counts in the main DataFrame
-    unique_y_main = df["y"].value_counts().sort_index()
-    logger.debug(
-        "%s: Unique 'y' values in main DataFrame:\n %s\n",
-        timestep,
-        unique_y_main.head(20),
-    )
-
-    # Log unique 'y' values and their counts in the averaged data
-    unique_y_averaged = averaged_data["y"].value_counts().sort_index()
-    logger.debug(
-        "%s: Unique 'y' values in averaged data:\n %s\n",
-        timestep,
-        unique_y_averaged.head(20),
-    )
-
-    # Compare and log differences in 'y' values
-    y_in_main_not_in_averaged = set(unique_y_main.index) - set(unique_y_averaged.index)
-    y_in_averaged_not_in_main = set(unique_y_averaged.index) - set(unique_y_main.index)
-    logger.debug(
-        "Y values in main DataFrame not in averaged data: %s", y_in_main_not_in_averaged
-    )
-    logger.debug(
-        "Y values in averaged data not in main DataFrame: %s", y_in_averaged_not_in_main
-    )
-
-    # Select 5 rows with a specific y value before the merge
-    sample_y_value = unique_y_main.index[2]  # Taking the first y value as sample
-    df_sample_before_merge = df[df["y"] == sample_y_value].head(10)
-    logger.debug("Sample rows before merge:\n%s", df_sample_before_merge)
-
     # Process the dataset for detailed fluctuation analysis
     df_merged = pd.merge(df, averaged_data, on="y", how="left")
 
-    # Select the same 5 rows after the merge
-    df_sample_after_merge = df_merged[df_merged["y"] == sample_y_value].head(10)
-    logger.debug("Sample rows after merge:\n%s", df_sample_after_merge)
-
     df_processed = df.copy()
-
-    logger.debug(f"df_processed columns: {df_processed.columns.tolist()}")
-    logger.debug(f"df_processed index: {df_processed.index}")
-    logger.debug(f"df_processed y values: {df_processed['y'].values}")
 
     df_processed["U"] = df["u"]
     df_processed["V"] = df["v"]
@@ -212,10 +173,6 @@ def process_velocity_data_single(
     df_processed["u"] = df["u"] - df_merged["U_bar"]
     df_processed["v"] = df["v"] - df_merged["V_bar"]
     df_processed["w"] = df["w"] - df_merged["W_bar"]
-
-    logger.debug(f"NEW df_processed columns: {df_processed.columns.tolist()}")
-    logger.debug(f"NEW df_processed index: {df_processed.index}")
-    logger.debug(f"NEW df_processed y values: {df_processed['y'].values}")
 
     # Ensure no 'timestep' column remains in the output data
     df_processed.drop(columns="timestep", inplace=True, errors="ignore")

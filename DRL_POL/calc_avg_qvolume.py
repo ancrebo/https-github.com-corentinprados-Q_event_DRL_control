@@ -93,7 +93,11 @@ def create_timestep_file_map(pvd_path: str) -> Dict[str, float]:
 
 
 def calculate_avg_qevent_ratio(
-    directory: str, averaged_data_path: str, H: float, num_timesteps: int
+    directory: str,
+    averaged_data_path: str,
+    H: float,
+    num_timesteps: int,
+    tolerance: float = 1e-3,
 ) -> None:
     pvd_path = os.path.join(directory, "channel.pvd")
     timestep_file_map = create_timestep_file_map(pvd_path)
@@ -122,7 +126,7 @@ def calculate_avg_qevent_ratio(
         )
 
         processed_df = process_velocity_data_single(
-            (timestep, normalized_df), averaged_data
+            (timestep, normalized_df), averaged_data, tolerance
         )[1]
         logger.debug(
             "calculate_avg_qevent_ratio: Processed data for timestep %s", timestep
