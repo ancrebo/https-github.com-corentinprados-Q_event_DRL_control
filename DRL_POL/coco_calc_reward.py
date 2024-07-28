@@ -170,21 +170,31 @@ def process_velocity_data_single(
 
     # Log unique 'y' values and their counts in the main DataFrame
     unique_y_main = df["y"].value_counts().sort_index()
-    logger.debug(
-        "%s: Unique 'y' values in main DataFrame:\n %s\n",
-        timestep,
-        unique_y_main.head(20),
-    )
+    # logger.debug(
+    #     "%s: Unique 'y' values in main DataFrame:\n %s\n",
+    #     timestep,
+    #     unique_y_main.head(20),
+    # )
 
     # Log unique 'y' values and their counts in the averaged data
     unique_y_averaged = averaged_data["y"].value_counts().sort_index()
-    logger.debug(
-        "%s: Unique 'y' values in averaged data:\n %s\n",
-        timestep,
-        unique_y_averaged.head(20),
-    )
+    # logger.debug(
+    #     "%s: Unique 'y' values in averaged data:\n %s\n",
+    #     timestep,
+    #     unique_y_averaged.head(20),
+    # )
 
+    # Select 5 rows with a specific y value before the merge
+    sample_y_value = unique_y_main.index[0]  # Taking the first y value as sample
+    df_sample_before_merge = df[df["y"] == sample_y_value].head(10)
+    logger.debug("Sample rows before merge:\n%s", df_sample_before_merge)
+
+    # Process the dataset for detailed fluctuation analysis
     df_merged = pd.merge(df, averaged_data, on="y", how="left")
+
+    # Select the same 5 rows after the merge
+    df_sample_after_merge = df_merged[df_merged["y"] == sample_y_value].head(10)
+    logger.debug("Sample rows after merge:\n%s", df_sample_after_merge)
 
     # Log the result of the merge
     nan_U_bar = df_merged["U_bar"].isna().sum()
