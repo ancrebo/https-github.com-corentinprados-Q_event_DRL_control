@@ -39,6 +39,11 @@ logging_config_dict: Dict[str, Dict[str, Any]] = {
         "file_level": "DEBUG",
         "override": False,
     },
+    "calc_avg_qvolume": {
+        "console_level": "INFO",
+        "file_level": "DEBUG",
+        "override": True,
+    },
     "coco_calc_avg_vel": {
         "console_level": "DEBUG",
         "file_level": "DEBUG",
@@ -112,8 +117,12 @@ def configure_logger(module_name: str, default_level: str = "INFO") -> logging.L
         console_level = config["console_level"].upper()
         file_level = config["file_level"].upper()
     else:
+        config = None
         console_level = default_level.upper()
         file_level = default_level.upper()
+
+    if config is None:
+        raise ValueError(f"Module {module_name} not found in logging_config_dict")
 
     # Clear existing handlers if override is specified
     if config["override"]:

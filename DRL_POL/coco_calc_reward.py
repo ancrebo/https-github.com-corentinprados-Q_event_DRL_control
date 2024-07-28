@@ -15,7 +15,7 @@ from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
 # Set up logger
 logger = configure_logger("coco_calc_reward", default_level=DEFAULT_LOGGING_LEVEL)
 
-logger.info("coco_calc_reward.py: Logging level set to %s", logger.level)
+logger.info("coco_calc_reward.py: Logging level set to %s\n", logger.level)
 
 
 def load_data_and_convert_to_dataframe_single(
@@ -33,7 +33,7 @@ def load_data_and_convert_to_dataframe_single(
       * A timestep (float)
       * A DataFrame with columns for spatial coordinates (x, y, z) and velocity components (u, v, w)
     """
-    logger.info("Loading data from PVTU files...")
+    logger.debug("load_data_and_convert_to_dataframe: Loading data from PVTU files...")
     # Parse the PVD file to extract mappings of timesteps to their corresponding PVTU files
     pvd_path = os.path.join(directory, file_name)
     tree = ET.parse(pvd_path)
@@ -66,7 +66,11 @@ def load_data_and_convert_to_dataframe_single(
 
     data_frames: Tuple[float, pd.DataFrame] = (timestep, df)
 
-    logger.info(f"Data from {file} at timestep {timestep} loaded into DataFrame.")
+    logger.debug(
+        "load_data_and_convert_dataframe_single: Data from %s at timestep %s loaded into DataFrame.",
+        file,
+        timestep,
+    )
     return data_frames
 
 
@@ -87,7 +91,7 @@ def normalize_all_single(
     - normalized_data (tuple): A tuple containing the timestep and the updated DataFrame with normalized velocities and spatial coordinates.
     """
     timestep, df = timestep_df
-    logger.info("Normalizing data...")
+    logger.debug("normalize_all_single: Normalizing data...")
 
     # Copy the DataFrame to preserve original data
     df_copy = df.copy()
@@ -102,12 +106,28 @@ def normalize_all_single(
     df_copy["y"] = df_copy["y"] / delta_tau
     df_copy["z"] = df_copy["z"] / delta_tau
 
-    logger.info("Data normalization complete.")
+    # Log NaN counts
+    nan_u_count = df_copy["u"].isna().sum()
+    nan_v_count = df_copy["v"].isna().sum()
+    logger.debug(
+        "normalize_all_single: %s: Number of NaNs in 'u' after normalization: %d",
+        timestep,
+        nan_u_count,
+    )
+    logger.debug(
+        "normalize_all_single: %s: Number of NaNs in 'v' after normalization: %d",
+        timestep,
+        nan_v_count,
+    )
+
+    logger.debug("noramlize_all_single: Data normalization complete!")
     return timestep, df_copy
 
 
 def process_velocity_data_single(
-    timestep_df: Tuple[float, pd.DataFrame], averaged_data: pd.DataFrame
+    timestep_df: Tuple[float, pd.DataFrame],
+    averaged_data: pd.DataFrame,
+    tolerance: float = 1e-4,
 ) -> Tuple[float, pd.DataFrame]:
     """
     Processes a tuple containing CFD simulation data to calculate fluctuating components of velocity fields.
@@ -118,26 +138,43 @@ def process_velocity_data_single(
       and velocity components (u, v, w). (NORMALIZED!)
     - averaged_data (DataFrame): Contains averaged velocities ($\overline{U}(y)$, $\overline{V}(y)$, $\overline{W}(y)$)
       and rms of velocity fluctuations ($u'(y)$, $v'(y)$, $w'(y)$) as columns, indexed by the y-coordinate. (NORMALIZED!)
+    - tolerance (float): The tolerance for matching 'y' values between the main and averaged data. ENSURES THEY ARE THE SAME!
 
     Returns:
     - processed_data (tuple): A tuple containing a timestep and a DataFrame with original and fluctuating
       velocity components (U, V, W, u, v, w).
     """
     timestep, df = timestep_df
-    logger.info("Processing velocity data using loaded averaged data...")
+    logger.debug(
+        "process_velocity_data_single: Processing velocity data using loaded averaged data..."
+    )
+
+    precision: int = 3
+    tolerance: float = 1e-3
+
+    # Adjust 'y' values in averaged data to match main data if within tolerance
+    main_y_unique = df["y"].unique()
+    averaged_y_unique = averaged_data["y"].unique()
+
+    for main_y in main_y_unique:
+        for i, avg_y in enumerate(averaged_y_unique):
+            if np.abs(main_y - avg_y) <= tolerance:
+                logger.debug(
+                    "process_velocity_data_single: Overwriting averaged y value %s with main y value %s",
+                    avg_y,
+                    main_y,
+                )
+                averaged_data.loc[averaged_data["y"] == avg_y, "y"] = main_y
+                averaged_y_unique[i] = (
+                    main_y  # Update the unique values list to reflect the change
+                )
+                break
 
     # Process the dataset for detailed fluctuation analysis
-    # y_means = averaged_data.loc[df["y"]]
-    # logger.debug(f"y_means: {y_means}")
-    # logger.debug(f"y_means columns: {y_means.columns.tolist()}")
-    # logger.debug(f"y_means index: {y_means.index}")
-
     df_merged = pd.merge(df, averaged_data, on="y", how="left")
 
     df_processed = df.copy()
-    logger.debug(f"df_processed columns: {df_processed.columns.tolist()}")
-    logger.debug(f"df_processed index: {df_processed.index}")
-    logger.debug(f"df_processed y values: {df_processed['y'].values}")
+
     df_processed["U"] = df["u"]
     df_processed["V"] = df["v"]
     df_processed["W"] = df["w"]
@@ -148,7 +185,33 @@ def process_velocity_data_single(
     # Ensure no 'timestep' column remains in the output data
     df_processed.drop(columns="timestep", inplace=True, errors="ignore")
 
-    logger.info("Velocity data processing complete.")
+    # Log NaN counts
+    nan_u_count = df_processed["u"].isna().sum()
+    nan_v_count = df_processed["v"].isna().sum()
+    nan_U_count = df_processed["U"].isna().sum()
+    nan_V_count = df_processed["V"].isna().sum()
+    logger.debug(
+        "process_velocity_data_single: %s: Number of NaNs in 'u' after processing: %d",
+        timestep,
+        nan_u_count,
+    )
+    logger.debug(
+        "process_velocity_data_single: %s: Number of NaNs in 'v' after processing: %d",
+        timestep,
+        nan_v_count,
+    )
+    logger.debug(
+        "process_velocity_data_single: %s: Number of NaNs in 'U' after processing: %d",
+        timestep,
+        nan_U_count,
+    )
+    logger.debug(
+        "process_velocity_data_single: %s: Number of NaNs in 'V' after processing: %d",
+        timestep,
+        nan_V_count,
+    )
+
+    logger.debug("process_velocity_data_single: Velocity data processing complete!")
 
     return timestep, df_processed
 
@@ -162,7 +225,7 @@ def detect_Q_events_single(
     Parameters:
     - timestep_df (tuple): Data processed by `process_velocity_data_single`, containing:
       * A timestep (float)
-      * A DataFrame with spatial coordinates (x, y, z) and velocity components U, V, W, u, v, w (NORMALIZED!)
+      * A DataFrame with spatial coordinates (x, y, z) and velocity components u, v, w, U, V, W (NORMALIZED!)
     - averaged_data (DataFrame): Data containing the rms values for velocity components u and v for each y coordinate. ** u' and v' **
     - H (float): The sensitivity threshold for identifying Q events.
 
@@ -171,7 +234,7 @@ def detect_Q_events_single(
       * A timestep (float)
       * A DataFrame with columns ['x', 'y', 'z', 'Q'], where 'Q' is a boolean indicating whether a Q event is detected.
     """
-    logger.info("Detecting Q events...")
+    logger.debug("detect_Q_events_single: Detecting Q events...")
     timestep, df = timestep_df
 
     # Fetch the rms values for 'u' and 'v' based on y-coordinate
@@ -190,8 +253,13 @@ def detect_Q_events_single(
 
     # Create DataFrame with Q event boolean flag
     q_df = pd.DataFrame({"x": df["x"], "y": df["y"], "z": df["z"], "Q": q_events})
+    logger.debug(
+        "detect_Q_events_single: %s: number of Q events detected: %d",
+        timestep,
+        q_events.sum(),
+    )
 
-    logger.info("Q event detection complete.")
+    logger.debug("detect_Q_events_single: Q event detection complete!")
 
     return timestep, q_df
 
@@ -212,7 +280,7 @@ def calculate_local_Q_ratios(
     Returns:
     - pd.DataFrame: DataFrame with columns ['x_index', 'z_index', 'Q_event_count', 'total_points', 'Q_ratio'].
     """
-    logger.info("Calculating local Q ratios...")
+    logger.debug("calculate_local_Q_ratios: Calculating local Q ratios...")
     step_x = Lx_norm / nx
     step_z = Lz_norm / nz
     results = []
@@ -246,26 +314,50 @@ def calculate_local_Q_ratios(
 
     result_df = pd.DataFrame(results)
 
-    logger.info("Local Q ratio calculation complete.")
+    logger.debug("calculate_local_Q_ratios: Local Q ratio calculation complete!")
 
     return result_df
 
 
-def calculate_reward(df: pd.DataFrame, nx: int, nz: int) -> float:
+def calculate_reward(df: pd.DataFrame, avg_qratio: float, nx: int, nz: int) -> float:
     """
     Calculate the reward based on the Q ratio in the local volume.
 
+    The reward is scaled to range from -1 to 1, where a lower local Q ratio compared
+    to the global average results in a positive reward and a higher local Q ratio
+    results in a negative reward. The goal is to minimize the Q ratio.
+
     Parameters:
-    - df (pd.DataFrame): DataFrame with columns ['x_index', 'z_index', 'Q_ratio'].
+    ----------
+    df : pd.DataFrame
+        DataFrame containing the columns ['x_index', 'z_index', 'Q_ratio'] which
+        represents the Q ratios at different grid points.
+    avg_qratio : float
+        The average global Q event volume ratio used for scaling the reward.
+    nx : int
+        The x-index of the local volume.
+    nz : int
+        The z-index of the local volume.
 
     Returns:
-    - float: The calculated reward value.
+    -------
+    float
+        The calculated reward value. A value of 1 indicates no Q events in the
+        local volume, a value of 0 indicates the local Q ratio equals the global
+        average, and negative values indicate the local Q ratio exceeds the global average.
     """
-    logger.debug(f"Calculating reward for a environment [{nx}, {nz}] ...")
+    logger.debug(
+        "calculate_reward: Calculating reward for a environment [%d, %d] ...", nx, nz
+    )
 
     q_ratio = df[(df["x_index"] == nx) & (df["z_index"] == nz)]["Q_ratio"].values[0]
-    reward = 1 - q_ratio
-    logger.debug("Reward calculation complete.")
+    # reward = 1 - q_ratio
+    reward = 1 - (q_ratio / avg_qratio)
+
+    # clip the reward to [-1, 1] # TODO: Is this necessary??? - Pieter
+    reward = np.clip(reward, -1, 1)
+
+    logger.debug("calculate_reward: Reward calculation complete!")
     return reward
 
 
@@ -277,54 +369,65 @@ def calculate_reward_full(
     nx: int,
     nz: int,
     averaged_data_path: str,
-    output_file: str,
+    output_qratio_file: str,
+    output_reward_file: str,
 ) -> None:
     """
     Calculate the rewards based on Q events for a single timestep, saving results to a CSV file.
 
     Parameters:
-    - directory (str): Directory containing the PVD and PVTU files.
-    - Lx (float): Length in the x direction.
-    - Lz (float): Length in the z direction.
-    - H (float): Sensitivity threshold for identifying Q events.
-    - nx (int): Number of sections in the x direction.
-    - nz (int): Number of sections in the z direction.
-    - averaged_data_path (str): Path to the CSV file with averaged data.
-    - output_file (str): Path to the output CSV file for rewards.
+    ----------
+    directory : str
+        Directory containing the PVD and PVTU files.
+    Lx : float
+        Length in the x direction.
+    Lz : float
+        Length in the z direction.
+    H : float
+        Sensitivity threshold for identifying Q events.
+    nx : int
+        Number of sections in the x direction.
+    nz : int
+        Number of sections in the z direction.
+    averaged_data_path : str
+        Path to the directory with averaged data CSV files.
+    output_qratio_file : str
+        Path to the output CSV file for saving calculated local Q event volume ratios.
+    output_reward_file : str
+        Path to the output CSV file for saving calculated rewards.
     """
-    logging.info("Starting to calculate rewards based on Q events...")
+    logging.info(
+        "calculate_reward_full: Starting to calculate rewards based on Q events..."
+    )
 
     # Load and process the data
     filename = "channel.pvd"
     data = load_data_and_convert_to_dataframe_single(directory, filename)
 
+    # Load pre-calculated values
     precalc_value_filename = "calculated_values.csv"
     precalc_value_filepath = os.path.join(averaged_data_path, precalc_value_filename)
     precalc_values = pd.read_csv(precalc_value_filepath)
+    u_tau = precalc_values.iloc[0, 1]
+    delta_tau = precalc_values.iloc[1, 1]
 
-    # List all precalculated values
-    logger.debug(f"Pre-calculated values: {precalc_values}")
-    # logger.debug(
-    #     f"u_tau: {precalc_values['u_tau'].values[0]}, delta_tau: {precalc_values['delta_tau'].values[0]}"
-    # )
-
-    # List all pre-calculated values
-    logger.debug(f"Pre-calculated values DataFrame:\n{precalc_values}")
-    logger.debug(
-        f"Columns in pre-calculated values DataFrame: {precalc_values.columns.tolist()}"
+    # Load global Q event average ratio and standard deviation
+    q_event_summary_filename = "q_event_ratio_summary.csv"
+    q_event_summary_filepath = os.path.join(
+        averaged_data_path, q_event_summary_filename
     )
+    q_event_summary = pd.read_csv(q_event_summary_filepath)
+    avg_qratio = q_event_summary["average_q_event_ratio"].values[0]
+    std_dev_qratio = q_event_summary["std_dev_q_event_ratio"].values[0]
 
-    # Print first few rows of the pre-calculated values DataFrame
+    logger.debug("calculate_reward_full: Pre-calculated values: \n%s", precalc_values)
     logger.debug(
-        f"First few rows of pre-calculated values DataFrame:\n{precalc_values.head()}"
+        "calculate_reward_full: Loaded Global Q event average ratio: %f", avg_qratio
     )
-
-    u_tau = precalc_values.iloc[
-        0, 1
-    ]  # HARDCODED TO u_tau location in file saved by `coco_calc_avg_vel.py` - Pieter
-    delta_tau = precalc_values.iloc[
-        1, 1
-    ]  # HARDCODED TO delta_tau location in file saved by `coco_calc_avg_vel.py` - Pieter
+    logger.debug(
+        "calculate_reward_full: Loaded Global Q event standard deviation: %f",
+        std_dev_qratio,
+    )
 
     data_normalized = normalize_all_single(data, u_tau, delta_tau)
 
@@ -344,21 +447,35 @@ def calculate_reward_full(
 
     result_df = calculate_local_Q_ratios(df, nx, nz, Lx_norm, Lz_norm)
     result_df["timestep"] = timestep
+
+    # Add ENV_ID column to result_df
+    result_df["ENV_ID"] = result_df.apply(
+        lambda row: int(agent_index_2d_to_1d(row["x_index"], row["z_index"], nz)),
+        axis=1,
+    )
+
     all_results.append(result_df)
 
     final_result_df = pd.concat(all_results, ignore_index=True)
 
-    rewards = []
-    for i in range(nx):
-        for j in range(nz):
-            reward = calculate_reward(final_result_df, i, j)
-            env_id = agent_index_2d_to_1d(i, j, nz)  # Converted 2D index to 1D
-            rewards.append({"ENV_ID": env_id, "reward": reward})
+    # Save the local Q event ratios to a CSV file
+    final_result_df.to_csv(output_qratio_file, index=False)
+    logger.info(
+        "calculate_reward_full: Local Q event ratios saved to %s!", output_qratio_file
+    )
 
-    reward_df = pd.DataFrame(rewards)
+    # Calculate and save rewards
+    final_result_df["reward"] = final_result_df.apply(
+        lambda row: calculate_reward(
+            final_result_df, avg_qratio, row["x_index"], row["z_index"]
+        ),
+        axis=1,
+    )
 
-    reward_df.to_csv(output_file, index=False)
-    logger.info(f"Rewards saved to {output_file}!")
+    reward_df = final_result_df[["ENV_ID", "reward"]]
+
+    reward_df.to_csv(output_reward_file, index=False)
+    logger.info("calculate_reward_full: Rewards saved to %s!", output_reward_file)
 
     # Clean up
     del (
@@ -368,10 +485,9 @@ def calculate_reward_full(
         processed_data,
         Q_event_frames,
         final_result_df,
-        rewards,
     )
     gc.collect()
-    logger.debug("Memory cleaned up.")
+    logger.debug("calculate_reward_full: Memory cleaned up.")
 
 
 """
@@ -419,22 +535,19 @@ if __name__ == "__main__":
         help="Path to DIRECTORY containing csv file with averaged data AND csv file with pre-calculated values for u_tau and delta_tau.",
     )
     parser.add_argument(
-        "--output_file",
+        "--output_qratio_file",
         type=str,
         required=True,
-        help="Path to the output CSV file for rewards.",
+        help="Path to the output CSV file for saving calculated local Q event volume ratio.",
     )
     parser.add_argument(
-        "--loglvl",
+        "--output_reward_file",
         type=str,
-        default="INFO",
-        help="Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL).",
+        required=True,
+        help="Path to the output CSV file for saving calculated rewards.",
     )
 
     args = parser.parse_args()
-
-    # Set logging level
-    logger.setLevel(args.loglvl)
 
     calculate_reward_full(
         args.directory,
@@ -444,5 +557,6 @@ if __name__ == "__main__":
         args.nx,
         args.nz,
         args.averaged_data_path,
-        args.output_file,
+        args.output_qratio_file,
+        args.output_reward_file,
     )
