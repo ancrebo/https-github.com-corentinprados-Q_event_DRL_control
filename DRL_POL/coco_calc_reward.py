@@ -154,11 +154,17 @@ def process_velocity_data_single(
         averaged_data["y"].unique(),
     )
 
-    # Apply rounding to 'y' values using pandas.DataFrame.round
-    df_altered_copy = df.copy()
-    df_altered_copy["y"] = df["y"].round(precision)
-    averaged_data_copy = averaged_data.copy()
-    averaged_data_copy["y"] = averaged_data["y"].round(precision)
+    # iterate through each row of main dataframe and manually assign the rounded value to the 'y' column
+    for index, row in df.iterrows():
+        df.at[index, "y"] = np.round(row["y"], precision)
+    for index, row in averaged_data.iterrows():
+        averaged_data.at[index, "y"] = np.round(row["y"], precision)
+
+    # # Apply rounding to 'y' values using pandas.DataFrame.round
+    # df_altered_copy = df.copy()
+    # df_altered_copy["y"] = df["y"].round(precision)
+    # averaged_data_copy = averaged_data.copy()
+    # averaged_data_copy["y"] = averaged_data["y"].round(precision)
 
     # Print 'y' values after rounding
     logger.debug(
