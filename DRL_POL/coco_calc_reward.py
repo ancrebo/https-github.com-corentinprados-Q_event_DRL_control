@@ -155,8 +155,10 @@ def process_velocity_data_single(
     )
 
     # Apply rounding to 'y' values using pandas.DataFrame.round
-    df["y"] = df["y"].round(precision)
-    averaged_data["y"] = averaged_data["y"].round(precision)
+    df_altered_copy = df.copy()
+    df_altered_copy["y"] = df["y"].round(precision)
+    averaged_data_copy = averaged_data.copy()
+    averaged_data_copy["y"] = averaged_data["y"].round(precision)
 
     # Print 'y' values after rounding
     logger.debug(
@@ -165,6 +167,16 @@ def process_velocity_data_single(
     logger.debug(
         "Rounded 'y' values in averaged data after rounding:\n%s",
         averaged_data["y"].unique(),
+    )
+
+    # Check if altered 'y' values are equal to the original 'y' values
+    logger.debug(
+        "Are 'y' values in main DataFrame equal to altered 'y' values? %s",
+        df["y"].equals(df_altered_copy["y"]),
+    )
+    logger.debug(
+        "Are 'y' values in averaged data equal to altered 'y' values? %s",
+        averaged_data["y"].equals(averaged_data_copy["y"]),
     )
 
     # Ensure y values are rounded to the same precision in both DataFrames
