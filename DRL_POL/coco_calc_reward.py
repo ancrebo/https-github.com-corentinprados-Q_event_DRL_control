@@ -171,11 +171,12 @@ def process_velocity_data_single(
 
     # Print 'y' values after rounding
     logger.debug(
-        "Rounded 'y' values in main DataFrame after rounding:\n%s", df["y"].unique()
+        "Rounded 'y' values in main DataFrame after rounding:\n%s",
+        sorted(df["y"].unique()),
     )
     logger.debug(
         "Rounded 'y' values in averaged data after rounding:\n%s",
-        averaged_data["y"].unique(),
+        sorted(averaged_data["y"].unique()),
     )
 
     # Check if altered 'y' values are equal to the original 'y' values
