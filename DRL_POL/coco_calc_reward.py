@@ -145,12 +145,34 @@ def process_velocity_data_single(
 
     precision: int = 3
 
+    # Print 'y' values before rounding
+    logger.debug(
+        "Original 'y' values in main DataFrame before rounding:\n%s", df["y"].unique()
+    )
+    logger.debug(
+        "Original 'y' values in averaged data before rounding:\n%s",
+        averaged_data["y"].unique(),
+    )
+
+    # Apply rounding to 'y' values using pandas.DataFrame.round
+    df["y"] = df["y"].round(precision)
+    averaged_data["y"] = averaged_data["y"].round(precision)
+
+    # Print 'y' values after rounding
+    logger.debug(
+        "Rounded 'y' values in main DataFrame after rounding:\n%s", df["y"].unique()
+    )
+    logger.debug(
+        "Rounded 'y' values in averaged data after rounding:\n%s",
+        averaged_data["y"].unique(),
+    )
+
     # Ensure y values are rounded to the same precision in both DataFrames
     # df["y"] = np.round(df["y"], precision)
     # averaged_data["y"] = np.round(averaged_data["y"], precision)
-
-    df["y"] = df.round({"y": precision})
-    averaged_data["y"] = averaged_data.round({"y": precision})
+    #
+    # df["y"] = df.round({"y": precision})
+    # averaged_data["y"] = averaged_data.round({"y": precision})
 
     # Convert 'y' values to float64 to ensure consistency
     df["y"] = df["y"].astype("float64")
