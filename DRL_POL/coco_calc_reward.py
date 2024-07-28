@@ -450,7 +450,8 @@ def calculate_reward_full(
 
     # Add ENV_ID column to result_df
     result_df["ENV_ID"] = result_df.apply(
-        lambda row: agent_index_2d_to_1d(row["x_index"], row["z_index"], nz), axis=1
+        lambda row: int(agent_index_2d_to_1d(row["x_index"], row["z_index"], nz)),
+        axis=1,
     )
 
     all_results.append(result_df)
