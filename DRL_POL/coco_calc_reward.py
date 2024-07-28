@@ -143,6 +143,15 @@ def process_velocity_data_single(
     timestep, df = timestep_df
     logger.info("Processing velocity data using loaded averaged data...")
 
+    # Check and log data types of 'y' columns
+    logger.debug(
+        "Data type of 'y' in main DataFrame BEFORE converting: %s", df["y"].dtype
+    )
+    logger.debug(
+        "Data type of 'y' in averaged data BEFORE converting: %s",
+        averaged_data["y"].dtype,
+    )
+
     # Ensure y values are rounded to the same precision in both DataFrames
     df["y"] = df["y"].round(precision)
     averaged_data["y"] = averaged_data["y"].round(precision)
@@ -152,8 +161,13 @@ def process_velocity_data_single(
     averaged_data["y"] = pd.to_numeric(averaged_data["y"])
 
     # Check and log data types of 'y' columns
-    logger.debug("Data type of 'y' in main DataFrame: %s", df["y"].dtype)
-    logger.debug("Data type of 'y' in averaged data: %s", averaged_data["y"].dtype)
+    logger.debug(
+        "Data type of 'y' in main DataFrame AFTER converting: %s", df["y"].dtype
+    )
+    logger.debug(
+        "Data type of 'y' in averaged data AFTER converting: %s",
+        averaged_data["y"].dtype,
+    )
 
     # Check for NaN values in the initial dataframe
     nan_u_initial = df["u"].isna().sum()
