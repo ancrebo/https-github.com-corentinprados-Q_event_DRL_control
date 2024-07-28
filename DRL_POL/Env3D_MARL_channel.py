@@ -75,14 +75,14 @@ else:
     )
 from alya import (
     write_case_file,
-    write_witness_file,
     write_physical_properties,
     write_time_interval,
     write_run_type,
     detect_last_timeinterval,
 )
+
 from extract_forces import compute_avg_lift_drag
-from witness import read_last_wit
+from witness import read_last_wit, write_witness_file
 from cr import cr_start, cr_stop
 
 # from wrapper3D        import Wrapper

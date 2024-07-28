@@ -21,7 +21,7 @@ logger.info("%s.py: Logging level set to %s\n", __name__, logger.level)
 
 
 # Function to build and return the jets
-# See `jets_definition` in `parameters.py` for the use of this function
+# See jets_definition in parameters.py for the use of this function
 def build_jets(
     jet_class: Type[Any],
     jets_definition: Dict[str, Dict[str, Any]],
@@ -33,14 +33,16 @@ def build_jets(
     For that one has to give the kind of jet class (directly the class object)
     as well as the jet names and jet geometric parameters.
     """
-    logger.info("`build_jets`: Initializing jets of class %s...", jet_class.__name__)
+    logger.info("build_jets: Initializing jets of class %s...\n", jet_class.__name__)
     names = list(jets_definition.keys())
     # Build jets dictionary
     jets = {}
     for name in names:
         jets[name] = jet_class(name, jets_definition[name], T_smoo=delta_t_smooth)
     logger.info(
-        "`build_jets`: %d %s class instances created.\n", len(names), jet_class.__name__
+        "build_jets: %d %s class instance(s) created.\n",
+        len(names),
+        jet_class.__name__,
     )
     return jets
 
@@ -62,7 +64,7 @@ def Q_smooth_linear(
         Q(t) = (Qn - Qs)*(t - ts)/Tsmooth + Qs
     """
     logger.debug(
-        "`Q_smooth_linear`: Creating linear smoothing function over time interval [%f, %f]",
+        "Q_smooth_linear: Creating linear smoothing function over time interval [%f, %f]",
         timestart,
         timestart + Tsmooth,
     )
@@ -85,7 +87,7 @@ def Q_smooth_exp(ts: float, Tsmooth: float) -> str:
 
     """
     logger.debug(
-        "`Q_smooth_exp`: Creating exponential smoothing function over time interval [%f, %f]",
+        "Q_smooth_exp: Creating exponential smoothing function over time interval [%f, %f]",
         ts,
         ts + Tsmooth,
     )
@@ -98,7 +100,7 @@ def Q_smooth_exp(ts: float, Tsmooth: float) -> str:
     h = f"{f1}/({f1}+{f2})"
 
     # return '((%f) + ((%s)*(%f)))' % (Q1,h,Q2-Q1)
-    logger.debug("`Q_smooth_exp`: Exponential smoothing function: %s", h)
+    logger.debug("Q_smooth_exp: Exponential smoothing function: %s", h)
     return h
 
 
@@ -108,7 +110,7 @@ def heav_func(position: float, delta: float) -> str:
     takes de position and activates the Q inside range [position-delta,position+delta]
     """
     logger.debug(
-        "`heav_func`: Creating heaviside function for position %f and delta %f",
+        "heav_func: Creating heaviside function for position %f and delta %f",
         position,
         delta,
     )
@@ -123,7 +125,7 @@ def heav_func_channel(
     takes the x and z positions and activates the Q inside range [x-delta,x+delta],[z-delta,z+delta] -Chriss
     """
     logger.debug(
-        "`heav_func_channel`: Creating heaviside function for position_x %f, delta_x %f, position_z %f, delta_z %f",
+        "heav_func_channel: Creating heaviside function for position_x %f, delta_x %f, position_z %f, delta_z %f",
         position_x,
         delta_x,
         position_z,
@@ -171,7 +173,7 @@ class Jet(ABC):
         if Q_pre is None:
             Q_pre = [0.0]
 
-        logger.debug("`Jet`: Base class super init of jet %s...", name)
+        logger.debug("Jet: Base class super init of jet %s...", name)
 
         # Basic jet variables
         self.name: str = name
@@ -204,7 +206,7 @@ class Jet(ABC):
         Replaces the jets path file for a new one, generic.
         The name of the file must be the same of that of the jet.
         """
-        logger.info("`Jet`: Updating jet file %s...", filepath)
+        logger.info("Jet: Updating jet file %s...", filepath)
         functions = (
             [self.Vx, self.Vy] if self.dimension == 2 else [self.Vx, self.Vy, self.Vz]
         )
@@ -277,7 +279,7 @@ class JetCylinder(Jet):
         """
         Initialize the JetCylinder class.
         """
-        logger.info("`JetCylinder.init`: Initializing jet %s...", name)
+        logger.info("JetCylinder.init: Initializing jet %s...", name)
 
         super().__init__(
             name, params, Q_pre, Q_new, time_start, dimension, T_smoo, smooth_func
@@ -287,7 +289,7 @@ class JetCylinder(Jet):
             delta_Q_z,
         )
 
-        logger.info("`JetCylinder.init`: Jet %s initialized.", name)
+        logger.info("JetCylinder.init: Jet %s initialized.", name)
         self.update(
             self.Q_pre,
             self.Q_new,
@@ -296,14 +298,14 @@ class JetCylinder(Jet):
             Qs_position_z=self.Qs_position_z,
             delta_Q_z=self.delta_Q_z,
         )
-        logger.debug("`JetCylinder.init`: Jet %s intial update complete.\n", name)
+        logger.debug("JetCylinder.init: Jet %s intial update complete.\n", name)
 
     def set_geometry(self, params: Dict[str, Any]) -> None:
         """
         Specialized method that sets up the geometry of the jet
         """
         logger.debug(
-            "`JetCylinder.set_geometry`: Importing geometry params for jet %s ...",
+            "JetCylinder.set_geometry: Importing geometry params for jet %s ...",
             self.name,
         )
         from parameters import (
@@ -313,7 +315,7 @@ class JetCylinder(Jet):
         )
 
         logger.debug(
-            "`JetCylinder.set_geometry`: Setting up jet geometry for jet %s ...",
+            "JetCylinder.set_geometry: Setting up jet geometry for jet %s ...",
             self.name,
         )
         # Sanity check
@@ -333,7 +335,7 @@ class JetCylinder(Jet):
         self.Qs_position_z = Qs_position_z
         self.delta_Q_z = delta_Q_z
         logger.debug(
-            "`JetCylinder.set_geometry`: Jet geometry set up for jet %s.", self.name
+            "JetCylinder.set_geometry: Jet geometry set up for jet %s.", self.name
         )
 
     def update(
@@ -350,7 +352,7 @@ class JetCylinder(Jet):
         Calls the specialized method smoothfunc to set up the jet geometry
         per each of the child classes.
         """
-        logger.info("`JetCylinder.update`: Updating jet %s...", self.name)
+        logger.info("JetCylinder.update: Updating jet %s...", self.name)
 
         Qs_position_z: List[float] = kwargs.get("Qs_position_z")
         delta_Q_z: float = kwargs.get("delta_Q_z")
@@ -375,7 +377,7 @@ class JetCylinder(Jet):
         self.delta_Q_z: float = (
             delta_Q_z  # Updating delta just in case (could be removed, already assigned during init) - Pieter
         )
-        logger.debug("`JetCylinder.update`: creating new smoothing functions...")
+        logger.debug("JetCylinder.update: creating new smoothing functions...")
         # Call the specialized method that creates a smoothing function for the current time
         smooth_fun: str = self.create_smooth_funcs(
             self.Q_new,
@@ -386,7 +388,7 @@ class JetCylinder(Jet):
             Qs_position_z=self.Qs_position_z,
             delta_Q_z=self.delta_Q_z,
         )
-        logger.debug("`JetCylinder.update`: assigning new velocity functions...")
+        logger.debug("JetCylinder.update: assigning new velocity functions...")
         # Create the velocities (function?) using the smoothing functions,
         if self.dimension == 2:
             # For 2D jets set Vx and Vy
@@ -397,7 +399,7 @@ class JetCylinder(Jet):
             self.Vx = f"{smooth_fun}*cos({self.theta})"
             self.Vy = f"{smooth_fun}*abs(sin({self.theta}))"  # TODO: temporal fix for component y (not opposite? check update_jet)
             self.Vz = "0"
-        logger.info("`JetCylinder.update`: Jet %s updated.\n", self.name)
+        logger.info("JetCylinder.update: Jet %s updated.\n", self.name)
 
     def create_smooth_funcs(
         self,
@@ -412,7 +414,7 @@ class JetCylinder(Jet):
         """
         Specialized method that creates the smooth functions for cylinder cases
         """
-        logger.debug("`JetCylinder.create_smooth_funcs`: Creating smooth functions...")
+        logger.debug("JetCylinder.create_smooth_funcs: Creating smooth functions...")
         Qs_position_z: List[float] = kwargs.get("Qs_position_z")
         delta_Q_z: float = kwargs.get("delta_Q_z")
 
@@ -436,7 +438,7 @@ class JetCylinder(Jet):
         # print(f"JetCylinder: create_smooth_funcs: self.smooth_func: {self.smooth_func}\n")
         if self.smooth_func == "EXPONENTIAL":
             logger.debug(
-                "`JetCylinder.create_smooth_funcs`: Exponential smoothing selected..."
+                "JetCylinder.create_smooth_funcs: Exponential smoothing selected..."
             )
             ## Q_pre and Q_new --> list! with nz_Qs dimensions
             string_h = Q_smooth_exp(time_start, T_smoo)
@@ -454,13 +456,13 @@ class JetCylinder(Jet):
 
         elif self.smooth_func == "LINEAR":  # Same as "" currently
             logger.debug(
-                "`JetCylinder.create_smooth_funcs`: Linear smoothing selected..."
+                "JetCylinder.create_smooth_funcs: Linear smoothing selected..."
             )
             string_Q = Q_smooth_linear(Q_new[0], Q_pre[0], time_start, T_smoo)
 
         elif self.smooth_func == "":
             logger.debug(
-                "`JetCylinder.create_smooth_funcs`: No smoothing selected, defaulting to Linear..."
+                "JetCylinder.create_smooth_funcs: No smoothing selected, defaulting to Linear..."
             )
             string_Q = Q_smooth_linear(Q_new[0], Q_pre[0], time_start, T_smoo)
 
@@ -472,12 +474,12 @@ class JetCylinder(Jet):
         if self.short_spacetime_func == True:
             # just with Qnorm*Qi -- no projection or smoothing in time/space
             logger.debug(
-                "`JetCylinder.create_smooth_funcs`: Short spacetime function option selected..."
+                "JetCylinder.create_smooth_funcs: Short spacetime function option selected..."
             )
             return f"({scale:.1f})({string_all_Q_new})"
         else:
             logger.debug(
-                "`JetCylinder.create_smooth_funcs`: Long spacetime function option selected..."
+                "JetCylinder.create_smooth_funcs: Long spacetime function option selected..."
             )  # NEED BETTER logger.debug message - Pieter
             string_C = f"cos({np.pi:.3f}/{w:.3f}*({self.theta}-({self.theta0:.3f})))"
             return f"({scale:.1f})*({string_Q})*({string_C})"
@@ -487,13 +489,13 @@ class JetCylinder(Jet):
         """
         Normalize angle between [-pi,pi]
         """
-        logger.debug("`JetCylinder.normalize_angle`: Normalizing angle %f...", angle)
+        logger.debug("JetCylinder.normalize_angle: Normalizing angle %f...", angle)
         # TODO: check this... not very clear to me
         if angle > np.pi:
             angle -= 2 * np.pi
         if angle < 2.0 * np.pi:
             angle = -((2.0 * np.pi) - angle)
-        logger.debug("`JetCylinder.normalize_angle`: Normalized angle: %f", angle)
+        logger.debug("JetCylinder.normalize_angle: Normalized angle: %f", angle)
         return angle
 
     @staticmethod
@@ -501,11 +503,11 @@ class JetCylinder(Jet):
         """
         TODO: documentation!
         """
-        logger.debug("`JetCylinder.get_theta`: Getting theta...")
+        logger.debug("JetCylinder.get_theta: Getting theta...")
         X: str = f"(x-{cylinder_coordinates[0]})"
         Y: str = f"(y-{cylinder_coordinates[1]})"
         result: str = atan2_str(X, Y)
-        logger.debug("`JetCylinder.get_theta`: Theta string: %s", result)
+        logger.debug("JetCylinder.get_theta: Theta string: %s", result)
         return result
 
 
@@ -634,13 +636,13 @@ class JetChannel(Jet):
         """
         Initialize the JetChannel class.
         """
-        logger.info("`JetChannel.init`: Initializing jet %s...", name)
+        logger.info("JetChannel.init: Initializing jet %s...", name)
 
         super().__init__(
             name, params, Q_pre, Q_new, time_start, dimension, T_smoo, smooth_func
         )
 
-        logger.info("`JetChannel.init`: Jet %s initialized.", name)
+        logger.info("JetChannel.init: Jet %s initialized.\n", name)
         self.update(
             self.Q_pre,
             self.Q_new,
@@ -651,14 +653,14 @@ class JetChannel(Jet):
             Qs_position_z=self.Qs_position_z,
             delta_Q_z=self.delta_Q_z,
         )
-        logger.debug("`JetChannel.init`: Jet %s intial update complete.", name)
+        logger.debug("JetChannel.init: Jet %s intial update complete.", name)
 
     def set_geometry(self, params: Dict[str, Any]) -> None:
         """
         Specialized method that sets up the geometry of the jet, including importing Qs_position_x, Qs_position_z, delta_Q_z and delta_Q_z
         """
         logger.debug(
-            "`JetChannel.set_geometry`: Importing geometry params for jet %s ...",
+            "JetChannel.set_geometry: Importing geometry params for jet %s ...",
             self.name,
         )
         from parameters import (
@@ -669,7 +671,7 @@ class JetChannel(Jet):
         )
 
         logger.debug(
-            "`JetChannel.set_geometry`: Setting up jet geometry for jet %s ...",
+            "JetChannel.set_geometry: Setting up jet geometry for jet %s ...",
             self.name,
         )
 
@@ -679,7 +681,7 @@ class JetChannel(Jet):
         self.delta_Q_z: float = delta_Q_z
 
         logger.debug(
-            "`JetChannel.set_geometry`: Jet geometry set up for jet %s.", self.name
+            "JetChannel.set_geometry: Jet geometry set up for jet %s.", self.name
         )
 
     def update(
@@ -694,7 +696,7 @@ class JetChannel(Jet):
         """
         TO BE IMPLEMENTED FOR CHANNEL CASE
         """
-        logger.info("`JetChannel.update`: Updating jet %s...", self.name)
+        logger.info("JetChannel.update: Updating jet %s...", self.name)
 
         Qs_position_x: List[float] = kwargs.get("Qs_position_x")
         delta_Q_x: float = kwargs.get("delta_Q_x")
@@ -729,7 +731,7 @@ class JetChannel(Jet):
         self.delta_Q_z: float = (
             delta_Q_z  # Updating delta just in case (could be removed, already assigned during init) - Pieter
         )
-        logger.debug("`JetChannel.update`: creating new smoothing functions...")
+        logger.debug("JetChannel.update: creating new smoothing functions...")
         # Call the specialized method that creates a smoothing function for the current time
         smooth_fun: str = self.create_smooth_funcs(
             self.Q_new,
@@ -742,7 +744,7 @@ class JetChannel(Jet):
             Qs_position_x=self.Qs_position_x,
             delta_Q_x=self.delta_Q_x,
         )
-        logger.debug("`JetChannel.update`: assigning new velocity functions...")
+        logger.debug("JetChannel.update: assigning new velocity functions...")
         # Create the velocities (function?) using the smoothing functions,
         if self.dimension == 2:
             # For 2D jets set Vx and Vy
@@ -752,7 +754,7 @@ class JetChannel(Jet):
             self.Vx = "0"
             self.Vy = f"{smooth_fun}"
             self.Vz = "0"
-        logger.info("`JetChannel.update`: Jet %s updated.\n", self.name)
+        logger.info("JetChannel.update: Jet %s updated.\n", self.name)
 
     # TODO: Update this function for channel
 
@@ -768,7 +770,7 @@ class JetChannel(Jet):
         """
         Specialized method that creates the smooth functions in 2D
         """
-        logger.debug("`JetChannel.create_smooth_funcs`: Creating smooth functions...")
+        logger.debug("JetChannel.create_smooth_funcs: Creating smooth functions...")
 
         Qs_position_x: List[float] = kwargs.get("Qs_position_x")
         delta_Q_x: float = kwargs.get("delta_Q_x")
@@ -787,7 +789,7 @@ class JetChannel(Jet):
         # TODO: implement smoothing in space for channel case - Chriss
         if smooth_func == "EXPONENTIAL":
             logger.debug(
-                "`JetChannel.create_smooth_funcs`: Exponential smoothing selected..."
+                "JetChannel.create_smooth_funcs: Exponential smoothing selected..."
             )
             ## Q_pre and Q_new --> list! with nz_Qs dimensions
             # Exponential smoothing law. Can be applied in time or space
@@ -809,13 +811,11 @@ class JetChannel(Jet):
             string_Q = f"(({string_all_Q_pre}) + ({string_h})*(({string_all_Q_new})-({string_all_Q_pre})))"
 
         elif smooth_func == "LINEAR":
-            logger.debug(
-                "`JetChannel.create_smooth_funcs`: Linear smoothing selected..."
-            )
+            logger.debug("JetChannel.create_smooth_funcs: Linear smoothing selected...")
             string_Q = Q_smooth_linear(Q_new[0], Q_pre[0], time_start, T_smoo)
         elif smooth_func == "":
             logger.debug(
-                "`JetChannel.create_smooth_funcs`: No smoothing selected, defaulting to Linear..."
+                "JetChannel.create_smooth_funcs: No smoothing selected, defaulting to Linear..."
             )
             string_Q = Q_smooth_linear(Q_new[0], Q_pre[0], time_start, T_smoo)
         else:
@@ -825,13 +825,13 @@ class JetChannel(Jet):
 
         if self.short_spacetime_func:
             logger.debug(
-                "`JetChannel.create_smooth_funcs`: Short spacetime function option selected..."
+                "JetChannel.create_smooth_funcs: Short spacetime function option selected..."
             )
             # just with Qnorm*Qi -- no projection or smoothing in time/space
             return f"({scale:.1f})({string_all_Q_new})"
         else:
             logger.debug(
-                "`JetChannel.create_smooth_funcs`: Long spacetime function option selected..."
+                "JetChannel.create_smooth_funcs: Long spacetime function option selected..."
             )
             # Here we only had cos to show the projection; comes from how the jets were on the cylinder surface before
             # string_C is smoothing in space. This will be added at a later time -Chriss

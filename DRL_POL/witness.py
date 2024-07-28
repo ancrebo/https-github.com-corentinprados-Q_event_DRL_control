@@ -225,36 +225,49 @@ def read_last_wit(
     return result_data
 
 
-def calculate_channel_witness_coordinates(
-    n: int,  # nx_Qs
-    m: int,  # nz_Qs
-    Lx: float,
-    Ly: float,
-    Lz: float,
-    y_value_density: int,
-    pattern: str = "X",
-    y_skipping: bool = False,
-    y_skipping_value: int = 3,
-) -> Dict[str, Any]:
+def calculate_channel_witness_coordinates(params: Dict[str, Any]) -> Dict[str, Any]:
     """
     Calculate witness coordinates and indices for a channel pattern.
 
     Parameters:
-        n (int): Number of sections in the x direction.
-        m (int): Number of sections in the z direction.
-        Lx (float): Length in the x direction.
-        Ly (float): Length in the y direction.
-        Lz (float): Length in the z direction.
-        y_value_density (int): Density of y values.
-        pattern (str): Pattern type ('X' or '+'). Default is 'X'.
-        y_skipping (bool): Whether to skip y values. Default is False.
-        y_skipping_value (int): Interval for skipping y values if y_skipping is True. Default is 3.
+        params (Dict[str, Any]): Dictionary containing the parameters:
+            - probe_type (str): Type of probes used, either velocity or pressure.
+            - n (int): Number of sections in the x direction.
+            - m (int): Number of sections in the z direction.
+            - Lx (float): Length in the x direction.
+            - Ly (float): Length in the y direction.
+            - Lz (float): Length in the z direction.
+            - y_value_density (int): Density of y values.
+            - pattern (str): Pattern type ('X' or '+').
+            - y_skipping (bool): Whether to skip y values in between pattern layers.
+            - y_skipping_value (int): Number of layers between each full pattern layer if y_skipping is True.
 
     Returns:
-        Dict[str, Any]: A dictionary containing 'locations' (probe coordinates),
-                        'indices2D' (2D indices of probes), 'indices1D' (1D indices of probes),
-                        and 'tag_probs' (tag ranges).
+        Dict[str, Any]: A dictionary containing the following keys:
+            'locations' (List[Tuple[float, float, float]]): Coordinates of the probes.
+            'tag_probs' (Dict[str, List[int]]): Tag ranges for different patterns.
+            'probe_type' (str): Type of probes used, either velocity or pressure.
+            'indices2D' (List[Tuple[int, int]]): 2D indices of the probes.
+            'indices1D' (List[int]): 1D indices of the probes.
+
+    Raises:
+        ValueError: If an invalid pattern is specified or if y-values are out of range.
     """
+    logger.debug(
+        "calculate_channel_witness_coordinates: Starting to calculate witness coordinates..."
+    )
+
+    probe_type = params["probe_type"]
+    n = params["nx_Qs"]
+    m = params["nz_Qs"]
+    Lx = params["Lx"]
+    Ly = params["Ly"]
+    Lz = params["Lz"]
+    y_value_density = params["y_value_density"]
+    pattern = params["pattern"]
+    y_skipping = params["y_skipping"]
+    y_skip_values = params["y_skip_values"]
+
     # Create list of y values to place pattern - Exclude the first term (0)
     y_values: List[float] = np.linspace(0, Ly, y_value_density + 1).tolist()[1:]
 
@@ -284,20 +297,27 @@ def calculate_channel_witness_coordinates(
                     (center_x, center_z - 0.25 * step_z),
                     (center_x, center_z + 0.25 * step_z),
                 ]
+            else:
+                raise ValueError(
+                    f"calculate_channel_witness_coordinates: Invalid pattern: {pattern}"
+                )
 
             center_point: Tuple[float, float] = (center_x, center_z)
 
             for index, y in enumerate(y_values):
                 if 0 <= y <= Ly:  # Ensure y-values are within the global y limit
-                    if y_skipping and (index % y_skipping_value != 0):
+                    if y_skipping and (index % y_skip_values != 0):
+                        # Place only the center point
                         coordinates.append(
                             (center_point[0] / Lx, y / Ly, center_point[1] / Lz)
                         )
                         indices2D.append((i, j))
                     else:
+                        # Place the full pattern
                         for x, z in end_points:
                             coordinates.append((x / Lx, y / Ly, z / Lz))
                             indices2D.append((i, j))
+                        # Also place the center point
                         coordinates.append(
                             (center_point[0] / Lx, y / Ly, center_point[1] / Lz)
                         )
@@ -311,11 +331,6 @@ def calculate_channel_witness_coordinates(
     for index2D in indices2D:
         indices1D.append(index2D[0] * m + index2D[1])
 
-    # Convert lists to numpy arrays
-    coordinates_array: np.ndarray = np.array(coordinates)
-    indices2D_array: np.ndarray = np.array(indices2D)
-    indices1D_array: np.ndarray = np.array(indices1D)
-
     # Define tag ranges similar to the first script
     len_left_positions_probes = 0
     len_pattern_positions_probes = len(coordinates)
@@ -328,9 +343,187 @@ def calculate_channel_witness_coordinates(
 
     probe_dict = {
         "locations": coordinates,
+        "tag_probs": tag_probs,
+        "probe_type": probe_type,
         "indices2D": indices2D,
         "indices1D": indices1D,
-        "tag_probs": tag_probs,
     }
-
+    logger.debug(
+        "calculate_channel_witness_coordinates: Finished calculating witness coordinates!\n"
+    )
     return probe_dict
+
+
+def write_witness_file(
+    filepath: str, probes_positions: List[Tuple[float, float, float]]
+) -> None:
+    """
+    UPDATED FUNCTION AS OF JULY 27, 2024 - @pietero
+
+    Writes the witness file that needs to be included in the .ker.dat file.
+
+    Parameters:
+        filepath (str): The path where the witness.dat file will be written.
+        probes_positions (np.ndarray): An array of probe positions.
+    """
+    logger.debug(
+        "write_witness_file: Writing witness file to %s with %int witness points",
+        filepath,
+        len(probes_positions),
+    )
+    # Ensure the directory exists
+    os.makedirs(filepath, exist_ok=True)
+
+    nprobes = len(probes_positions)
+    ndim = len(probes_positions[0]) if probes_positions else 0
+
+    # Open file for writing
+    with open(os.path.join(filepath, "witness.dat"), "w") as file:
+        # Write header
+        file.write(f"WITNESS_POINTS, NUMBER={nprobes}\n")
+
+        # Write probes
+        if ndim == 2:
+            for pos in probes_positions:
+                file.write(f"{pos[0]:.4f},{pos[1]:.4f}\n")
+        elif ndim == 3:
+            for pos in probes_positions:
+                file.write(f"{pos[0]:.4f},{pos[1]:.4f},{pos[2]:.4f}\n")
+        else:
+            raise ValueError(
+                f"write_witness_file: Unsupported number of dimensions: {ndim}"
+            )
+
+        # Write end
+        file.write("END_WITNESS_POINTS\n")
+
+    logger.debug(
+        "write_witness_file: Finished writing witness file to %s with %int witness points",
+        filepath,
+        len(probes_positions),
+    )
+
+
+def write_witness_version_file(
+    filepath: str,
+    probes_location: int,
+    probe_type: str,
+    pattern: str,
+    y_value_density: int,
+    y_skipping: bool,
+    y_skip_values: int,
+    nx_Qs: int,
+    nz_Qs: int,
+) -> None:
+    """
+    Write a text file to indicate what version of witness file is being used.
+
+    Parameters:
+        filepath (str): The path where the witness version file will be written.
+        probes_location (int): Identifier for the probe location type.
+        probe_type (str): The type of probes to be used.
+        pattern (str): Pattern type ('X' or '+').
+        y_value_density (int): Number of y values total.
+        y_skipping (bool): Whether to skip full pattern placement on certain layers.
+        y_skip_values (int): Number of layers to skip if y_skipping is True.
+        nx_Qs (int): Number of sections in the x direction.
+        nz_Qs (int): Number of sections in the z direction.
+    """
+    logger.debug(
+        "write_witness_version_file: Writing witness version file to %s", filepath
+    )
+
+    with open(os.path.join(filepath, "witness_version.txt"), "w") as file:
+        file.write(f"Witness Probes Location Version: v{probes_location}\n")
+        file.write(f"Probe Type: {probe_type}\n")
+        file.write(f"Pattern: {pattern}\n")
+        file.write(f"Y Value Density: {y_value_density}\n")
+        file.write(f"Y Skipping: {y_skipping}\n")
+        file.write(f"Y Skip Values: {y_skip_values}\n")
+        file.write(f"nx_Qs: {nx_Qs}\n")
+        file.write(f"nz_Qs: {nz_Qs}\n")
+
+    logger.debug(
+        "write_witness_version_file: Witness version file has been written to %s",
+        filepath,
+    )
+
+
+def write_witness_file_and_visualize(
+    case_folder: str,
+    output_params: Dict[str, Any],
+    probes_location: int = 5,
+    pattern: str = "X",
+    y_value_density: int = 8,
+    y_skipping: bool = False,
+    y_skip_values: int = 1,
+    nx_Qs: int = 1,
+    nz_Qs: int = 1,
+) -> None:
+    """
+    Create the witness.dat file and visualize the witness points, saving a plot to the case folder.
+
+    Parameters:
+        case_folder (str): The case folder path.
+        output_params (Dict[str, Any]): The output parameters containing witness point locations.
+        probes_location (int, optional): Identifier for the probe location type. Default is 5.
+        pattern (str, optional): Pattern type ('X' or '+'). Default is 'X'.
+        y_value_density (int, optional): Number of y values total. Default is 8.
+        y_skipping (bool, optional): Whether to skip full pattern placement on certain layers. Default is False.
+        y_skip_values (List[int], optional): Number of layers to skip if y_skipping is True. Default is None.
+        nx_Qs (int, optional): Number of sections in the x direction. Default is 1.
+        nz_Qs (int, optional): Number of sections in the z direction. Default is 1.
+    """
+
+    write_witness_file(
+        case_folder,
+        output_params["locations"],
+    )
+
+    write_witness_version_file(
+        case_folder,
+        probes_location,
+        output_params["probe_type"],
+        pattern,
+        y_value_density,
+        y_skipping,
+        y_skip_values,
+        nx_Qs,
+        nz_Qs,
+    )
+
+    from visualization import plot_witness_points
+
+    plot_witness_points(
+        output_params["locations"],
+        filename=os.path.join(case_folder, f"witnessv{probes_location}_plot.png"),
+        nx_Qs=nx_Qs,
+        nz_Qs=nz_Qs,
+        y_value_density=y_value_density,
+        y_skip_values=y_skip_values,
+    )
+
+    logger.info(
+        "write_witness_file_and_visualize: New witness.dat has been created in %s",
+        case_folder,
+    )
+    logger.debug("write_witness_file_and_visualize: witness.dat creation parameters:")
+    logger.debug(
+        "write_witness_file_and_visualize: Witness Probes Location Type: %s",
+        probes_location,
+    )
+    logger.debug(
+        "write_witness_file_and_visualize: Probe Type: %s", output_params["probe_type"]
+    )
+    logger.debug("write_witness_file_and_visualize: Pattern: %s", pattern)
+    logger.debug(
+        "write_witness_file_and_visualize: Y Value Density: %s", y_value_density
+    )
+    logger.debug("write_witness_file_and_visualize: Y Skipping: %s", y_skipping)
+    logger.debug("write_witness_file_and_visualize: Y Skip Values: %s", y_skip_values)
+    logger.debug("write_witness_file_and_visualize: nx_Qs: %s", nx_Qs)
+    logger.debug("write_witness_file_and_visualize: nz_Qs: %s", nz_Qs)
+    logger.info(
+        "write_witness_file_and_visualize: Witness point visualization has been saved at %s",
+        os.path.join(case_folder, f"witnessv{probes_location}_plot.png"),
+    )
