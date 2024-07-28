@@ -39,6 +39,11 @@ logging_config_dict: Dict[str, Dict[str, Any]] = {
         "file_level": "DEBUG",
         "override": False,
     },
+    "calc_avg_qvolume": {
+        "console_level": "INFO",
+        "file_level": "DEBUG",
+        "override": True,
+    },
     "coco_calc_avg_vel": {
         "console_level": "DEBUG",
         "file_level": "DEBUG",
