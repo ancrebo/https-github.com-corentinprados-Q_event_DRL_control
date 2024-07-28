@@ -121,7 +121,9 @@ def normalize_all_single(
 
 
 def process_velocity_data_single(
-    timestep_df: Tuple[float, pd.DataFrame], averaged_data: pd.DataFrame, precision: int = 6
+    timestep_df: Tuple[float, pd.DataFrame],
+    averaged_data: pd.DataFrame,
+    precision: int = 5,
 ) -> Tuple[float, pd.DataFrame]:
     """
     Processes a tuple containing CFD simulation data to calculate fluctuating components of velocity fields.
@@ -196,7 +198,7 @@ def process_velocity_data_single(
     )
 
     # Select 5 rows with a specific y value before the merge
-    sample_y_value = unique_y_main.index[5]  # Taking the first y value as sample
+    sample_y_value = unique_y_main.index[2]  # Taking the first y value as sample
     df_sample_before_merge = df[df["y"] == sample_y_value].head(10)
     logger.debug("Sample rows before merge:\n%s", df_sample_before_merge)
 
