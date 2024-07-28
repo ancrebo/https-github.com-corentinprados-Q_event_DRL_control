@@ -187,11 +187,11 @@ if __name__ == "__main__":
     num_timesteps = args.num_timesteps
 
     # HARDCODED PATHS FOR TESTING
-    directory = "/scratch/pietero/baseline/prados_recent/re180_min_channel_900_calculating_Ubar/vtk_for_average/vtk"
-    averaged_data_path = (
-        "/scratch/pietero/andres_clone/DRL_POL/alya_files/baseline/calculated_data/"
-    )
-    H = 3.0
-    num_timesteps = 10
+    # directory = "/scratch/pietero/baseline/prados_recent/re180_min_channel_900_calculating_Ubar/vtk_for_average/vtk"
+    # averaged_data_path = (
+    #     "/scratch/pietero/andres_clone/DRL_POL/alya_files/baseline/calculated_data/"
+    # )
+    # H = 3.0
+    # num_timesteps = 10
 
     calculate_avg_qevent_ratio(directory, averaged_data_path, H, num_timesteps)
