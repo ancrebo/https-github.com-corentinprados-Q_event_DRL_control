@@ -35,7 +35,7 @@ def load_data_for_timestep(directory: str, file_name: str) -> pd.DataFrame:
     Returns:
     - df (pd.DataFrame): DataFrame with columns for spatial coordinates (x, y, z) and velocity components (u, v, w).
     """
-    logger.info(f"Loading data from PVTU file: {file_name}")
+    logger.info("load_data_for_timestep: %s: Loading data from PVTU file", file_name)
     path = os.path.join(directory, file_name)
     mesh = pv.read(path)  # Read the mesh data from the PVTU file
 
@@ -69,7 +69,7 @@ def load_data_for_timestep(directory: str, file_name: str) -> pd.DataFrame:
         nan_v_count,
     )
 
-    logger.info(f"Data from {file_name} loaded into DataFrame.")
+    logger.info("load_data_for_timestep: %s: Data loaded into DataFrame", file_name)
     return df
 
 
@@ -83,12 +83,16 @@ def create_timestep_file_map(pvd_path: str) -> Dict[str, float]:
     Returns:
     - timestep_file_map (dict): Dictionary mapping PVTU file names to timesteps.
     """
+    logger.debug("create_timestep_file_map: Parsing PVD file %s", pvd_path)
     tree = ET.parse(pvd_path)
     root = tree.getroot()
     timestep_file_map = {
         dataset.attrib["file"]: float(dataset.attrib["timestep"])
         for dataset in root.find("Collection")
     }
+    logger.debug(
+        "create_timestep_file_map: timestep file map created from %s", pvd_path
+    )
     return timestep_file_map
 
 
@@ -99,6 +103,8 @@ def calculate_avg_qevent_ratio(
     num_timesteps: int,
     tolerance: float = 1e-3,
 ) -> None:
+    logger.debug("calculate_avg_qevent_ratio: Starting calculation...")
+
     pvd_path = os.path.join(directory, "channel.pvd")
     timestep_file_map = create_timestep_file_map(pvd_path)
     # Ensure we have at least num_timesteps timesteps
@@ -164,7 +170,7 @@ def calculate_avg_qevent_ratio(
         os.path.join(averaged_data_path, "q_event_ratio_history.csv"), index=False
     )
     logger.info(
-        "Q event ratio history saved to %s",
+        "calculate_avg_qevent_ratio: Q event ratio history saved to %s",
         os.path.join(averaged_data_path, "q_event_ratio_history.csv"),
     )
 
@@ -179,13 +185,21 @@ def calculate_avg_qevent_ratio(
         os.path.join(averaged_data_path, "q_event_ratio_summary.csv"), index=False
     )
     logger.info(
-        "Q event ratio summary saved to %s",
+        "calculate_avg_qevent_ratio: Q event ratio summary saved to %s",
         os.path.join(averaged_data_path, "q_event_ratio_summary.csv"),
     )
 
-    logger.info(f"Average Q Event Volume Ratio: {average_q_event_ratio}")
-    logger.info(f"Standard Deviation of Q Event Volume Ratio: {std_dev_q_event_ratio}")
-    logger.info(f"H value used: {H}\n")  # Log the H value used
+    logger.info(
+        "calculate_avg_qevent_ratio: Average Q Event Volume Ratio: %f",
+        average_q_event_ratio,
+    )
+    logger.info(
+        "calculate_avg_qevent_ratio: Standard Deviation of Q Event Volume Ratio: %f",
+        std_dev_q_event_ratio,
+    )
+    logger.info(
+        "calculate_avg_qevent_ratio: H value used: %f", H
+    )  # Log the H value used
 
 
 if __name__ == "__main__":
@@ -217,8 +231,10 @@ if __name__ == "__main__":
         required=True,
         help="Number of timesteps to process from the end.",
     )
+    logger.debug("Parsing Arguments...")
     args = parser.parse_args()
-
+    logger.debug("Arguments Parsed!")
+    logger.debug("Arguments: \n%s\n", args)
     directory = args.directory
     averaged_data_path = args.averaged_data_path
     H = args.H
@@ -231,5 +247,6 @@ if __name__ == "__main__":
     # )
     # H = 3.0
     # num_timesteps = 10
-
+    logger.debug("Calling `calculate_avg_qevent_ratio`...")
     calculate_avg_qevent_ratio(directory, averaged_data_path, H, num_timesteps)
+    logger.debug("Finished calc_avg_qvolume.py script!!!")
