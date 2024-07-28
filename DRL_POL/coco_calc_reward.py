@@ -106,10 +106,14 @@ def normalize_all_single(
     nan_u_count = df_copy["u"].isna().sum()
     nan_v_count = df_copy["v"].isna().sum()
     logger.debug(
-        "normalize_all_single: %s: Number of NaNs in 'u' after normalization: %d", timestep, nan_u_count
+        "normalize_all_single: %s: Number of NaNs in 'u' after normalization: %d",
+        timestep,
+        nan_u_count,
     )
     logger.debug(
-        "normalize_all_single: %s: Number of NaNs in 'v' after normalization: %d", timestep, nan_v_count
+        "normalize_all_single: %s: Number of NaNs in 'v' after normalization: %d",
+        timestep,
+        nan_v_count,
     )
 
     logger.info("Data normalization complete.")
@@ -136,6 +140,28 @@ def process_velocity_data_single(
     timestep, df = timestep_df
     logger.info("Processing velocity data using loaded averaged data...")
 
+    # Check for NaN values in the initial dataframe
+    nan_u_initial = df["u"].isna().sum()
+    nan_v_initial = df["v"].isna().sum()
+    logger.debug(
+        "process_velocity_data_single: %s: Initial NaNs in 'u': %d",
+        timestep,
+        nan_u_initial,
+    )
+    logger.debug(
+        "process_velocity_data_single: %s: Initial NaNs in 'v': %d",
+        timestep,
+        nan_v_initial,
+    )
+
+    # Check the structure of averaged_data
+    logger.debug(
+        "process_velocity_data_single: averaged_data columns: %s", averaged_data.columns
+    )
+    logger.debug(
+        "process_velocity_data_single: averaged_data sample: %s", averaged_data.head()
+    )
+
     # Process the dataset for detailed fluctuation analysis
     # y_means = averaged_data.loc[df["y"]]
     # logger.debug(f"y_means: {y_means}")
@@ -144,11 +170,31 @@ def process_velocity_data_single(
 
     df_merged = pd.merge(df, averaged_data, on="y", how="left")
 
+    # Log the result of the merge
+    nan_U_bar = df_merged["U_bar"].isna().sum()
+    nan_V_bar = df_merged["V_bar"].isna().sum()
+    nan_W_bar = df_merged["W_bar"].isna().sum()
+    logger.debug(
+        "process_velocity_data_single: %s: NaNs in 'U_bar' after merge: %d",
+        timestep,
+        nan_U_bar,
+    )
+    logger.debug(
+        "process_velocity_data_single: %s: NaNs in 'V_bar' after merge: %d",
+        timestep,
+        nan_V_bar,
+    )
+    logger.debug(
+        "process_velocity_data_single: %s: NaNs in 'W_bar' after merge: %d",
+        timestep,
+        nan_W_bar,
+    )
+
     df_processed = df.copy()
 
-    logger.debug(f"df_processed columns: {df_processed.columns.tolist()}")
-    logger.debug(f"df_processed index: {df_processed.index}")
-    logger.debug(f"df_processed y values: {df_processed['y'].values}")
+    # logger.debug(f"df_processed columns: {df_processed.columns.tolist()}")
+    # logger.debug(f"df_processed index: {df_processed.index}")
+    # logger.debug(f"df_processed y values: {df_processed['y'].values}")
     df_processed["U"] = df["u"]
     df_processed["V"] = df["v"]
     df_processed["W"] = df["w"]
@@ -169,16 +215,24 @@ def process_velocity_data_single(
     nan_U_count = df_processed["U"].isna().sum()
     nan_V_count = df_processed["V"].isna().sum()
     logger.debug(
-        "process_velocity_data_single: %s: Number of NaNs in 'u' after processing: %d", timestep, nan_u_count
+        "process_velocity_data_single: %s: Number of NaNs in 'u' after processing: %d",
+        timestep,
+        nan_u_count,
     )
     logger.debug(
-        "process_velocity_data_single: %s: Number of NaNs in 'v' after processing: %d", timestep, nan_v_count
+        "process_velocity_data_single: %s: Number of NaNs in 'v' after processing: %d",
+        timestep,
+        nan_v_count,
     )
     logger.debug(
-        "process_velocity_data_single: %s: Number of NaNs in 'U' after processing: %d", timestep, nan_U_count
+        "process_velocity_data_single: %s: Number of NaNs in 'U' after processing: %d",
+        timestep,
+        nan_U_count,
     )
     logger.debug(
-        "process_velocity_data_single: %s: Number of NaNs in 'V' after processing: %d", timestep, nan_V_count
+        "process_velocity_data_single: %s: Number of NaNs in 'V' after processing: %d",
+        timestep,
+        nan_V_count,
     )
 
     logger.info("Velocity data processing complete.")
