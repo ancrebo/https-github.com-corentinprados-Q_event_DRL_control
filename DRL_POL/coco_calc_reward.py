@@ -147,6 +147,14 @@ def process_velocity_data_single(
     df["y"] = df["y"].round(precision)
     averaged_data["y"] = averaged_data["y"].round(precision)
 
+    # Convert 'y' values to numeric types to ensure consistency
+    df["y"] = pd.to_numeric(df["y"])
+    averaged_data["y"] = pd.to_numeric(averaged_data["y"])
+
+    # Check and log data types of 'y' columns
+    logger.debug("Data type of 'y' in main DataFrame: %s", df["y"].dtype)
+    logger.debug("Data type of 'y' in averaged data: %s", averaged_data["y"].dtype)
+
     # Check for NaN values in the initial dataframe
     nan_u_initial = df["u"].isna().sum()
     nan_v_initial = df["v"].isna().sum()
