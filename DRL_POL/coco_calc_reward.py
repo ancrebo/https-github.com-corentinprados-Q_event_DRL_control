@@ -143,22 +143,13 @@ def process_velocity_data_single(
     timestep, df = timestep_df
     logger.info("Processing velocity data using loaded averaged data...")
 
-    # Check and log data types of 'y' columns
-    logger.debug(
-        "Data type of 'y' in main DataFrame BEFORE converting: %s", df["y"].dtype
-    )
-    logger.debug(
-        "Data type of 'y' in averaged data BEFORE converting: %s",
-        averaged_data["y"].dtype,
-    )
-
     # Ensure y values are rounded to the same precision in both DataFrames
     df["y"] = df["y"].round(precision)
     averaged_data["y"] = averaged_data["y"].round(precision)
 
     # Convert 'y' values to float64 to ensure consistency
-    df["y"] = df["y"].astype('float64')
-    averaged_data["y"] = averaged_data["y"].astype('float64')
+    df["y"] = df["y"].astype("float64")
+    averaged_data["y"] = averaged_data["y"].astype("float64")
 
     # Check and log data types of 'y' columns
     logger.debug(
@@ -193,32 +184,30 @@ def process_velocity_data_single(
         averaged_data.head(),
     )
 
-    # Process the dataset for detailed fluctuation analysis
-    # y_means = averaged_data.loc[df["y"]]
-    # logger.debug(f"y_means: {y_means}")
-    # logger.debug(f"y_means columns: {y_means.columns.tolist()}")
-    # logger.debug(f"y_means index: {y_means.index}")
-
     # Log unique 'y' values and their counts in the main DataFrame
     unique_y_main = df["y"].value_counts().sort_index()
-    # logger.debug(
-    #     "%s: Unique 'y' values in main DataFrame:\n %s\n",
-    #     timestep,
-    #     unique_y_main.head(20),
-    # )
+    logger.debug(
+        "%s: Unique 'y' values in main DataFrame:\n %s\n",
+        timestep,
+        unique_y_main.head(20),
+    )
 
     # Log unique 'y' values and their counts in the averaged data
     unique_y_averaged = averaged_data["y"].value_counts().sort_index()
-    # logger.debug(
-    #     "%s: Unique 'y' values in averaged data:\n %s\n",
-    #     timestep,
-    #     unique_y_averaged.head(20),
-    # )
-
-    # print whether the unique y values are EXACTLY the same
     logger.debug(
-        "Are the unique y values the same?\n\n%s!!!\n\n",
-        unique_y_main.equals(unique_y_averaged),
+        "%s: Unique 'y' values in averaged data:\n %s\n",
+        timestep,
+        unique_y_averaged.head(20),
+    )
+
+    # Compare and log differences in 'y' values
+    y_in_main_not_in_averaged = set(unique_y_main.index) - set(unique_y_averaged.index)
+    y_in_averaged_not_in_main = set(unique_y_averaged.index) - set(unique_y_main.index)
+    logger.debug(
+        "Y values in main DataFrame not in averaged data: %s", y_in_main_not_in_averaged
+    )
+    logger.debug(
+        "Y values in averaged data not in main DataFrame: %s", y_in_averaged_not_in_main
     )
 
     # Select 5 rows with a specific y value before the merge
