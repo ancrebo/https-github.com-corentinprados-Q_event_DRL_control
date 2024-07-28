@@ -146,12 +146,6 @@ def process_velocity_data_single(
     precision: int = 3
     tolerance: float = 1e-3
 
-    # Print 'y' values before adjustment
-    logger.debug("Original 'y' values in main DataFrame:\n%s", df["y"].unique())
-    logger.debug(
-        "Original 'y' values in averaged data:\n%s", averaged_data["y"].unique()
-    )
-
     # Adjust 'y' values in averaged data to match main data if within tolerance
     main_y_unique = df["y"].unique()
     averaged_y_unique = averaged_data["y"].unique()
@@ -159,41 +153,14 @@ def process_velocity_data_single(
     for main_y in main_y_unique:
         for i, avg_y in enumerate(averaged_y_unique):
             if np.abs(main_y - avg_y) <= tolerance:
+                logger.debug(
+                    f"Overwriting averaged y value {avg_y} with main y value {main_y}"
+                )
                 averaged_data.loc[averaged_data["y"] == avg_y, "y"] = main_y
                 averaged_y_unique[i] = (
                     main_y  # Update the unique values list to reflect the change
                 )
                 break
-
-    # Print 'y' values after adjustment
-    logger.debug("Adjusted 'y' values in main DataFrame:\n%s", df["y"].unique())
-    logger.debug(
-        "Adjusted 'y' values in averaged data:\n%s", averaged_data["y"].unique()
-    )
-
-    # Check for NaN values in the initial dataframe
-    nan_u_initial = df["u"].isna().sum()
-    nan_v_initial = df["v"].isna().sum()
-    logger.debug(
-        "process_velocity_data_single: %s: Initial NaNs in 'u': %d",
-        timestep,
-        nan_u_initial,
-    )
-    logger.debug(
-        "process_velocity_data_single: %s: Initial NaNs in 'v': %d",
-        timestep,
-        nan_v_initial,
-    )
-
-    # Check the structure of averaged_data
-    logger.debug(
-        "process_velocity_data_single: averaged_data columns: \n%s\n",
-        averaged_data.columns,
-    )
-    logger.debug(
-        "process_velocity_data_single: averaged_data sample: \n%s\n",
-        averaged_data.head(),
-    )
 
     # Log unique 'y' values and their counts in the main DataFrame
     unique_y_main = df["y"].value_counts().sort_index()
@@ -233,31 +200,12 @@ def process_velocity_data_single(
     df_sample_after_merge = df_merged[df_merged["y"] == sample_y_value].head(10)
     logger.debug("Sample rows after merge:\n%s", df_sample_after_merge)
 
-    # Log the result of the merge
-    nan_U_bar = df_merged["U_bar"].isna().sum()
-    nan_V_bar = df_merged["V_bar"].isna().sum()
-    nan_W_bar = df_merged["W_bar"].isna().sum()
-    logger.debug(
-        "process_velocity_data_single: %s: NaNs in 'U_bar' after merge: %d",
-        timestep,
-        nan_U_bar,
-    )
-    logger.debug(
-        "process_velocity_data_single: %s: NaNs in 'V_bar' after merge: %d",
-        timestep,
-        nan_V_bar,
-    )
-    logger.debug(
-        "process_velocity_data_single: %s: NaNs in 'W_bar' after merge: %d",
-        timestep,
-        nan_W_bar,
-    )
-
     df_processed = df.copy()
 
-    # logger.debug(f"df_processed columns: {df_processed.columns.tolist()}")
-    # logger.debug(f"df_processed index: {df_processed.index}")
-    # logger.debug(f"df_processed y values: {df_processed['y'].values}")
+    logger.debug(f"df_processed columns: {df_processed.columns.tolist()}")
+    logger.debug(f"df_processed index: {df_processed.index}")
+    logger.debug(f"df_processed y values: {df_processed['y'].values}")
+
     df_processed["U"] = df["u"]
     df_processed["V"] = df["v"]
     df_processed["W"] = df["w"]
