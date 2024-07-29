@@ -407,7 +407,7 @@ output_params: Dict[str, Any] = calculate_channel_witness_coordinates(
 
 ## CREATION OF WITNESS FILE
 # Whether to overwrite the witness file if exists, True overwrites existing file
-need_witness_file_override: bool = True
+need_witness_file_override: bool = False
 logger.debug("Witness file override: %s", need_witness_file_override)
 
 case_folder = f"alya_files/case_{training_case}"
