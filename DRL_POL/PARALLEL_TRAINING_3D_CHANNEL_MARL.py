@@ -31,7 +31,7 @@ from env_utils import (
 )
 from configuration import ALYA_ULTCL
 
-from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
+from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL, logging_config_dict
 
 # Set up logger
 logger = configure_logger(
@@ -40,6 +40,11 @@ logger = configure_logger(
 
 logger.info(
     "PARALLEL_TRAINING_3D_CHANNEL_MARL.py: Logging level set to %s\n", logger.level
+)
+
+# List all module names in the logging configuration dictionary
+logger.debug(
+    "Logging configuration dictionary keys: \n%s\n", logging_config_dict.keys()
 )
 
 # Parser for command line arguments
