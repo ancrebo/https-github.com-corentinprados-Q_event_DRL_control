@@ -2032,13 +2032,13 @@ class Environment(Environment):
                     "rewards",
                 )
                 qratio_output_file_name = (
-                    f"qratios_{self.host}_EP_{self.episode_number}.csv"
+                    f"qratios_{self.host}_EP_{self.episode_number}_action_{self.action_count}.csv"
                 )
                 qratio_output_file_path = os.path.join(
                     output_folder_path_reward, qratio_output_file_name
                 )
                 reward_output_file_name = (
-                    f"rewards_{self.host}_EP_{self.episode_number}.csv"
+                    f"rewards_{self.host}_EP_{self.episode_number}_action_{self.action_count}.csv"
                 )
                 reward_output_file_path = os.path.join(
                     output_folder_path_reward, reward_output_file_name
