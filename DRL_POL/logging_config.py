@@ -17,6 +17,13 @@ possible_logging_levels = {
 # Set the DEFAULT logging level, passed to individual modules
 DEFAULT_LOGGING_LEVEL = "INFO"
 
+# Default Config
+DEFAULT_CONFIG = {
+    "console_level": DEFAULT_LOGGING_LEVEL,
+    "file_level": DEFAULT_LOGGING_LEVEL,
+    "override": False,
+}
+
 # Dictionary to set logging levels and override for default values for each module
 logging_config_dict: Dict[str, Dict[str, Any]] = {
     "PARALLEL_TRAINING_3D_CHANNEL_MARL": {
@@ -106,7 +113,7 @@ def configure_logger(module_name: str, default_level: str = "INFO") -> logging.L
             f"Logger configuration for module '{module_name}' not found in logging_config_dict"
         )
 
-    config = logging_config_dict[module_name]
+    config = logging_config_dict.get(module_name, DEFAULT_CONFIG)
 
     if "override" not in config:
         raise ValueError(
@@ -117,9 +124,8 @@ def configure_logger(module_name: str, default_level: str = "INFO") -> logging.L
         console_level = config["console_level"].upper()
         file_level = config["file_level"].upper()
     else:
-        config = None
-        console_level = default_level.upper()
-        file_level = default_level.upper()
+        console_level = config["console_level"].upper()
+        file_level = config["file_level"].upper()
 
     if config is None:
         raise ValueError(f"Module {module_name} not found in logging_config_dict")
