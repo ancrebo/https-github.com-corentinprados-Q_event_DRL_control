@@ -473,8 +473,10 @@ def calculate_reward_full(
         ),
         axis=1,
     )
+    logger.debug("calculate_reward_full: final_result_df: \n%s\n", final_result_df)
 
     reward_df = final_result_df[["ENV_ID", "reward"]]
+    logger.debug("calculate_reward_full: reward_df: \n%s\n", reward_df)
 
     reward_df.to_csv(output_reward_file, index=False)
     logger.info("calculate_reward_full: Rewards saved to %s!", output_reward_file)
