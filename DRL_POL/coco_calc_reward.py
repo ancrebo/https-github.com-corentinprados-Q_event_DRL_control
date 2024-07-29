@@ -1,4 +1,5 @@
 import os
+import shutil
 import argparse
 import logging
 import numpy as np
@@ -500,6 +501,16 @@ def calculate_reward_full(
     )
     gc.collect()
     logger.debug("calculate_reward_full: Memory cleaned up.")
+
+    # Remove the `final_post_reward` folder so the next action can save cleanly
+    final_post_folder = os.path.join(directory, "..")
+    final_post_folder = os.path.abspath(final_post_folder)
+    logger.debug("calculate_reward_full: Removing %s", final_post_folder)
+    if os.path.exists(final_post_folder):
+        shutil.rmtree(final_post_folder)
+        logger.debug("calculate_reward_full: %s removed", final_post_folder)
+    else:
+        logger.debug("calculate_reward_full: %s does not exist", final_post_folder)
 
 
 """
