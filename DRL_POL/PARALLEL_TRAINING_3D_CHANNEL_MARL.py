@@ -250,8 +250,7 @@ logger.info("nodelist: %s\n", nodelist)
 
 # here the array of environments is defined, will be n-1 host (the 1st one is MASTER) #TODO: assign more nodes to an environment
 logger.info(
-    "Creating %d parallel environments for %d separate CFD environments...\n",
-    num_servers,
+    "Creating %d parallel environments for separate CFD simulations...\n",
     num_servers,
 )
 parallel_environments = [
