@@ -2410,7 +2410,7 @@ class Environment(Environment):
                 f"{1}",
                 f"EP_{self.episode_number}",
                 "rewards",
-                f"rewards_{self.host}_EP_{self.episode_number}.csv",
+                f"rewards_{self.host}_EP_{self.episode_number}_action_{self.action_count}.csv",
             )
             self.log(
                 logging.DEBUG,
@@ -2418,6 +2418,11 @@ class Environment(Environment):
                 self.ENV_ID,
                 output_file_path,
             )
+            if not os.path.exists(output_file_path):
+                raise ValueError(
+                    f"No reward file found at {output_file_path} for ENV_ID {self.ENV_ID[1]}"
+                )
+
             data = np.genfromtxt(output_file_path, delimiter=",", names=True)
 
             # Find the row where ENV_ID matches self.ENV_ID[1]
