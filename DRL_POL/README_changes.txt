@@ -10,5 +10,5 @@
 #### IMPORTANT! The functions in boundary_codes.dat will not work if this is wrong!
 ### ker.dat
 #### Added SPACE_&_TIME_FUNCTIONS and JET_TOP/BOTTOM
-### Added JET_TOP/BOTTOM.dat files
+### Added JET_TOP/BOTTOM.dat and boundary_codes.dat files
 #### (-Chriss)
