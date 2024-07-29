@@ -124,8 +124,8 @@ def configure_logger(module_name: str, default_level: str = "INFO") -> logging.L
         console_level = config["console_level"].upper()
         file_level = config["file_level"].upper()
     else:
-        console_level = config["console_level"].upper()
-        file_level = config["file_level"].upper()
+        console_level = DEFAULT_CONFIG["console_level"].upper()
+        file_level = DEFAULT_CONFIG["file_level"].upper()
 
     if config is None:
         raise ValueError(f"Module {module_name} not found in logging_config_dict")
