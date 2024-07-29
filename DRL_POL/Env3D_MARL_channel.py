@@ -2031,15 +2031,11 @@ class Environment(Environment):
                     directory_post,
                     "rewards",
                 )
-                qratio_output_file_name = (
-                    f"qratios_{self.host}_EP_{self.episode_number}_action_{self.action_count}.csv"
-                )
+                qratio_output_file_name = f"qratios_{self.host}_EP_{self.episode_number}_action_{self.action_count}.csv"
                 qratio_output_file_path = os.path.join(
                     output_folder_path_reward, qratio_output_file_name
                 )
-                reward_output_file_name = (
-                    f"rewards_{self.host}_EP_{self.episode_number}_action_{self.action_count}.csv"
-                )
+                reward_output_file_name = f"rewards_{self.host}_EP_{self.episode_number}_action_{self.action_count}.csv"
                 reward_output_file_path = os.path.join(
                     output_folder_path_reward, reward_output_file_name
                 )
@@ -2438,9 +2434,10 @@ class Environment(Environment):
                 )
 
             reward_value: float = float(matching_row["reward"][0])
-            primary_logger.info(
-                "ENV_ID %s: Env3D.compute_reward: Reward value: %f\n",
+            self.log(
+                logging.INFO,
+                "ENV_ID %s: Env3D.compute_reward: Rewards loaded! \n%s\n",
                 self.ENV_ID,
-                reward_value,
+                data,
             )
             return reward_value
