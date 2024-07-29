@@ -33,7 +33,11 @@ def load_data_and_convert_to_dataframe_single(
       * A timestep (float)
       * A DataFrame with columns for spatial coordinates (x, y, z) and velocity components (u, v, w)
     """
-    logger.debug("load_data_and_convert_to_dataframe: Loading data from PVTU files...")
+    logger.debug(
+        "load_data_and_convert_to_dataframe_single: Loading data from PVTU files..."
+    )
+    logger.debug("load_data_and_convert_to_dataframe_single: Directory: %s", directory)
+
     # Parse the PVD file to extract mappings of timesteps to their corresponding PVTU files
     pvd_path = os.path.join(directory, file_name)
     tree = ET.parse(pvd_path)
@@ -42,6 +46,10 @@ def load_data_and_convert_to_dataframe_single(
         dataset.attrib["file"]: float(dataset.attrib["timestep"])
         for dataset in root.find("Collection")
     }
+    logger.debug(
+        "load_data_and_convert_to_dataframe_single: Timesteps in PVD file: %s",
+        timestep_file_map,
+    )
 
     # Assuming we are only interested in a single timestep
     file, timestep = next(iter(timestep_file_map.items()))
