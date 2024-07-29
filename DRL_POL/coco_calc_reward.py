@@ -455,8 +455,10 @@ def calculate_reward_full(
     )
 
     all_results.append(result_df)
+    logger.debug("calculate_reward_full: all_results: \n%s\n", all_results)
 
     final_result_df = pd.concat(all_results, ignore_index=True)
+    logger.debug("calculate_reward_full: final_result_df: \n%s\n", final_result_df)
 
     # Save the local Q event ratios to a CSV file
     final_result_df.to_csv(output_qratio_file, index=False)
