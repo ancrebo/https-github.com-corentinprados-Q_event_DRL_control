@@ -78,16 +78,12 @@ $  POSTPROCESS SCASS         STEPS = 100
   END_WITNESS
 END_OUTPUT_&_POST_PROCESS  
 $------------------------------------------------------------
-BOUNDARY_CONDITIONS
+BOUNDARY_CONDITIONS, NON_CONSTANT
   PARAMETERS
     $FIX_PRESSURE: AUTO
     INITIAL VALUE_FUNCTION = 1 ! use field 1 for initial condition
-    VARIATION_NON_CONSTANT
+    VARIATION = NON_CONSTANT
   END_PARAMETERs
-$  INCLUDE boundary_codes.dat
-  CODES, NODES
-   1   111   0.0 0.0 0.0 
-   2   111   0.0 0.0 0.0 
-  END_CODES 
+  INCLUDE boundary_codes.dat
 END_BOUNDARY_CONDITIONS  
 $------------------------------------------------------------
