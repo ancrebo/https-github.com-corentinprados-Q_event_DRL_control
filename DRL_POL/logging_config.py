@@ -101,10 +101,10 @@ def configure_logger(module_name: str, default_level: str = "INFO") -> logging.L
     """
     logger = logging.getLogger(module_name)
 
-    if module_name not in logging_config_dict:
-        raise ValueError(
-            f"Logger configuration for module '{module_name}' not found in logging_config_dict"
-        )
+    # if module_name not in logging_config_dict:
+    #     raise ValueError(
+    #         f"Logger configuration for module '{module_name}' not found in logging_config_dict"
+    #     )
 
     config = logging_config_dict[module_name]
 
