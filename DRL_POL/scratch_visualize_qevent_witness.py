@@ -151,6 +151,11 @@ if __name__ == "__main__":
     logger.info("Finished `detect_Q_events_single` function.\n")
 
     ####################################################################################################
+    import os
+
+    if "DISPLAY" not in os.environ:
+        os.environ["DISPLAY"] = ":0.0"  # Adjust as necessary
+
     df_last_timestep = Q_event_frames[1]
 
     # Convert the boolean Q values to integers for visualization
