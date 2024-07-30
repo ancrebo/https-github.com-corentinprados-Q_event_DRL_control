@@ -216,7 +216,7 @@ if __name__ == "__main__":
     contour = grid.contour(isosurfaces=[0.5])  # Adjust the isovalue as needed
 
     # Plot the result
-    plotter = pv.Plotter(off_screen=True)
+    plotter = pv.Plotter(off_screen=False)
     plotter.add_mesh(contour, color="red")
     plotter.add_mesh(grid, style="wireframe", color="black")
     plotter.show()
