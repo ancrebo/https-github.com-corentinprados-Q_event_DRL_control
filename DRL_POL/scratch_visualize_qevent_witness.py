@@ -210,9 +210,8 @@ if __name__ == "__main__":
     plotter.show()
 
     # Save the result
-    save_dir = "/path/to/save/directory"  # Update this to your desired directory
-    png_path = os.path.join(save_dir, "q_events_surface_plot.png")
-    svg_path = os.path.join(save_dir, "q_events_surface_plot.svg")
+    png_path = os.path.join(save_directory, "q_events_surface_plot.png")
+    svg_path = os.path.join(save_directory, "q_events_surface_plot.svg")
 
     plotter.screenshot(png_path)
     plotter.save_graphic(svg_path)
