@@ -807,11 +807,11 @@ class JetChannel(Jet):
                 )
 
                 if i == 1:
-                    string_all_Q_pre = f"{string_heav}*({Q_pre[i]:.4f})"
-                    string_all_Q_new = f"{string_heav}*({Q_new[i]:.4f})"
+                    string_all_Q_pre = f"{string_heav}*({Q_pre[i-1]:.4f})"
+                    string_all_Q_new = f"{string_heav}*({Q_new[i-1]:.4f})"
                 else:
-                    string_all_Q_pre += f"+ {string_heav}*({Q_pre[i]:.4f})"
-                    string_all_Q_new += f"+ {string_heav}*({Q_new[i]:.4f})"
+                    string_all_Q_pre += f"+ {string_heav}*({Q_pre[i-1]:.4f})"
+                    string_all_Q_new += f"+ {string_heav}*({Q_new[i-1]:.4f})"
 
             string_Q = f"(({string_all_Q_pre}) + ({string_h})*(({string_all_Q_new})-({string_all_Q_pre})))"
             # string_heav = heav_func_channel(
