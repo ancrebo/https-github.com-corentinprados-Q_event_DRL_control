@@ -42,7 +42,7 @@ episode: str = "EP_1"
 
 pvdname: str = "channel.pvd"
 
-directory: str = os.path.join(directory_base, episode, "VTK")
+directory: str = os.path.join(directory_base, episode, "vtk")
 
 save_directory: str = "/scratch/pietero/DRL_visualizations"
 ####################################################################################################
@@ -244,9 +244,9 @@ plotter.show_grid()
 
 # Save the figure
 logger.info("Saving the figure...")
-save_dir = '/path/to/save/directory'  # Update this to your desired directory
-png_path = os.path.join(save_dir, 'q_events_surface_plot.png')
-svg_path = os.path.join(save_dir, 'q_events_surface_plot.svg')
+save_dir = "/path/to/save/directory"  # Update this to your desired directory
+png_path = os.path.join(save_dir, "q_events_surface_plot.png")
+svg_path = os.path.join(save_dir, "q_events_surface_plot.svg")
 
 plotter.screenshot(png_path)
 logger.info("PNG file saved successfully at %s", png_path)
