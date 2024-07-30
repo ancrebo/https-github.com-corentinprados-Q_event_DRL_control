@@ -153,10 +153,6 @@ if __name__ == "__main__":
     ####################################################################################################
     df_last_timestep = Q_event_frames[1]
 
-    # Extract points and scalar values
-    points = df_last_timestep[["x", "y", "z"]].values
-    scalars = df_last_timestep["Q"].values
-
     # Parse the PVD file to extract mappings of timesteps to their corresponding PVTU files
     pvd_path = os.path.join(directory, pvdname)
     tree = ET.parse(pvd_path)
@@ -183,11 +179,26 @@ if __name__ == "__main__":
     cells = mesh.cells
     celltypes = mesh.celltypes
 
+    # Extract points and scalar values
+    points = mesh.points
+    scalars = df_last_timestep["Q"].values
+
+    # Verify the scalar values are compatible
+    print("Scalar Values:", scalars[:10])  # Print first 10 scalar values for inspection
+
     # Create the unstructured grid
     grid = pv.UnstructuredGrid(cells, celltypes, points)
 
     # Add scalar data to the points
-    grid.point_data["Q"] = scalars
+    if scalars.shape[0] == points.shape[0]:
+        grid.point_data["Q"] = scalars
+    else:
+        raise ValueError(
+            "The number of scalar values does not match the number of points."
+        )
+
+    # Use a virtual framebuffer for headless rendering
+    pv.start_xvfb()
 
     # Apply the marching cubes algorithm
     contour = grid.contour(isosurfaces=[0.5])  # Adjust the isovalue as needed
