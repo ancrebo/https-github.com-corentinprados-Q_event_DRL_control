@@ -748,7 +748,7 @@ class JetChannel(Jet):
         # Create the velocities (function?) using the smoothing functions,
         if self.dimension == 2:
             # For 2D jets set Vx and Vy
-            self.Vx = f"{smooth_fun}"
+            self.Vx = "0"
             self.Vy = f"{smooth_fun}"
         else:
             self.Vx = "0"
@@ -804,7 +804,7 @@ class JetChannel(Jet):
 
             for i in range(1, self.nb_inv_per_CFD):
                 string_heav = heav_func_channel(
-                    Qs_position_x[0], delta_Q_x, Qs_position_z[0], delta_Q_z
+                    Qs_position_x[i], delta_Q_x, Qs_position_z[i], delta_Q_z
                 )
                 string_all_Q_pre += f"+ {string_heav}*({Q_pre[i]:.4f})"
                 string_all_Q_new += f"+ {string_heav}*({Q_new[i]:.4f})"
