@@ -10,6 +10,7 @@ import os, numpy as np
 from abc import ABC, abstractmethod
 from typing import List, Type, Any, Dict, Optional
 
+from env_utils import agent_index_1d_to_2d
 from alya import write_jet_file
 
 from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
@@ -795,20 +796,36 @@ class JetChannel(Jet):
             # Exponential smoothing law. Can be applied in time or space
             string_h = Q_smooth_exp(time_start, T_smoo)
 
-            # create the new Q string
-            string_heav = heav_func_channel(
-                Qs_position_x[0], delta_Q_x, Qs_position_z[0], delta_Q_z
-            )
-            string_all_Q_pre = f"{string_heav}*({Q_pre[0]:.4f})"
-            string_all_Q_new = f"{string_heav}*({Q_new[0]:.4f})"
+            nz_Qs: int = len(Qs_position_x)
 
-            for i in range(1, self.nb_inv_per_CFD):
+            # create the new Q string
+            for i in range(1, self.nb_inv_per_CFD + 1):
+                x_index, z_index = agent_index_1d_to_2d(i, nz_Qs)
+
                 string_heav = heav_func_channel(
-                    Qs_position_x[i], delta_Q_x, Qs_position_z[i], delta_Q_z
+                    Qs_position_x[x_index], delta_Q_x, Qs_position_z[z_index], delta_Q_z
                 )
-                string_all_Q_pre += f"+ {string_heav}*({Q_pre[i]:.4f})"
-                string_all_Q_new += f"+ {string_heav}*({Q_new[i]:.4f})"
+
+                if i == 1:
+                    string_all_Q_pre = f"{string_heav}*({Q_pre[i-1]:.4f})"
+                    string_all_Q_new = f"{string_heav}*({Q_new[i-1]:.4f})"
+                else:
+                    string_all_Q_pre += f"+ {string_heav}*({Q_pre[i-1]:.4f})"
+                    string_all_Q_new += f"+ {string_heav}*({Q_new[i-1]:.4f})"
+
             string_Q = f"(({string_all_Q_pre}) + ({string_h})*(({string_all_Q_new})-({string_all_Q_pre})))"
+            # string_heav = heav_func_channel(
+            #     Qs_position_x[0], delta_Q_x, Qs_position_z[0], delta_Q_z
+            # )
+            # string_all_Q_pre = f"{string_heav}*({Q_pre[0]:.4f})"
+            # string_all_Q_new = f"{string_heav}*({Q_new[0]:.4f})"
+            #
+            # for i in range(1, self.nb_inv_per_CFD):
+            #     string_heav = heav_func_channel(
+            #         Qs_position_x[i], delta_Q_x, Qs_position_z[i], delta_Q_z
+            #     )
+            #     string_all_Q_pre += f"+ {string_heav}*({Q_pre[i]:.4f})"
+            #     string_all_Q_new += f"+ {string_heav}*({Q_new[i]:.4f})"
 
         elif smooth_func == "LINEAR":
             logger.debug("JetChannel.create_smooth_funcs: Linear smoothing selected...")
@@ -837,4 +854,4 @@ class JetChannel(Jet):
             # string_C is smoothing in space. This will be added at a later time -Chriss
             #           string_C = f"cos({np.pi:.3f}/{w:.3f}*({self.theta}-({self.theta0:.3f})))"
             #           return f"({scale:.1f})*({string_Q})*({string_C})"
-            return f"({scale:.1f})*({string_Q}))"
+            return f"({scale:.1f})*({string_Q})"

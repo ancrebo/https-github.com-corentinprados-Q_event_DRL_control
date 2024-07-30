@@ -343,7 +343,7 @@ def write_jet_file(filepath: str, name: str, functions: List[str]) -> None:
     """
     Writes the inflow file that is included in the .ker.dat
     """
-    logger.debug("alya.write_jet_file: Writing jet file %s to %s" % name, filepath)
+    logger.debug("alya.write_jet_file: Writing jet file %s to %s", name, filepath)
     file = open(os.path.join(filepath, f"{name}.dat"), "w")
     # Write file
     file.write(f"FUNCTION={name.upper()}, DIMENSION={len(functions)}\n")
@@ -352,7 +352,7 @@ def write_jet_file(filepath: str, name: str, functions: List[str]) -> None:
     file.write("END_FUNCTION\n")
     file.close()
     logger.debug(
-        "alya.write_jet_file: Finished writing jet file %s to %s" % name, filepath
+        "alya.write_jet_file: Finished writing jet file %s to %s", name, filepath
     )
 
 
