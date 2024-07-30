@@ -100,37 +100,41 @@ def load_last_timestep(directory: str, pvdname: str) -> Tuple[float, pd.DataFram
     return last_timestep, df
 
 
+logger.info("Starting `load_last_timestep` function...")
 ## Extract the spatial coordinates and velocity components from the mesh
 data: Tuple[float, pd.DataFrame] = load_last_timestep(directory, pvdname)
-
+logger.info("Finished `load_last_timestep` function.\n")
 ####################################################################################################
 ## Normalize the velocity data
-u_tau: float = 0.04871566388520865
-delta_tau: float = 0.007280998149274599
-
-normalized_data = normalize_all_single(data, u_tau, delta_tau)
-####################################################################################################
 # Load pre-calculated values
+logger.info("Loading pre-calculated values...")
 precalc_value_filepath = os.path.join(averaged_data_path, precalc_value_filename)
 precalc_values = pd.read_csv(precalc_value_filepath)
 u_tau = precalc_values.iloc[0, 1]
 delta_tau = precalc_values.iloc[1, 1]
 
-# Load global Q event average ratio and standard deviation
-q_event_summary_filepath = os.path.join(averaged_data_path, q_event_summary_filename)
-q_event_summary = pd.read_csv(q_event_summary_filepath)
-avg_qratio = q_event_summary["average_q_event_ratio"].values[0]
-std_dev_qratio = q_event_summary["std_dev_q_event_ratio"].values[0]
-
-data_normalized = normalize_all_single(data, u_tau, delta_tau)
-
 averaged_data_filepath = os.path.join(averaged_data_path, averaged_data_filename)
 averaged_data = pd.read_csv(averaged_data_filepath)
+logger.info("Finished loading pre-calculated values.\n")
 
+# Load global Q event average ratio and standard deviation
+# q_event_summary_filepath = os.path.join(averaged_data_path, q_event_summary_filename)
+# q_event_summary = pd.read_csv(q_event_summary_filepath)
+# avg_qratio = q_event_summary["average_q_event_ratio"].values[0]
+# std_dev_qratio = q_event_summary["std_dev_q_event_ratio"].values[0]
+
+logger.info("Starting `normalize_all_single` function...")
+data_normalized = normalize_all_single(data, u_tau, delta_tau)
+logger.info("Finished `normalize_all_single` function.\n")
+
+logger.info("Starting `process_velocity_data_single` function...")
 processed_data = process_velocity_data_single(data_normalized, averaged_data)
+logger.info("Finished `process_velocity_data_single` function.\n")
 
+logger.info("Starting `detect_Q_events_single` function...")
 Q_event_frames = detect_Q_events_single(processed_data, averaged_data, H)
-
+logger.info("Finished `detect_Q_events_single` function.\n")
+####################################################################################################
 ## Create Structured 3D Grid
 # Extract relevant data
 df_last_timestep = Q_event_frames[1]
@@ -140,6 +144,7 @@ Q_values = df_last_timestep["Q"].values
 # Define grid resolution
 grid_resolution = 100  # Higher resolution for better quality, can be adjusted
 
+logger.info("Creating structured 3D grid...")
 # Create a grid of points
 x = np.linspace(
     df_last_timestep["x"].min(), df_last_timestep["x"].max(), grid_resolution
@@ -151,29 +156,39 @@ z = np.linspace(
     df_last_timestep["z"].min(), df_last_timestep["z"].max(), grid_resolution
 )
 X, Y, Z = np.meshgrid(x, y, z)
+logger.info("Finished creating structured 3D grid.\n")
+
 
 # Interpolate the Q values onto the grid
+logger.info("Interpolating Q values onto the grid GLOBALLY...")
 Q_grid = griddata(points, Q_values, (X, Y, Z), method="linear", fill_value=0)
+logger.info("Finished interpolating Q values onto the grid.\n")
 
 ## Apply Marching Cubes Algorithm
 # Convert the grid to a PyVista structured grid
+logger.info("Creating PyVista structured grid...")
 structured_grid = pv.StructuredGrid(X, Y, Z)
 structured_grid["Q"] = Q_grid.ravel(order="F")
+logger.info("Finished creating PyVista structured grid.\n")
 
 # Apply the marching cubes algorithm to extract isosurfaces
+logger.info("Applying marching cubes algorithm...")
 contour = structured_grid.contour(isosurfaces=[0.5], scalars="Q")
+logger.info("Finished applying marching cubes algorithm.\n")
 
 ## PLOTTING
 # Initialize a PyVista plotter
+logger.info("Initializing PyVista plotter...")
 plotter = pv.Plotter(off_screen=True)
 
 # Add the global surface
+logger.info("Adding global surface to plot...")
 plotter.add_mesh(contour, color="red", opacity=0.5)
 
 # Highlight the local volume
 # Define local volume boundaries based on your explanation
 n, m = 2, 2  # Example values
-Lx, Ly, Lz = 1.0, 1.0, 1.0  # Example global dimensions
+Lx, Ly, Lz = 2.67, 1.0, 0.8  # Example global dimensions
 local_x_index, local_z_index = 1, 1  # Example local volume indices
 
 step_x = Lx / n
@@ -184,6 +199,7 @@ local_z_min = local_z_index * step_z
 local_z_max = (local_z_index + 1) * step_z
 
 # Filter points within this local volume
+logger.info("Filtering points within the local volume...")
 local_points = df_last_timestep[
     (df_last_timestep["x"] >= local_x_min)
     & (df_last_timestep["x"] <= local_x_max)
@@ -192,6 +208,7 @@ local_points = df_last_timestep[
 ]
 
 # Interpolate Q values for the local volume
+logger.info("Interpolating Q values for the local volume...")
 Q_local_grid = griddata(
     points=(local_points["x"], local_points["y"], local_points["z"]),
     values=local_points["Q"],
@@ -201,14 +218,19 @@ Q_local_grid = griddata(
 )
 
 # Convert the local grid to a PyVista grid and apply marching cubes
+logger.info("Creating PyVista structured grid for the local volume...")
 local_structured_grid = pv.StructuredGrid(X, Y, Z)
 local_structured_grid["Q"] = Q_local_grid.ravel(order="F")
+
+logger.info("Applying marching cubes algorithm to the local volume...")
 local_contour = local_structured_grid.contour(isosurfaces=[0.5], scalars="Q")
 
 # Add the local surface with a different color
+logger.info("Adding local surface to plot...")
 plotter.add_mesh(local_contour, color="yellow", opacity=0.8)
 
 # Add a bounding box for the local volume
+logger.info("Adding bounding box for the local volume...")
 plotter.add_mesh(
     pv.Box(bounds=(local_x_min, local_x_max, 0, Ly, local_z_min, local_z_max)),
     color="blue",
@@ -216,9 +238,18 @@ plotter.add_mesh(
 )
 
 # Set plotter properties for high-quality output
+logger.info("Setting plotter properties...")
 plotter.view_xy()
 plotter.show_grid()
 
 # Save the figure
-plotter.screenshot("q_events_surface_plot.png")
-plotter.save_graphic("q_events_surface_plot.svg")  # For vector format
+logger.info("Saving the figure...")
+save_dir = '/path/to/save/directory'  # Update this to your desired directory
+png_path = os.path.join(save_dir, 'q_events_surface_plot.png')
+svg_path = os.path.join(save_dir, 'q_events_surface_plot.svg')
+
+plotter.screenshot(png_path)
+logger.info("PNG file saved successfully at %s", png_path)
+plotter.save_graphic(svg_path)  # For vector format
+logger.info("SVG file saved successfully at %s\n", svg_path)
+logger.info("Visualization complete!!!\n")
