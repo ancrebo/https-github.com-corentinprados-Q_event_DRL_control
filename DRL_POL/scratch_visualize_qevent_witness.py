@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET  # For XML parsing
 import pyvista as pv
 from scipy.interpolate import griddata
 from typing import Tuple, List, Dict
+import dask
 
 from coco_calc_reward import (
     normalize_all_single,
@@ -48,7 +49,6 @@ if __name__ == "__main__":
     save_directory: str = "/scratch/pietero/DRL_visualizations"
     ####################################################################################################
 
-
     def load_last_timestep(directory: str, pvdname: str) -> Tuple[float, pd.DataFrame]:
         """
         Loads the last timestep data from PVTU files and converts it into a Pandas DataFrame.
@@ -84,7 +84,9 @@ if __name__ == "__main__":
 
         # Extract the spatial coordinates and velocity components from the mesh
         points = mesh.points  # x, y, z coordinates
-        U, V, W = mesh["VELOC"].T  # Transpose to separate the velocity components (U, V, W)
+        U, V, W = mesh[
+            "VELOC"
+        ].T  # Transpose to separate the velocity components (U, V, W)
 
         # Create a DataFrame with the extracted data
         df = pd.DataFrame(
@@ -99,7 +101,6 @@ if __name__ == "__main__":
         )
 
         return last_timestep, df
-
 
     logger.info("Starting `load_last_timestep` function...")
     ## Extract the spatial coordinates and velocity components from the mesh
@@ -135,7 +136,6 @@ if __name__ == "__main__":
     logger.info("Starting `detect_Q_events_single` function...")
     Q_event_frames = detect_Q_events_single(processed_data, averaged_data, H)
     logger.info("Finished `detect_Q_events_single` function.\n")
-
 
     ####################################################################################################
     def interpolate_with_logging(points, values, X, Y, Z, chunk_size=10):
@@ -198,10 +198,8 @@ if __name__ == "__main__":
 
         return Q_grid
 
-
     import dask.array as da
     from dask import delayed
-
 
     def interpolate_chunk(points, values, grid_points_flat):
         """
@@ -209,7 +207,6 @@ if __name__ == "__main__":
         This function is delayed to be used with Dask for parallel processing.
         """
         return griddata(points, values, grid_points_flat, method="linear", fill_value=0)
-
 
     def interpolate_with_dask(points, values, X, Y, Z, chunk_size=10):
         """
@@ -230,7 +227,9 @@ if __name__ == "__main__":
         tasks = []
         # Calculate the total number of chunks using numpy's ceil
         total_chunks = int(
-            np.ceil(nx / chunk_size) * np.ceil(ny / chunk_size) * np.ceil(nz / chunk_size)
+            np.ceil(nx / chunk_size)
+            * np.ceil(ny / chunk_size)
+            * np.ceil(nz / chunk_size)
         )
         chunk_count = 0
 
@@ -292,7 +291,6 @@ if __name__ == "__main__":
 
         return Q_grid.compute()
 
-
     from dask.distributed import Client
 
     client = Client()  # This will use all available cores by default
@@ -321,7 +319,6 @@ if __name__ == "__main__":
     )
     X, Y, Z = np.meshgrid(x, y, z)
     logger.info("Finished creating structured 3D grid.\n")
-
 
     # Interpolate the Q values onto the grid
     logger.info("Interpolating Q values onto the grid GLOBALLY...")
