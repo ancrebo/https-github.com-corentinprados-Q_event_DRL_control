@@ -1953,6 +1953,9 @@ class Environment(Environment):
                         delta_Q_x=self.delta_Q_x,
                     )  # TODO: @pietero make sure this works for channel - Pieter
 
+                    # Update the jet profile alya file
+                    jet.update_file(simu_path)
+
             if self.reward_function == "q_event_volume":
                 self.log(
                     logging.INFO,
