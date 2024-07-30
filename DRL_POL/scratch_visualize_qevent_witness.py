@@ -151,14 +151,35 @@ if __name__ == "__main__":
     logger.info("Finished `detect_Q_events_single` function.\n")
 
     ####################################################################################################
-    # Extract points and scalar values
-    points = df_last_timestep[['x', 'y', 'z']].values
-    scalars = df_last_timestep['Q'].values
+    df_last_timestep = Q_event_frames[1]
 
+    # Extract points and scalar values
+    points = df_last_timestep[["x", "y", "z"]].values
+    scalars = df_last_timestep["Q"].values
+
+    # Parse the PVD file to extract mappings of timesteps to their corresponding PVTU files
+    pvd_path = os.path.join(directory, pvdname)
+    tree = ET.parse(pvd_path)
+    root = tree.getroot()
+    timestep_file_map = {
+        dataset.attrib["file"]: float(dataset.attrib["timestep"])
+        for dataset in root.find("Collection")
+    }
+
+    # Get the last timestep and corresponding file
+    last_file = max(timestep_file_map, key=timestep_file_map.get)
+    last_timestep = timestep_file_map[last_file]
+    path = os.path.join(directory, last_file)
+
+    logger.info(f"Loading mesh from {last_file} at timestep {last_timestep}")
+
+    # Read the mesh data from the PVTU file
+    mesh = pv.read(path)
     # Define the cell connectivity
     # Assuming the cells array is already in the format required by PyVista
     # The cell array starts with the number of points per cell followed by the point indices
     # For a VTK_HEXAHEDRON, the first number will always be 8, followed by the 8 point indices
+
     cells = mesh.cells
     celltypes = mesh.celltypes
 
@@ -166,21 +187,21 @@ if __name__ == "__main__":
     grid = pv.UnstructuredGrid(cells, celltypes, points)
 
     # Add scalar data to the points
-    grid.point_data['Q'] = scalars
+    grid.point_data["Q"] = scalars
 
     # Apply the marching cubes algorithm
     contour = grid.contour(isosurfaces=[0.5])  # Adjust the isovalue as needed
 
     # Plot the result
     plotter = pv.Plotter(off_screen=True)
-    plotter.add_mesh(contour, color='red')
-    plotter.add_mesh(grid, style='wireframe', color='black')
+    plotter.add_mesh(contour, color="red")
+    plotter.add_mesh(grid, style="wireframe", color="black")
     plotter.show()
 
     # Save the result
-    save_dir = '/path/to/save/directory'  # Update this to your desired directory
-    png_path = os.path.join(save_dir, 'q_events_surface_plot.png')
-    svg_path = os.path.join(save_dir, 'q_events_surface_plot.svg')
+    save_dir = "/path/to/save/directory"  # Update this to your desired directory
+    png_path = os.path.join(save_dir, "q_events_surface_plot.png")
+    svg_path = os.path.join(save_dir, "q_events_surface_plot.svg")
 
     plotter.screenshot(png_path)
     plotter.save_graphic(svg_path)
