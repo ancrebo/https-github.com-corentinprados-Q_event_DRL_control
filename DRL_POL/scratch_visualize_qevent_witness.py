@@ -153,6 +153,9 @@ if __name__ == "__main__":
     ####################################################################################################
     df_last_timestep = Q_event_frames[1]
 
+    # Convert the boolean Q values to integers for visualization
+    df_last_timestep["Q"] = df_last_timestep["Q"].astype(int)
+
     # Parse the PVD file to extract mappings of timesteps to their corresponding PVTU files
     pvd_path = os.path.join(directory, pvdname)
     tree = ET.parse(pvd_path)
