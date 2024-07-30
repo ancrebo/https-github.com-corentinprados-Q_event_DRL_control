@@ -322,7 +322,7 @@ if __name__ == "__main__":
 
     # Interpolate the Q values onto the grid
     logger.info("Interpolating Q values onto the grid GLOBALLY...")
-    Q_grid = interpolate_with_dask(points, Q_values, X, Y, Z, chunk_size=chunk_size)
+    Q_grid = interpolate_with_logging(points, Q_values, X, Y, Z, chunk_size=chunk_size)
     logger.info("Finished interpolating Q values onto the grid.\n")
 
     ## Apply Marching Cubes Algorithm
@@ -370,7 +370,7 @@ if __name__ == "__main__":
 
     # Interpolate Q values for the local volume
     logger.info("Interpolating Q values for the local volume...")
-    Q_local_grid = interpolate_with_dask(
+    Q_local_grid = interpolate_with_logging(
         points=local_points[["x", "y", "z"]].values,
         values=local_points["Q"].values,
         X=X,
