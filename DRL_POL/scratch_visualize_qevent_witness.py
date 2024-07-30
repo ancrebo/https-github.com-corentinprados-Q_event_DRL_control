@@ -227,9 +227,8 @@ def interpolate_with_dask(points, values, X, Y, Z, chunk_size=10):
     Q_grid = da.zeros_like(X, dtype=np.float64)
 
     tasks = []
-    total_chunks = (
-        (nx // chunk_size + 1) * (ny // chunk_size + 1) * (nz // chunk_size + 1)
-    )
+    # Calculate the total number of chunks using numpy's ceil
+    total_chunks = int(np.ceil(nx / chunk_size) * np.ceil(ny / chunk_size) * np.ceil(nz / chunk_size))
     chunk_count = 0
 
     for i in range(0, nx, chunk_size):
