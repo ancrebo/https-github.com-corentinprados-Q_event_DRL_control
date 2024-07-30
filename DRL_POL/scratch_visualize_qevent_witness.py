@@ -91,9 +91,9 @@ def load_last_timestep(directory: str, pvdname: str) -> Tuple[float, pd.DataFram
             "x": points[:, 0],
             "y": points[:, 1],
             "z": points[:, 2],
-            "U": U,
-            "V": V,
-            "W": W,
+            "u": U,
+            "v": V,
+            "w": W,
         }
     )
 
