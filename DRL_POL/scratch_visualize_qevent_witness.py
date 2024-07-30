@@ -81,6 +81,7 @@ if __name__ == "__main__":
 
         # Read the mesh data from the PVTU file
         mesh = pv.read(path)
+        print(mesh)
 
         # Extract the spatial coordinates and velocity components from the mesh
         points = mesh.points  # x, y, z coordinates
@@ -106,6 +107,7 @@ if __name__ == "__main__":
     ## Extract the spatial coordinates and velocity components from the mesh
     data: Tuple[float, pd.DataFrame] = load_last_timestep(directory, pvdname)
     logger.info("Finished `load_last_timestep` function.\n")
+    exit()
     ####################################################################################################
     ## Normalize the velocity data
     # Load pre-calculated values
