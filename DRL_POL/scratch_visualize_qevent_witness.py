@@ -134,7 +134,67 @@ logger.info("Finished `process_velocity_data_single` function.\n")
 logger.info("Starting `detect_Q_events_single` function...")
 Q_event_frames = detect_Q_events_single(processed_data, averaged_data, H)
 logger.info("Finished `detect_Q_events_single` function.\n")
+
+
 ####################################################################################################
+def interpolate_with_logging(points, values, X, Y, Z, chunk_size=10):
+    """
+    Interpolate values onto a grid in chunks and log progress.
+
+    Parameters:
+    - points (np.ndarray): Array of input points (N, 3).
+    - values (np.ndarray): Array of values to interpolate (N,).
+    - X, Y, Z (np.ndarray): Meshgrid arrays.
+    - chunk_size (int): Number of slices to process at a time.
+
+    Returns:
+    - Q_grid (np.ndarray): Interpolated grid values.
+    """
+    nx, ny, nz = X.shape
+    Q_grid = np.zeros_like(X, dtype=np.float64)
+
+    total_chunks = (
+        (nx // chunk_size + 1) * (ny // chunk_size + 1) * (nz // chunk_size + 1)
+    )
+    chunk_count = 0
+
+    for i in range(0, nx, chunk_size):
+        for j in range(0, ny, chunk_size):
+            for k in range(0, nz, chunk_size):
+                chunk_count += 1
+
+                x_slice = slice(i, min(i + chunk_size, nx))
+                y_slice = slice(j, min(j + chunk_size, ny))
+                z_slice = slice(k, min(k + chunk_size, nz))
+
+                grid_points = (
+                    X[x_slice, y_slice, z_slice],
+                    Y[x_slice, y_slice, z_slice],
+                    Z[x_slice, y_slice, z_slice],
+                )
+
+                grid_points_flat = np.array(
+                    [
+                        grid_points[0].flatten(),
+                        grid_points[1].flatten(),
+                        grid_points[2].flatten(),
+                    ]
+                ).T
+
+                Q_slice = griddata(
+                    points, values, grid_points_flat, method="linear", fill_value=0
+                )
+                Q_grid[x_slice, y_slice, z_slice] = Q_slice.reshape(
+                    grid_points[0].shape
+                )
+
+                logger.info(
+                    f"Interpolated chunk {chunk_count} of {total_chunks}: X[{x_slice}], Y[{y_slice}], Z[{z_slice}]"
+                )
+
+    return Q_grid
+
+
 ## Create Structured 3D Grid
 # Extract relevant data
 df_last_timestep = Q_event_frames[1]
@@ -161,7 +221,7 @@ logger.info("Finished creating structured 3D grid.\n")
 
 # Interpolate the Q values onto the grid
 logger.info("Interpolating Q values onto the grid GLOBALLY...")
-Q_grid = griddata(points, Q_values, (X, Y, Z), method="linear", fill_value=0)
+Q_grid = interpolate_with_logging(points, Q_values, X, Y, Z, chunk_size=10)
 logger.info("Finished interpolating Q values onto the grid.\n")
 
 ## Apply Marching Cubes Algorithm
