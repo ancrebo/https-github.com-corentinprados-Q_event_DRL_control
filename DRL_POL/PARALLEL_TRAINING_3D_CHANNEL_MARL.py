@@ -267,7 +267,7 @@ if "nx_Qs" not in globals():
     nx_Qs = 1
 
 logger.info(
-    "Splitting environments into %d local environments...\n",
+    "Splitting each global environment into %d local environments...\n",
     nx_Qs * nz_Qs,
 )
 environments = [

@@ -159,7 +159,9 @@ use_MARL = True
 
 nb_inv_per_CFD = 4  # same as nz_Qs¿¿¿ # TODO: @pietero is this necessary with nTotal_Qs defined later? - Pieter
 actions_per_inv = 1  # how many actions to control per pseudoenvironment
-batch_size = nb_inv_per_CFD * num_servers
+batch_size = (
+    nb_inv_per_CFD * num_servers
+)  # TODO: Is this number of episodes before policy updates? - Pieter
 # frontal_area = Lz / nb_inv_per_CFD
 
 if num_servers == 1 and not use_MARL:
