@@ -264,7 +264,9 @@ def interpolate_with_dask(points, values, X, Y, Z, chunk_size=10):
                 )
 
     # Compute all tasks in parallel
+    logger.info("Computing interpolated chunks in parallel...")
     Q_chunks = da.compute(*tasks)
+    logger.info("Finished computing interpolated chunks!!!\n")
 
     # Combine results into Q_grid
     chunk_count = 0
@@ -279,6 +281,12 @@ def interpolate_with_dask(points, values, X, Y, Z, chunk_size=10):
                     grid_points[0].shape
                 )
                 chunk_count += 1
+
+                # Log progress
+                progress_percentage = (chunk_count / total_chunks) * 100
+                logger.info(
+                    f"Processed chunk {chunk_count} out of {total_chunks} ({progress_percentage:.2f}% complete)"
+                )
 
     return Q_grid.compute()
 
@@ -359,10 +367,12 @@ local_points = df_last_timestep[
 # Interpolate Q values for the local volume
 logger.info("Interpolating Q values for the local volume...")
 Q_local_grid = interpolate_with_dask(
-    points=local_points[['x', 'y', 'z']].values,
-    values=local_points['Q'].values,
-    X=X, Y=Y, Z=Z,
-    chunk_size=chunk_size
+    points=local_points[["x", "y", "z"]].values,
+    values=local_points["Q"].values,
+    X=X,
+    Y=Y,
+    Z=Z,
+    chunk_size=chunk_size,
 )
 
 # Convert the local grid to a PyVista grid and apply marching cubes
