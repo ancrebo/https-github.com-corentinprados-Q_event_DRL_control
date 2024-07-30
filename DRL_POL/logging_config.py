@@ -91,6 +91,11 @@ logging_config_dict: Dict[str, Dict[str, Any]] = {
         "file_level": "INFO",
         "override": True,
     },
+    "visualize_qevent_witness": {
+        "console_level": "INFO",
+        "file_level": "DEBUG",
+        "override": True,
+    },
 }
 
 
