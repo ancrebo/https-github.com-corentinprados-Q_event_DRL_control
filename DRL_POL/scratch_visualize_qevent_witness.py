@@ -228,7 +228,9 @@ def interpolate_with_dask(points, values, X, Y, Z, chunk_size=10):
 
     tasks = []
     # Calculate the total number of chunks using numpy's ceil
-    total_chunks = int(np.ceil(nx / chunk_size) * np.ceil(ny / chunk_size) * np.ceil(nz / chunk_size))
+    total_chunks = int(
+        np.ceil(nx / chunk_size) * np.ceil(ny / chunk_size) * np.ceil(nz / chunk_size)
+    )
     chunk_count = 0
 
     for i in range(0, nx, chunk_size):
@@ -264,7 +266,7 @@ def interpolate_with_dask(points, values, X, Y, Z, chunk_size=10):
 
     # Compute all tasks in parallel
     logger.info("Computing interpolated chunks in parallel...")
-    Q_chunks = da.compute(*tasks)
+    Q_chunks = dask.compute(*tasks)
     logger.info("Finished computing interpolated chunks!!!\n")
 
     # Combine results into Q_grid
@@ -289,6 +291,11 @@ def interpolate_with_dask(points, values, X, Y, Z, chunk_size=10):
 
     return Q_grid.compute()
 
+
+from dask.distributed import Client
+
+client = Client()  # This will use all available cores by default
+logger.info(client)
 
 ## Create Structured 3D Grid
 # Extract relevant data
