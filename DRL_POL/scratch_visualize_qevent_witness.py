@@ -92,6 +92,11 @@ if __name__ == "__main__":
 
         print("Number of Cell Types: ", len(celltypes))
 
+        # Print the first few points, cells, and cell types
+        print("First 5 points: \n", points[:5])
+        print("First 5 cells: \n", cells[:5])
+        print("First 5 cell types: \n", celltypes[:5])
+
         U, V, W = mesh[
             "VELOC"
         ].T  # Transpose to separate the velocity components (U, V, W)
