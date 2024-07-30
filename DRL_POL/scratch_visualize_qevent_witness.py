@@ -229,8 +229,8 @@ if __name__ == "__main__":
     logger.info("Adding contour to plot...")
     plotter.add_mesh(contour, color="red", opacity=0.5)
 
-    logger.info("Adding wireframe to plot...")
-    plotter.add_mesh(grid, style="wireframe", color="black")
+    # logger.info("Adding wireframe to plot...")
+    # plotter.add_mesh(grid, style="wireframe", color="black")
 
     # Add axes
     logger.info("Adding axes...")
