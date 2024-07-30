@@ -290,7 +290,8 @@ points = df_last_timestep[["x", "y", "z"]].values
 Q_values = df_last_timestep["Q"].values
 
 # Define grid resolution
-grid_resolution = 100  # Higher resolution for better quality, can be adjusted
+grid_resolution = 30  # Higher resolution for better quality, can be adjusted
+chunk_size = 5  # Number of slices to process at a time
 
 logger.info("Creating structured 3D grid...")
 # Create a grid of points
@@ -309,7 +310,7 @@ logger.info("Finished creating structured 3D grid.\n")
 
 # Interpolate the Q values onto the grid
 logger.info("Interpolating Q values onto the grid GLOBALLY...")
-Q_grid = interpolate_with_dask(points, Q_values, X, Y, Z, chunk_size=5)
+Q_grid = interpolate_with_dask(points, Q_values, X, Y, Z, chunk_size=chunk_size)
 logger.info("Finished interpolating Q values onto the grid.\n")
 
 ## Apply Marching Cubes Algorithm
@@ -357,12 +358,11 @@ local_points = df_last_timestep[
 
 # Interpolate Q values for the local volume
 logger.info("Interpolating Q values for the local volume...")
-Q_local_grid = griddata(
-    points=(local_points["x"], local_points["y"], local_points["z"]),
-    values=local_points["Q"],
-    xi=(X, Y, Z),
-    method="linear",
-    fill_value=0,
+Q_local_grid = interpolate_with_dask(
+    points=local_points[['x', 'y', 'z']].values,
+    values=local_points['Q'].values,
+    X=X, Y=Y, Z=Z,
+    chunk_size=chunk_size
 )
 
 # Convert the local grid to a PyVista grid and apply marching cubes
