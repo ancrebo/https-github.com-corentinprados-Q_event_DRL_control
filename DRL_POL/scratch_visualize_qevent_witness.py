@@ -156,6 +156,10 @@ if __name__ == "__main__":
     # Convert the boolean Q values to integers for visualization
     df_last_timestep["Q"] = df_last_timestep["Q"].astype(float)
 
+    # Create list of unique values for Q
+    unique_Q_values = df_last_timestep["Q"].unique()
+    print("Unique Q Values:", unique_Q_values)
+
     # Parse the PVD file to extract mappings of timesteps to their corresponding PVTU files
     pvd_path = os.path.join(directory, pvdname)
     tree = ET.parse(pvd_path)
