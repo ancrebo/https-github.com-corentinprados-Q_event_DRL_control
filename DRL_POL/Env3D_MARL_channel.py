@@ -659,9 +659,10 @@ class Environment(Environment):
 
                     self.log(
                         logging.INFO,
-                        "ENV_ID %s: Env3D.run: 2D: \n\n----STARTING ALYA RUN WITH UPDATED ACTIONS!!!----\n"
-                        "-----------------Action #%d\n",
+                        "ENV_ID %s: Env3D.run:\n\n----STARTING ALYA RUN WITH UPDATED ACTIONS!!!----\n"
+                        "-----------Episode #%d Action #%d\n",
                         self.ENV_ID,
+                        self.episode_number,
                         self.action_count,
                     )
                     run_subprocess(
@@ -676,7 +677,7 @@ class Environment(Environment):
 
                     self.log(
                         logging.DEBUG,
-                        "ENV_ID %s: Env3D.run: 2D: Updating ALYA sets...",
+                        "ENV_ID %s: Env3D.run:Updating ALYA sets...",
                         self.ENV_ID,
                     )
                     run_subprocess(
@@ -689,7 +690,7 @@ class Environment(Environment):
                 if self.dimension == 3:
                     self.log(
                         logging.DEBUG,
-                        "ENV_ID %s: Env3D.run: 3D: Creating logs folder...",
+                        "ENV_ID %s: Env3D.run:Creating logs folder...",
                         self.ENV_ID,
                     )
                     run_subprocess(
@@ -698,9 +699,10 @@ class Environment(Environment):
 
                     self.log(
                         logging.INFO,
-                        "ENV_ID %s: Env3D.run: 3D: \n\n----STARTING ALYA RUN WITH UPDATED ACTIONS!!!----\n"
-                        "-----------------Action #%d\n",
+                        "ENV_ID %s: Env3D.run:\n\n----STARTING ALYA RUN WITH UPDATED ACTIONS!!!----\n"
+                        "-----------Episode #%d Action #%d\n",
                         self.ENV_ID,
+                        self.episode_number,
                         self.action_count,
                     )
                     run_subprocess(
@@ -716,7 +718,7 @@ class Environment(Environment):
 
                     self.log(
                         logging.DEBUG,
-                        "ENV_ID %s: Env3D.run: 3D: Updating ALYA sets...",
+                        "ENV_ID %s: Env3D.run: Updating ALYA sets...",
                         self.ENV_ID,
                     )
                     run_subprocess(
