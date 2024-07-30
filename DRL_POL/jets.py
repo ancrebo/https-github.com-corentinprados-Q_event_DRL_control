@@ -854,4 +854,4 @@ class JetChannel(Jet):
             # string_C is smoothing in space. This will be added at a later time -Chriss
             #           string_C = f"cos({np.pi:.3f}/{w:.3f}*({self.theta}-({self.theta0:.3f})))"
             #           return f"({scale:.1f})*({string_Q})*({string_C})"
-            return f"({scale:.1f})*({string_Q}))"
+            return f"({scale:.1f})*({string_Q})"
