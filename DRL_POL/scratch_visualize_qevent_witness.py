@@ -85,6 +85,13 @@ if __name__ == "__main__":
 
         # Extract the spatial coordinates and velocity components from the mesh
         points = mesh.points  # x, y, z coordinates
+
+        # Extract cells and cell types
+        cells = mesh.cells
+        celltypes = mesh.celltypes
+
+        print("Number of Cell Types: ", len(celltypes))
+
         U, V, W = mesh[
             "VELOC"
         ].T  # Transpose to separate the velocity components (U, V, W)
