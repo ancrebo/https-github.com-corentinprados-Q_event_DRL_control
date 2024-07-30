@@ -199,9 +199,11 @@ if __name__ == "__main__":
     print("Scalar Values:", scalars[:10])  # Print first 10 scalar values for inspection
 
     # Create the unstructured grid
+    logger.info("Creating unstructured grid...")
     grid = pv.UnstructuredGrid(cells, celltypes, points)
 
     # Add scalar data to the points
+    logger.info("Adding scalar data to the points...")
     if scalars.shape[0] == points.shape[0]:
         grid.point_data["Q"] = scalars
     else:
@@ -210,15 +212,20 @@ if __name__ == "__main__":
         )
 
     # Use a virtual framebuffer for headless rendering
-    pv.start_xvfb()
+    # pv.start_xvfb()
 
     # Apply the marching cubes algorithm
+    logger.info("Applying the marching cubes algorithm...")
     contour = grid.contour(isosurfaces=[0.5])  # Adjust the isovalue as needed
 
     # Plot the result
+    logger.info("Creating plotter...")
     plotter = pv.Plotter(off_screen=False)
+    logger.info("Adding mesh to plot...")
     plotter.add_mesh(contour, color="red")
+    logger.info("Adding wireframe to plot...")
     plotter.add_mesh(grid, style="wireframe", color="black")
+    logger.info("Showing plotter...")
     plotter.show()
 
     # Save the result
