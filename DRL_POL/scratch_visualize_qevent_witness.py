@@ -221,10 +221,25 @@ if __name__ == "__main__":
     # Plot the result
     logger.info("Creating plotter...")
     plotter = pv.Plotter(off_screen=False)
-    logger.info("Adding mesh to plot...")
-    plotter.add_mesh(contour, color="red")
+
+    # Set plotter background color
+    plotter.set_background("white")
+
+    # Adding mesh to plot
+    logger.info("Adding contour to plot...")
+    plotter.add_mesh(contour, color="red", opacity=0.5)
+
     logger.info("Adding wireframe to plot...")
     plotter.add_mesh(grid, style="wireframe", color="black")
+
+    # Add axes
+    logger.info("Adding axes...")
+    plotter.show_axes()
+
+    # Add scalar bar
+    logger.info("Adding scalar bar...")
+    plotter.add_scalar_bar(title="Q Values")
+
     logger.info("Showing plotter...")
     plotter.show()
 
