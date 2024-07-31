@@ -34,7 +34,7 @@ if __name__ == "__main__":
     q_event_summary_filename = "q_event_ratio_summary.csv"
     averaged_data_filename = "averaged_data.csv"
 
-    directory_base: str = (
+    base_directory: str = (
         "/scratch/pietero/DRL_episode_analysis/testrun_witnessv5_np18_initial_longRun"
     )
 
@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
     pvdname: str = "channel.pvd"
 
-    directory: str = os.path.join(directory_base, episode, "vtk")
+    vtk_directory: str = os.path.join(base_directory, episode, "vtk")
 
     save_directory: str = "/scratch/pietero/DRL_visualizations"
     ####################################################################################################
@@ -115,7 +115,7 @@ if __name__ == "__main__":
 
     logger.info("Starting `load_last_timestep` function...")
     ## Extract the spatial coordinates and velocity components from the mesh
-    data: Tuple[float, pd.DataFrame] = load_last_timestep(directory, pvdname)
+    data: Tuple[float, pd.DataFrame] = load_last_timestep(vtk_directory, pvdname)
     logger.info("Finished `load_last_timestep` function.\n")
     ####################################################################################################
     ## Normalize the velocity data
@@ -156,7 +156,7 @@ if __name__ == "__main__":
     ####################################################################################################
     # Use timestep and the pvd file to identify the correct VTK file to load and read the mesh
     timestep_to_load, Q_event_df = Q_event_frames
-    pvd_path = os.path.join(directory, pvdname)
+    pvd_path = os.path.join(vtk_directory, pvdname)
     tree = ET.parse(pvd_path)
     root = tree.getroot()
     timestep_file_map = {
@@ -167,7 +167,7 @@ if __name__ == "__main__":
     file_name = [
         key for key, value in timestep_file_map.items() if value == timestep_to_load
     ][0]
-    path = os.path.join(directory, file_name)
+    path = os.path.join(vtk_directory, file_name)
     mesh = pv.read(path)
 
     # Extract the points and verify the order (optional, for sanity check)
