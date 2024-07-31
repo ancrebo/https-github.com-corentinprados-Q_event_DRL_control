@@ -269,9 +269,7 @@ def calculate_channel_witness_coordinates(params: Dict[str, Any]) -> Dict[str, A
     y_skip_values = params["y_skip_values"]
 
     # Create list of y values to place pattern - Exclude the first term (0) and last term (Ly)
-    y_values: List[float] = np.linspace(
-        0, Ly, y_value_density + 2
-    ).tolist()[1:-1]
+    y_values: List[float] = np.linspace(0, Ly, y_value_density + 2).tolist()[1:-1]
 
     coordinates: List[Tuple[float, float, float]] = []
     indices2D: List[Tuple[int, int]] = []
