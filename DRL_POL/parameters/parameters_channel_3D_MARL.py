@@ -57,6 +57,10 @@ n_agents_z: int = 2  # Number of agents along z direction
 quick_episodes: bool = False
 quick_episode_length: int = 3
 
+# Whether to override the witness file if it already exists
+probes_location: int = 5  # 5, 6, 7, 8 (see witness section)
+need_witness_file_override: bool = False
+
 # THESE VALUES ARE CALCULATED FROM `coco_small_load_post_processing.py` and are specific to THIS BASELINE! - Pieter
 # Check `calculated_values.csv` in baseline folder for these values
 u_tau: float = 0.04871566388520865
@@ -348,8 +352,7 @@ geometry_params = {  # Kept for legacy purposes but to be deleted when reworking
 ## 8 -- 3D channel  (PER LOCAL: X pattern, 50 layers, X every 5 layers)
 ## TODO: explain criteria of ordering history points, to "call" them quickly - Pol
 
-
-probes_location = 5  # 5, 6, 7, 8
+# REMINDER: CHECK `probe_location` at top of file for the selected probe version - Pieter
 
 list_position_probes = []
 
@@ -409,7 +412,7 @@ output_params: Dict[str, Any] = calculate_channel_witness_coordinates(
 
 ## CREATION OF WITNESS FILE
 # Whether to overwrite the witness file if exists, True overwrites existing file
-need_witness_file_override: bool = False
+
 logger.debug("Witness file override: %s", need_witness_file_override)
 
 case_folder = f"alya_files/case_{training_case}"
