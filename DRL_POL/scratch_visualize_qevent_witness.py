@@ -195,7 +195,7 @@ if __name__ == "__main__":
 
     # Save the modified mesh to a new VTK file
     modified_path = os.path.join(
-        base_directory, f"{episode}_timestep_{timestep_to_load}_Q_event.vtu"
+        base_directory, episode, f"{episode}_timestep_{timestep_to_load}_Q_event.vtu"
     )
     logger.info("Saving the modified mesh to %s", modified_path)
 
