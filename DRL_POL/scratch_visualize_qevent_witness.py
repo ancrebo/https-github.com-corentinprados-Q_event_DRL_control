@@ -194,8 +194,10 @@ if __name__ == "__main__":
     logger.info("Q values added to the mesh!!!")
 
     # Save the modified mesh to a new VTK file
+    # change . to _ in `timestep` to avoid issues with file naming
+    timestep_filename = str(timestep_to_load).replace(".", "_")
     modified_path = os.path.join(
-        base_directory, episode, f"{episode}_timestep_{timestep_to_load}_Q_event.vtu"
+        base_directory, episode, f"{episode}_timestep_{timestep_filename}_Q_event.vtu"
     )
     logger.info("Saving the modified mesh to %s", modified_path)
 
