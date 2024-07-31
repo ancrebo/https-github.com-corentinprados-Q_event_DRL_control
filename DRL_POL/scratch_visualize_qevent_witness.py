@@ -178,6 +178,7 @@ if __name__ == "__main__":
 
     # Extract the points and verify the order (optional, for sanity check)
     points = mesh.points
+    logger.info("Points extracted!!!")
     # Optionally, you can verify the order by comparing with your dataframe coordinates
     # df = pd.DataFrame({'x': points[:, 0], 'y': points[:, 1], 'z': points[:, 2]})
     # assert (df[['x', 'y', 'z']] == your_existing_dataframe[['x', 'y', 'z']]).all().all()
@@ -186,20 +187,27 @@ if __name__ == "__main__":
     # Example dataframe structure
     # your_existing_dataframe = pd.DataFrame({'x': [...], 'y': [...], 'z': [...], 'Q': [...]})
     Q_values = Q_event_df["Q"].to_numpy()
+    logger.info("Q values extracted!!!")
 
     # Add Q values as a new scalar field to the mesh
     mesh.point_data["Q"] = Q_values
+    logger.info("Q values added to the mesh!!!")
 
     # Save the modified mesh to a new VTK file
     modified_path = os.path.join(
         save_directory, f"EP_{episode}_timestep_{timestep_to_load}_Q_event.vtu"
     )
+    logger.info("Saving the modified mesh to %s", modified_path)
 
     # Load the modified mesh
+    logger.info("Loading the modified mesh...")
     modified_mesh = pv.read(modified_path)
+    logger.info("Modified mesh loaded!!!")
 
     # Verify the order
+    logger.info("Verifying the order of points in the mesh...")
     assert (mesh.points == modified_mesh.points).all()
+    logger.info("Order of points in the mesh verified!!!")
 
     # Log the details of the original mesh and the modified mesh
     logger.info("Original mesh details:\n%s\n", mesh)
