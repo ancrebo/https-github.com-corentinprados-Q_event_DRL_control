@@ -308,19 +308,15 @@ def calculate_channel_witness_coordinates(params: Dict[str, Any]) -> Dict[str, A
                 if 0 <= y <= Ly:  # Ensure y-values are within the global y limit
                     if y_skipping and (index % y_skip_values != 0):
                         # Place only the center point
-                        coordinates.append(
-                            (center_point[0] / Lx, y / Ly, center_point[1] / Lz)
-                        )
+                        coordinates.append((center_point[0], y, center_point[1]))
                         indices2D.append((i, j))
                     else:
                         # Place the full pattern
                         for x, z in end_points:
-                            coordinates.append((x / Lx, y / Ly, z / Lz))
+                            coordinates.append((x, y, z))
                             indices2D.append((i, j))
                         # Also place the center point
-                        coordinates.append(
-                            (center_point[0] / Lx, y / Ly, center_point[1] / Lz)
-                        )
+                        coordinates.append((center_point[0], y, center_point[1]))
                         indices2D.append((i, j))
                 else:
                     raise ValueError(
