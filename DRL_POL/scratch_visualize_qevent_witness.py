@@ -189,5 +189,12 @@ if __name__ == "__main__":
         save_directory, f"EP_{episode}_timestep_{timestep_to_load}_Q_event.vtu"
     )
 
-    # Verify the addition by printing the fields available in the modified mesh
-    print(mesh.point_data)
+    # Load the modified mesh
+    modified_mesh = pv.read(modified_path)
+
+    # Verify the order
+    assert (mesh.points == modified_mesh.points).all()
+
+    # Log the details of the original mesh and the modified mesh
+    logger.info("Original mesh details:\n%s\n", mesh)
+    logger.info("Modified mesh details:\n%s\n", modified_mesh)
