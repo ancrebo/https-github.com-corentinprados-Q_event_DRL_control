@@ -156,7 +156,10 @@ if __name__ == "__main__":
     ####################################################################################################
     # Use timestep and the pvd file to identify the correct VTK file to load and read the mesh
     timestep_to_load, Q_event_df = Q_event_frames
+    logger.info("Timestep to load: %s", timestep_to_load)
     pvd_path = os.path.join(vtk_directory, pvdname)
+    logger.info("PVD path: %s", pvd_path)
+
     tree = ET.parse(pvd_path)
     root = tree.getroot()
     timestep_file_map = {
@@ -167,8 +170,11 @@ if __name__ == "__main__":
     file_name = [
         key for key, value in timestep_file_map.items() if value == timestep_to_load
     ][0]
+    logger.info("File name: %s", file_name)
     path = os.path.join(vtk_directory, file_name)
+    logger.info("Path to load: %s", path)
     mesh = pv.read(path)
+    logger.info("Mesh loaded!!!")
 
     # Extract the points and verify the order (optional, for sanity check)
     points = mesh.points
