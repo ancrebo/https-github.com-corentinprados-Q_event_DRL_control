@@ -200,6 +200,8 @@ if __name__ == "__main__":
         base_directory, episode, f"{episode}_timestep_{timestep_filename}_Q_event.vtu"
     )
     logger.info("Saving the modified mesh to %s", modified_path)
+    mesh.save(modified_path)
+    logger.info("Modified mesh saved!!!")
 
     # Load the modified mesh
     logger.info("Loading the modified mesh...")
