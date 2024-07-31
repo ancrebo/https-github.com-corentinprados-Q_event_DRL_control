@@ -268,8 +268,8 @@ def calculate_channel_witness_coordinates(params: Dict[str, Any]) -> Dict[str, A
     y_skipping = params["y_skipping"]
     y_skip_values = params["y_skip_values"]
 
-    # Create list of y values to place pattern - Exclude the first term (0)
-    y_values: List[float] = np.linspace(0, Ly, y_value_density + 1).tolist()[1:]
+    # Create list of y values to place pattern - Exclude the first term (0) and last term (Ly)
+    y_values: List[float] = np.linspace(0, Ly, y_value_density + 2).tolist()[1:-1]
 
     coordinates: List[Tuple[float, float, float]] = []
     indices2D: List[Tuple[int, int]] = []
@@ -308,19 +308,15 @@ def calculate_channel_witness_coordinates(params: Dict[str, Any]) -> Dict[str, A
                 if 0 <= y <= Ly:  # Ensure y-values are within the global y limit
                     if y_skipping and (index % y_skip_values != 0):
                         # Place only the center point
-                        coordinates.append(
-                            (center_point[0] / Lx, y / Ly, center_point[1] / Lz)
-                        )
+                        coordinates.append((center_point[0], y, center_point[1]))
                         indices2D.append((i, j))
                     else:
                         # Place the full pattern
                         for x, z in end_points:
-                            coordinates.append((x / Lx, y / Ly, z / Lz))
+                            coordinates.append((x, y, z))
                             indices2D.append((i, j))
                         # Also place the center point
-                        coordinates.append(
-                            (center_point[0] / Lx, y / Ly, center_point[1] / Lz)
-                        )
+                        coordinates.append((center_point[0], y, center_point[1]))
                         indices2D.append((i, j))
                 else:
                     raise ValueError(
