@@ -8,7 +8,6 @@ of timesteps, and saves the data to a CSV file.
 Usage
 -----
 Run the script with the following command:
-
     python scatch_witness_load_u.py --case_folder /path/to/case_folder --output_file /path/to/output.csv --point_index 0 --n_timesteps 10
 
 Parameters
@@ -64,6 +63,7 @@ def extract_witness_data(
     n_timesteps : int
         The number of timesteps to extract for the witness point.
     """
+    logging.info("Starting the extraction process...")
     case_folder = Path(case_folder)
     wit_file = case_folder.glob("*.nsi.wit")
     witness_dat_file = case_folder / "witness.dat"
@@ -71,28 +71,49 @@ def extract_witness_data(
     # Ensure the wit file exists
     try:
         wit_file = next(wit_file)
+        logging.info(f"Found .nsi.wit file: {wit_file}")
     except StopIteration:
+        logging.error("No .nsi.wit file found in the specified case folder.")
         raise FileNotFoundError("No .nsi.wit file found in the specified case folder.")
 
     # Read witness points from witness.dat to validate point index
     witness_points = read_witness_dat(witness_dat_file)
+    logging.info(f"Number of witness points: {len(witness_points)}")
     if point_index < 0 or point_index >= len(witness_points):
+        logging.error(
+            f"Invalid point index: {point_index}. Must be between 0 and {len(witness_points)-1}."
+        )
         raise ValueError(
             f"Invalid point index: {point_index}. Must be between 0 and {len(witness_points)-1}."
         )
 
     point_coords = witness_points[point_index]
+    logging.info(f"Coordinates of the selected witness point: {point_coords}")
     coords_str = f"x{point_coords[0]}_y{point_coords[1]}_z{point_coords[2]}"
     output_file = f"{Path(output_file).stem}_{coords_str}.csv"
 
     # Read the last N timesteps from the .wit file
-    _, time, data = witnessReadNByBehind(str(wit_file), n_timesteps)
+    try:
+        _, time, data = witnessReadNByBehind(str(wit_file), n_timesteps)
+        logging.info(f"Number of timesteps read: {len(time)}")
+    except Exception as e:
+        logging.error(f"Error reading .nsi.wit file: {e}")
+        raise
 
     # Extract the u component for the specific witness point
-    u_values = data["VELOX"][:, point_index]
+    try:
+        u_values = data["VELOX"][:, point_index]
+        logging.info(f"Extracted u values for point index {point_index}")
+    except KeyError as e:
+        logging.error(f"Key error: {e}. Available keys: {data.keys()}")
+        raise
+    except IndexError as e:
+        logging.error(f"Index error: {e}. Data shape: {data['VELOX'].shape}")
+        raise
 
     # Save the extracted data to a CSV file
     save_to_csv(output_file, time, u_values)
+    logging.info(f"Data successfully saved to {output_file}")
 
 
 def read_witness_dat(file_path: Path) -> List[Tuple[float, float, float]]:
@@ -109,6 +130,7 @@ def read_witness_dat(file_path: Path) -> List[Tuple[float, float, float]]:
     List[Tuple[float, float, float]]
         List of tuples containing the coordinates of witness points.
     """
+    logging.info(f"Reading witness.dat file from {file_path}")
     points = []
     with open(file_path, "r") as file:
         for line in file:
@@ -118,6 +140,7 @@ def read_witness_dat(file_path: Path) -> List[Tuple[float, float, float]]:
                 continue
             x, y, z = map(float, line.strip().split(","))
             points.append((x, y, z))
+    logging.info(f"Read {len(points)} witness points")
     return points
 
 
@@ -134,11 +157,13 @@ def save_to_csv(output_file: str, times: np.ndarray, u_values: np.ndarray) -> No
     u_values : np.ndarray
         Array of u values for the specified witness point.
     """
+    logging.info(f"Saving data to CSV file: {output_file}")
     with open(output_file, "w", newline="") as csvfile:
         csv_writer = csv.writer(csvfile)
         csv_writer.writerow(["timestep", "u_value"])
         for i in range(len(u_values)):
             csv_writer.writerow([times[i], u_values[i]])
+    logging.info("Data successfully saved to CSV")
 
 
 if __name__ == "__main__":
