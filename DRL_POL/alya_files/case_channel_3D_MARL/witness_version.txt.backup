@@ -1,8 +1,8 @@
-Witness Probes Location Version: v5
+Witness Probes Location Version: v7
 Probe Type: velocity
 Pattern: X
-Y Value Density: 8
-Y Skipping: False
+Y Value Density: 10
+Y Skipping: True
 Y Skip Values: 3
 nx_Qs: 2
 nz_Qs: 2
