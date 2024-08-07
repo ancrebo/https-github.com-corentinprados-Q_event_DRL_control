@@ -1,12 +1,97 @@
-#!/bin/env python
-#
-# DEEP REINFORCEMENT LEARNING WITH ALYA
-#
-# Maxence Deferrez, Pol Suarez, Arnau Miro
-# 07/07/2022
+"""
+jets.py
+
+DEEP REINFORCEMENT LEARNING WITH ALYA
+
+This module provides classes and functions to manage jet implementations in ALYA
+simulations. It includes the `Jet` base class and specialized classes such as
+`JetCylinder` and `JetChannel`.
+
+These classes handle the initialization, geometry setup, and action updates for
+jets in different configurations. Additionally, the module offers utility
+functions for creating smooth transitions for jet actions. The module is designed
+to be imported and called from other scripts, such as `parameters.py`, where it is
+used to create and manage jet instances. The `build_jets` function is particularly
+important for initializing jet instances based on the definitions provided in
+`parameters.py`.
+
+Classes
+-------
+- Jet(ABC):
+    Abstract base class for jets. Provides generic methods for jet setup and updates.
+
+- JetCylinder(Jet):
+    Specialized class for handling jets in cylindrical coordinates.
+
+- JetChannel(Jet):
+    Specialized class for handling jets in channel configurations.
+
+Functions
+---------
+- build_jets(jet_class: Type[Any], jets_definition: Dict[str, Dict[str, Any]], delta_t_smooth: float) -> Dict[str, Any]:
+    Helper function to build and return a dictionary of jet instances.
+
+- atan2_str(X: str, Y: str) -> str:
+    Utility function to write atan2, as a string.
+
+- Q_smooth_linear(Qnew_single: float, Qpre_single: float, timestart: float, Tsmooth: float) -> str:
+    Creates a linear smoothing function over time, as a string.
+
+- Q_smooth_exp(ts: float, Tsmooth: float) -> str:
+    Creates an exponential smoothing function over time, as a string.
+
+- heav_func(position: float, delta: float) -> str:
+    Defines a Heaviside function for spanwise changes, as a string.
+
+- heav_func_channel(position_x: float, delta_x: float, position_z: float, delta_z: float) -> str:
+    Defines a Heaviside function for xz-grid changes, as a string.
+
+Usage
+-----
+This module is intended to be imported and used in other scripts. For example,
+in `parameters.py`, you can create new jet instances and in `Env3D_MARL_channel.py` you manage their actions
+using the relevant classes and functions from this module like the `update` and `update_file` methods.
+
+Dependencies
+------------
+- logging
+- numpy as np
+- typing (for Type, Any, Dict, List)
+- env_utils (for agent_index_1d_to_2d)
+- alya (for write_jet_file)
+- logging_config (for configure_logger, DEFAULT_LOGGING_LEVEL)
+
+Examples
+--------
+Example usage of `build_jets` function:
+
+>>> from jets import build_jets, JetCylinder
+>>> jets_definition = {
+...     "JET_TOP": {"width": 10, "radius": 5, "angle": 45, "positions_angle": 90, "positions": [0, 5], "remesh": False, "Qs_position_z": 1.0, "delta_Q_z": 0.1},
+...     "JET_BOTTOM": {"width": 10, "radius": 5, "angle": 45, "positions_angle": 270, "positions": [0, -5], "remesh": False, "Qs_position_z": 1.0, "delta_Q_z": 0.1}
+... }
+>>> jets = build_jets(JetCylinder, jets_definition, delta_t_smooth=0.2)
+
+Example usage of updating a jet for ALYA simulation:
+>>> jets['JET_TOP'].update(Q_pre=[0.0], Q_new=[1.0], time_start=0.0, smooth_func='LINEAR')
+>>> jets['JET_TOP'].update_file('JET_TOP.dat')
+
+Version History
+---------------
+- Major update in August 2024.
+
+Authors
+-------
+- Maxence Deferrez
+- Pol Suarez
+- Arnau Miro
+- Pieter Orlandini
+- Christine Anne Nordquist
+"""
+
 from __future__ import print_function, division
 
-import os, numpy as np
+import numpy as np
 from abc import ABC, abstractmethod
 from typing import List, Type, Any, Dict, Optional
 
@@ -50,6 +135,30 @@ def build_jets(
 
 # Function to write atan2 as a string
 def atan2_str(X: str, Y: str) -> str:
+    """
+    Generate a string representation of the atan2 function.
+
+    This function returns a string representation of the atan2 function for
+    the given variables X and Y.
+
+    Parameters
+    ----------
+    X : str
+        The x-coordinate variable as a string.
+    Y : str
+        The y-coordinate variable as a string.
+
+    Returns
+    -------
+    str
+        A string representing the atan2 function of X and Y.
+
+    Examples
+    --------
+    Generate the atan2 string for 'a' and 'b':
+        >>> atan2_str('a', 'b')
+        '2*atan(b/(a + sqrt(a^2+b^2)))'
+    """
     return f"2*atan({Y}/({X} + sqrt({X}^2+{Y}^2)))"
 
 
@@ -60,6 +169,41 @@ def atan2_str(X: str, Y: str) -> str:
 def Q_smooth_linear(
     Qnew_single: float, Qpre_single: float, timestart: float, Tsmooth: float
 ) -> str:
+    """
+    Generate a linear smoothing function for Q over a time interval.
+
+    This function creates a string representation of a linear smoothing
+    function for a quantity Q over a specified time interval.
+
+    Parameters
+    ----------
+    Qnew_single : float
+        The new value of Q.
+    Qpre_single : float
+        The previous value of Q.
+    timestart : float
+        The start time of the smoothing interval.
+    Tsmooth : float
+        The duration of the smoothing interval.
+
+    Returns
+    -------
+    str
+        A string representing the linear smoothing function.
+
+    Notes
+    -----
+    The linear smoothing law is defined as:
+
+    .. math::
+        Q(t) = \left( Q_{new} - Q_{pre} \right) \frac{t - t_{start}}{T_{smooth}} + Q_{pre}
+
+    Examples
+    --------
+    Generate a linear smoothing function:
+        >>> Q_smooth_linear(10.0, 5.0, 0.0, 2.0)
+        '(5.0/2.0*(t-0.0) + (5.0))'
+    """
     """
     Linear smoothing law:
         Q(t) = (Qn - Qs)*(t - ts)/Tsmooth + Qs
@@ -74,6 +218,54 @@ def Q_smooth_linear(
 
 
 def Q_smooth_exp(ts: float, Tsmooth: float) -> str:
+    """
+    Generate an exponential smoothing function for Q over a time interval.
+
+    This function creates a string representation of an exponential smoothing
+    function for a quantity Q over a specified time interval.
+
+    Parameters
+    ----------
+    ts : float
+        The start time of the smoothing interval.
+    Tsmooth : float
+        The duration of the smoothing interval.
+
+    Returns
+    -------
+    str
+        A string representing the exponential smoothing function.
+
+    Notes
+    -----
+    The exponential smoothing law is defined as:
+
+    .. math::
+        f(x) =
+        \begin{cases}
+        e^{-1/x} & \text{if } x > 0 \\
+        0        & \text{if } x \le 0
+        \end{cases}
+
+    The function is transitioned between two points:
+
+    .. math::
+        x \to \frac{x-a}{b-a}
+
+    And the final smoothing function is:
+
+    .. math::
+        g(x) = \frac{f(x)}{f(x) + f(1-x)}
+
+    For more details, refer to the Wikipedia page on
+    `Non-analytic smooth functions <https://en.wikipedia.org/wiki/Non-analytic_smooth_function#Smooth_transition_functions>`_.
+
+    Examples
+    --------
+    Generate an exponential smoothing function:
+        >>> Q_smooth_exp(0.0, 2.0)
+        'exp(-1/pos((t-0.00)/2.00))/(exp(-1/pos((t-0.00)/2.00))+exp(-1/pos(1-pos((t-0.00)/2.00))))'
+    """
     """
     Exponential smoothing law: from (https://en.wikipedia.org/wiki/Non-analytic_smooth_function#Smooth_transition_functions)
 
@@ -107,8 +299,36 @@ def Q_smooth_exp(ts: float, Tsmooth: float) -> str:
 
 def heav_func(position: float, delta: float) -> str:
     """
-    Define the heaviside function in spanwise to change the Q in diferent locations at an axis
-    takes de position and activates the Q inside range [position-delta,position+delta]
+    Generate a Heaviside function for a spanwise range.
+
+    This function creates a string representation of a Heaviside function
+    that activates the quantity Q within the range
+    [position - delta, position + delta].
+
+    Parameters
+    ----------
+    position : float
+        The central position of the range.
+    delta : float
+        The width of the range.
+
+    Returns
+    -------
+    str
+        A string representing the Heaviside function for the specified range.
+
+    Notes
+    -----
+    The Heaviside function is defined as:
+
+    .. math::
+        H(z) = \text{heav}((z - (position - \delta/2)) * ((position + \delta/2) - z))
+
+    Examples
+    --------
+    Generate a Heaviside function for position 5.0 and delta 2.0:
+        >>> heav_func(5.0, 2.0)
+        'heav((z-4.000)*(6.000-z))'
     """
     logger.debug(
         "heav_func: Creating heaviside function for position %f and delta %f",
@@ -122,8 +342,42 @@ def heav_func_channel(
     position_x: float, delta_x: float, position_z: float, delta_z: float
 ) -> str:
     """
-    Define the heaviside function xz-grid to change the Q in diferent locations
-    takes the x and z positions and activates the Q inside range [x-delta,x+delta],[z-delta,z+delta] -Chriss
+    Generate a Heaviside function for an x-z grid.
+
+    This function creates a string representation of a Heaviside function
+    that activates the quantity Q within the ranges
+    [x-delta_x, x+delta_x] and [z-delta_z, z+delta_z].
+
+    Parameters
+    ----------
+    position_x : float
+        The central position of the range in the x direction.
+    delta_x : float
+        The width of the range in the x direction.
+    position_z : float
+        The central position of the range in the z direction.
+    delta_z : float
+        The width of the range in the z direction.
+
+    Returns
+    -------
+    str
+        A string representing the Heaviside function for the specified ranges.
+
+    Notes
+    -----
+    The Heaviside function for the x-z grid is defined as:
+
+    .. math::
+        H(x, z) = \text{heav}((x - (position_x - \delta_x/2)) * ((position_x + \delta_x/2) - x))
+                  * \text{heav}((z - (position_z - \delta_z/2)) * ((position_z + \delta_z/2) - z))
+
+    Examples
+    --------
+    Generate a Heaviside function for x position 5.0, delta_x 2.0, z position
+    10.0, and delta_z 3.0:
+        >>> heav_func_channel(5.0, 2.0, 10.0, 3.0)
+        'heav((x-4.000)*(6.000-x)) * heav((z-8.500)*(11.500-z))'
     """
     logger.debug(
         "heav_func_channel: Creating heaviside function for position_x %f, delta_x %f, position_z %f, delta_z %f",
@@ -132,18 +386,65 @@ def heav_func_channel(
         position_z,
         delta_z,
     )
-    return f"heav((x-{position_x - delta_x * 0.5:.3f})*({position_x + delta_x * 0.5:.3f}-x)) * heav((z-{position_z - delta_z * 0.5:.3f})*({position_z + delta_z * 0.5:.3f}-z))"
+    heav_str: str = (
+        f"heav((x-{position_x - delta_x * 0.5:.3f})*({position_x + delta_x * 0.5:.3f}-x)) * heav((z-{position_z - delta_z * 0.5:.3f})*({position_z + delta_z * 0.5:.3f}-z))"
+    )
+    logger.debug("heav_func_channel: Heaviside function: \n%s", heav_str)
+    return heav_str
 
 
 class Jet(ABC):
     """
-    Parent class to implement jets on the DRL.
+    Abstract base class for jets in the Deep Reinforcement Learning (DRL) framework.
 
-    Implements a generic class constructor which calls specialized functions from
-    children classes in order to set up the jet.
+    This class defines the generic interface and basic parameters for jets,
+    which are then specialized by child classes for specific jet geometries
+    and behaviors.
 
-    It also implements the following generic methods:
-        -
+    Attributes
+    ----------
+    name : str
+        The name of the jet.
+    T_smoo : float
+        The smoothing time parameter.
+    smooth_func : str
+        The smoothing function type.
+    dimension : int
+        The dimensionality of the jet (2 or 3).
+    theta : float
+        The angle parameter for the jet.
+    Vx : str
+        The velocity function in the x direction.
+    Vy : str
+        The velocity function in the y direction.
+    Vz : str
+        The velocity function in the z direction (only for 3D jets).
+    Q_pre : List[float]
+        The previous jet action values.
+    Q_new : List[float]
+        The new jet action values.
+    time_start : float
+        The start time of the jet action.
+    short_spacetime_func : bool
+        Flag to indicate if short spacetime functions are used.
+    nb_inv_per_CFD : int
+        Number of intervals per CFD.
+
+    Methods
+    -------
+    update_file(filepath: str) -> None
+        Update the jet file with the current velocity functions.
+    update(Q_pre: List[float], Q_new: List[float], time_start: float, smooth_func: str, *args: Any, **kwargs: Any) -> None
+        Abstract method to update the jet for a given action of the DRL.
+    set_geometry(geometry_params: Dict[str, Any]) -> Any
+        Abstract method to set the jet geometry.
+    create_smooth_funcs(Q_new: List[float], Q_pre: List[float], time_start: float, T_smoo: float, smooth_func: str, *args: Any, **kwargs: Any) -> str
+        Abstract method to create the smooth functions for the jet.
+
+    Notes
+    -----
+    This class is designed to be extended by specific jet classes that implement
+    the abstract methods for their specific geometries and behaviors.
     """
 
     def __init__(
@@ -158,10 +459,29 @@ class Jet(ABC):
         smooth_func: str = "",
     ) -> None:
         """
-        Class initializer, generic.
-        Sets up the basic parameters and starts the class.
-        After creating the class we should initialize the geometry manually for
-        each of the specialized jets.
+        Initialize the Jet class with the given parameters.
+
+        This initializer sets up the basic parameters for the jet and calls the
+        specialized `set_geometry` method to set up the jet geometry.
+
+        Parameters
+        ----------
+        name : str
+            The name of the jet.
+        params : Dict[str, Dict[str, Any]]
+            The parameters for the jet.
+        Q_pre : List[float], optional
+            The previous jet action values (default is [0.0]).
+        Q_new : List[float], optional
+            The new jet action values (default is [0.0]).
+        time_start : float, optional
+            The start time of the jet action (default is 0.0).
+        dimension : int, optional
+            The dimensionality of the jet (default is 2).
+        T_smoo : float, optional
+            The smoothing time parameter (default is 0.2).
+        smooth_func : str, optional
+            The smoothing function type (default is "").
         """
         from parameters import (
             dimension,
@@ -204,8 +524,16 @@ class Jet(ABC):
 
     def update_file(self, filepath: str) -> None:
         """
-        Replaces the jets path file for a new one, generic.
-        The name of the file must be the same of that of the jet.
+        Update the jet file with the current velocity functions.
+
+        Parameters
+        ----------
+        filepath : str
+            The path to the file to be updated.
+
+        Notes
+        -----
+        This method writes the current velocity functions to the jet file.
         """
         logger.info("Jet: Updating jet file %s...", filepath)
         functions = (
@@ -224,8 +552,26 @@ class Jet(ABC):
         **kwargs: Any,
     ) -> None:
         """
-        Updates a jet for a given epoch of the DRL, generic.
-        To be implemented by child classes
+        Update the jet for a given action of the DRL.
+
+        This method must be implemented by child classes to update the jet
+        according to their specific behaviors.
+
+        Parameters
+        ----------
+        Q_pre : List[float]
+            The previous jet action values.
+        Q_new : List[float]
+            The new jet action values.
+        time_start : float
+            The start time of the jet action.
+        smooth_func : str
+            The smoothing function type.
+
+        Raises
+        ------
+        NotImplementedError
+            If the method is not implemented by a child class.
         """
         raise NotImplementedError(
             "Jet.update: Must specialize the `update` method for each specific jet kind"
@@ -234,8 +580,20 @@ class Jet(ABC):
     @abstractmethod
     def set_geometry(self, geometry_params: Dict[str, Any]) -> Any:
         """
-        Placeholder for specialized function that sets the jet geometry
-        per each of the independent cases.
+        Set the jet geometry.
+
+        This method must be implemented by child classes to set the jet
+        geometry according to their specific requirements.
+
+        Parameters
+        ----------
+        geometry_params : Dict[str, Any]
+            The parameters for the jet geometry.
+
+        Raises
+        ------
+        NotImplementedError
+            If the method is not implemented by a child class.
         """
         raise NotImplementedError(
             "Jet.set_geometry: Must specialize the `set_geometry` method for each specific jet kind"
@@ -253,8 +611,33 @@ class Jet(ABC):
         **kwargs: Any,
     ) -> str:
         """
-        Placeholder for specialized function that sets the jet geometry
-        per each of the independent cases.
+        Create the smooth functions for the jet.
+
+        This method must be implemented by child classes to create the smooth
+        functions according to their specific requirements.
+
+        Parameters
+        ----------
+        Q_new : List[float]
+            The new jet action values.
+        Q_pre : List[float]
+            The previous jet action values.
+        time_start : float
+            The start time of the jet action.
+        T_smoo : float
+            The smoothing time parameter.
+        smooth_func : str
+            The smoothing function type.
+
+        Returns
+        -------
+        str
+            The smooth function string.
+
+        Raises
+        ------
+        NotImplementedError
+            If the method is not implemented by a child class.
         """
         raise NotImplementedError(
             "Jet.create_smooth_funcs: Must specialize the `create_smooth_funcs` method for each jet class"
@@ -263,7 +646,41 @@ class Jet(ABC):
 
 class JetCylinder(Jet):
     """
-    Specialized jet class to deal with jets specified in cylindrical coordinates.
+    Specialized jet class to handle jets in cylindrical coordinates.
+
+    This class extends the `Jet` class and provides specific implementations for
+    handling jets in cylindrical coordinates, including setting up geometry and
+    creating smoothing functions.
+
+    Attributes
+    ----------
+    radius : float
+        The radius of the cylinder.
+    width : float
+        The width of the jet.
+    theta0 : float
+        The initial angle position of the jet.
+    theta : str
+        The angle function for the jet.
+    Qs_position_z : List[float]
+        Positions along the z-axis for the jet action.
+    delta_Q_z : float
+        Delta value for the z-axis position range.
+
+    Methods
+    -------
+    __init__(name: str, params: Dict[str, Any], Q_pre: List[float] = None, Q_new: List[float] = None, time_start: float = 0.0, dimension: int = 2, T_smoo: float = 0.2, smooth_func: str = "") -> None
+        Initialize the JetCylinder class with the given parameters.
+    set_geometry(params: Dict[str, Any]) -> None
+        Set the geometry of the jet.
+    update(Q_pre: List[float], Q_new: List[float], time_start: float, smooth_func: str, *args: Any, **kwargs: Any) -> None
+        Update the jet for a given action of the DRL.
+    create_smooth_funcs(Q_new: List[float], Q_pre: List[float], time_start: float, T_smoo: float, smooth_func: str, *args: Any, **kwargs: Any) -> str
+        Create the smooth functions for the jet in cylindrical coordinates.
+    normalize_angle(angle: float) -> float
+        Normalize an angle to the range [-pi, pi].
+    get_theta(cylinder_coordinates: List[float]) -> str
+        Get the theta function based on the cylinder coordinates.
     """
 
     def __init__(
@@ -279,6 +696,25 @@ class JetCylinder(Jet):
     ) -> None:
         """
         Initialize the JetCylinder class.
+
+        Parameters
+        ----------
+        name : str
+            The name of the jet.
+        params : Dict[str, Any]
+            The parameters for the jet.
+        Q_pre : List[float], optional
+            The previous jet action values (default is [0.0]).
+        Q_new : List[float], optional
+            The new jet action values (default is [0.0]).
+        time_start : float, optional
+            The start time of the jet action (default is 0.0).
+        dimension : int, optional
+            The dimensionality of the jet (default is 2).
+        T_smoo : float, optional
+            The smoothing time parameter (default is 0.2).
+        smooth_func : str, optional
+            The smoothing function type (default is "").
         """
         logger.info("JetCylinder.init: Initializing jet %s...", name)
 
@@ -303,7 +739,19 @@ class JetCylinder(Jet):
 
     def set_geometry(self, params: Dict[str, Any]) -> None:
         """
-        Specialized method that sets up the geometry of the jet
+        Set the geometry of the jet in cylindrical coordinates.
+
+        # TODO: @pietero add documentation about specific geometry parameters imported from parameters.py - Pieter
+
+        Parameters
+        ----------
+        params : Dict[str, Any]
+            The parameters for the jet geometry.
+
+        Raises
+        ------
+        ValueError
+            If any of the geometric parameters are invalid.
         """
         logger.debug(
             "JetCylinder.set_geometry: Importing geometry params for jet %s ...",
@@ -349,9 +797,30 @@ class JetCylinder(Jet):
         **kwargs: Any,
     ) -> None:
         """
-        Updates a jet for a given epoch of the DRL, generic.
-        Calls the specialized method smoothfunc to set up the jet geometry
-        per each of the child classes.
+        Update the jet for a given action of the DRL.
+
+        This method updates the jet's velocity functions and other properties
+        based on the provided action values and smoothing function.
+
+        Parameters
+        ----------
+        Q_pre : List[float]
+            The previous jet action values.
+        Q_new : List[float]
+            The new jet action values.
+        time_start : float
+            The start time of the jet action.
+        smooth_func : str
+            The smoothing function type.
+        Qs_position_z : List[float]
+            Positions along the z-axis for the jet action.
+        delta_Q_z : float
+            Delta value for the z-axis position range.
+
+        Raises
+        ------
+        ValueError
+            If required keyword arguments 'Qs_position_z' or 'delta_Q_z' are missing.
         """
         logger.info("JetCylinder.update: Updating jet %s...", self.name)
 
@@ -413,7 +882,39 @@ class JetCylinder(Jet):
         **kwargs: Any,
     ) -> str:
         """
-        Specialized method that creates the smooth functions for cylinder cases
+        Create the smooth functions for the jet in cylindrical coordinates.
+
+        Parameters
+        ----------
+        Q_new : List[float]
+            The new jet action values.
+        Q_pre : List[float]
+            The previous jet action values.
+        time_start : float
+            The start time of the jet action.
+        T_smoo : float
+            The smoothing time parameter.
+        smooth_func : str
+            The smoothing function type.
+        Qs_position_z : List[float]
+            Positions along the z-axis for the jet action.
+        delta_Q_z : float
+            Delta value for the z-axis position range.
+
+        Returns
+        -------
+        str
+            The smooth function string.
+
+        Raises
+        ------
+        ValueError
+            If required keyword arguments 'Qs_position_z' or 'delta_Q_z' are missing.
+
+        Notes
+        -----
+        The smoothing function can be either 'EXPONENTIAL' or 'LINEAR'. If no
+        smoothing function is specified, 'LINEAR' is used by default.
         """
         logger.debug("JetCylinder.create_smooth_funcs: Creating smooth functions...")
         Qs_position_z: List[float] = kwargs.get("Qs_position_z")
@@ -488,7 +989,17 @@ class JetCylinder(Jet):
     @staticmethod
     def normalize_angle(angle: float) -> float:
         """
-        Normalize angle between [-pi,pi]
+        Normalize an angle to the range [-pi, pi].
+
+        Parameters
+        ----------
+        angle : float
+            The angle to be normalized.
+
+        Returns
+        -------
+        float
+            The normalized angle.
         """
         logger.debug("JetCylinder.normalize_angle: Normalizing angle %f...", angle)
         # TODO: check this... not very clear to me
@@ -502,7 +1013,17 @@ class JetCylinder(Jet):
     @staticmethod
     def get_theta(cylinder_coordinates: List[float]) -> str:
         """
-        TODO: documentation!
+        Get the theta function based on the cylinder coordinates.
+
+        Parameters
+        ----------
+        cylinder_coordinates : List[float]
+            The coordinates of the cylinder.
+
+        Returns
+        -------
+        str
+            The theta function string.
         """
         logger.debug("JetCylinder.get_theta: Getting theta...")
         X: str = f"(x-{cylinder_coordinates[0]})"
@@ -620,7 +1141,33 @@ class JetAirfoil(Jet):
 
 class JetChannel(Jet):
     """
-    Specialized jet class to deal with jets in a channel.
+    Specialized jet class to handle jets in a channel.
+
+    This class extends the `Jet` class and provides specific implementations
+    for handling jets in channel geometries, including setting up geometry and
+    creating smoothing functions.
+
+    Attributes
+    ----------
+    Qs_position_x : List[float]
+        Positions along the x-axis for the jet action.
+    delta_Q_x : float
+        Delta value for the x-axis position range.
+    Qs_position_z : List[float]
+        Positions along the z-axis for the jet action.
+    delta_Q_z : float
+        Delta value for the z-axis position range.
+
+    Methods
+    -------
+    __init__(name: str, params: Dict[str, Any], Q_pre: List[float] = None, Q_new: List[float] = None, time_start: float = 0.0, dimension: int = 2, T_smoo: float = 0.2, smooth_func: str = "") -> None
+        Initialize the JetChannel class with the given parameters.
+    set_geometry(params: Dict[str, Any]) -> None
+        Set the geometry of the jet.
+    update(Q_pre: List[float], Q_new: List[float], time_start: float, smooth_func: str, *args: Any, **kwargs: Any) -> None
+        Update the jet for a given action of the DRL.
+    create_smooth_funcs(Q_new: List[float], Q_pre: List[float], time_start: float, T_smoo: float, smooth_func: str, **kwargs: Any) -> str
+        Create the smooth functions for the jet in channel coordinates.
     """
 
     def __init__(
@@ -636,6 +1183,25 @@ class JetChannel(Jet):
     ) -> None:
         """
         Initialize the JetChannel class.
+
+        Parameters
+        ----------
+        name : str
+            The name of the jet.
+        params : Dict[str, Any]
+            The parameters for the jet.
+        Q_pre : List[float], optional
+            The previous jet action values (default is [0.0]).
+        Q_new : List[float], optional
+            The new jet action values (default is [0.0]).
+        time_start : float, optional
+            The start time of the jet action (default is 0.0).
+        dimension : int, optional
+            The dimensionality of the jet (default is 2).
+        T_smoo : float, optional
+            The smoothing time parameter (default is 0.2).
+        smooth_func : str, optional
+            The smoothing function type (default is "").
         """
         logger.info("JetChannel.init: Initializing jet %s...", name)
 
@@ -658,7 +1224,17 @@ class JetChannel(Jet):
 
     def set_geometry(self, params: Dict[str, Any]) -> None:
         """
-        Specialized method that sets up the geometry of the jet, including importing Qs_position_x, Qs_position_z, delta_Q_z and delta_Q_z
+        Set the geometry of the jet in channel coordinates.
+
+        Parameters
+        ----------
+        params : Dict[str, Any]
+            The parameters for the jet geometry.
+
+        Raises
+        ------
+        ValueError
+            If any of the geometric parameters are invalid.
         """
         logger.debug(
             "JetChannel.set_geometry: Importing geometry params for jet %s ...",
@@ -695,7 +1271,35 @@ class JetChannel(Jet):
         **kwargs: Any,
     ) -> None:
         """
-        TO BE IMPLEMENTED FOR CHANNEL CASE
+        Update the jet for a given action of the DRL.
+
+        This method updates the jet's velocity functions and other properties
+        based on the provided action values and smoothing function.
+
+        Parameters
+        ----------
+        Q_pre : List[float]
+            The previous jet action values.
+        Q_new : List[float]
+            The new jet action values.
+        time_start : float
+            The start time of the jet action.
+        smooth_func : str
+            The smoothing function type.
+        Qs_position_x : List[float]
+            Positions along the x-axis for the jet action.
+        delta_Q_x : float
+            Delta value for the x-axis position range.
+        Qs_position_z : List[float]
+            Positions along the z-axis for the jet action.
+        delta_Q_z : float
+            Delta value for the z-axis position range.
+
+        Raises
+        ------
+        ValueError
+            If required keyword arguments 'Qs_position_x', 'delta_Q_x',
+            'Qs_position_z', or 'delta_Q_z' are missing.
         """
         logger.info("JetChannel.update: Updating jet %s...", self.name)
 
@@ -769,7 +1373,44 @@ class JetChannel(Jet):
         **kwargs: Any,
     ) -> str:
         """
-        Specialized method that creates the smooth functions in 2D
+        Create the smooth functions for the jet in channel coordinates.
+
+        Parameters
+        ----------
+        Q_new : List[float]
+            The new jet action values.
+        Q_pre : List[float]
+            The previous jet action values.
+        time_start : float
+            The start time of the jet action.
+        T_smoo : float
+            The smoothing time parameter.
+        smooth_func : str
+            The smoothing function type.
+        Qs_position_x : List[float]
+            Positions along the x-axis for the jet action.
+        delta_Q_x : float
+            Delta value for the x-axis position range.
+        Qs_position_z : List[float]
+            Positions along the z-axis for the jet action.
+        delta_Q_z : float
+            Delta value for the z-axis position range.
+
+        Returns
+        -------
+        str
+            The smooth function string.
+
+        Raises
+        ------
+        ValueError
+            If required keyword arguments 'Qs_position_x', 'delta_Q_x',
+            'Qs_position_z', or 'delta_Q_z' are missing.
+
+        Notes
+        -----
+        The smoothing function can be either 'EXPONENTIAL' or 'LINEAR'. If no
+        smoothing function is specified, 'LINEAR' is used by default.
         """
         logger.debug("JetChannel.create_smooth_funcs: Creating smooth functions...")
 
