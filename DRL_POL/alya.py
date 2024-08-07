@@ -1,9 +1,69 @@
-#!/bin/env python
-#
-# DEEP REINFORCEMENT LEARNING WITH ALYA
-#
-# Pol Suarez, Arnau Miro, Francisco Alcantara
-# 07/07/2022
+"""
+alya.py
+
+DEEP REINFORCEMENT LEARNING WITH ALYA
+
+This module provides functions to generate and manage meshes, initial
+conditions, and various configuration files for ALYA simulations. It
+leverages pyAlya tools and other utility functions to streamline the
+simulation setup process.
+
+Many functions are currently unused and may be removed in future updates.
+
+Functions
+---------
+- run_mesh(runpath: str, casename: str, ndim: int, ini_vel: Union[List[str], None] = None) -> None
+    Generates the mesh and initial conditions for an ALYA simulation. (CURRENTLY UNUSED!)
+
+- write_case_file(filepath: str, casename: str, simu_name: str) -> None
+    Writes the [casename].dat file for an ALYA simulation.
+
+- write_run_type(filepath: str, type: str, freq: int = 1) -> None
+    Writes the run type file that is included in the [casename].dat file for ALYA.
+
+- write_time_interval(filepath: str, start_time: float, end_time: float) -> None
+    Writes the time interval file that is included in the [casename].dat file for ALYA.
+
+- detect_last_timeinterval(filename: str) -> Union[float, None]
+    Detects the last time interval value in a file.
+
+- write_dom_file(filepath: str, casename: str, ncpus: int) -> None
+    Writes the [casename].dom.dat file for an ALYA simulation.
+
+- write_ker_file(filepath: str, casename: str, jetlist: List[str], steps: int,
+                 postprocess: List[str] = []) -> None
+    Writes the [casename].ker.dat file for an ALYA simulation.
+
+- write_physical_properties(filepath: str, rho: float, mu: float) -> None
+    Writes the physical_properties.dat file for an ALYA simulation.
+
+- write_inflow_file(filepath: str, functions: List[str]) -> None
+    Writes the inflow.dat file for an ALYA simulation.
+
+- write_jet_file(filepath: str, name: str, functions: List[str]) -> None
+    Writes a jet file for an ALYA simulation. Typically used to update the jets with actions
+    from the DRL agent(s) before a new "action step" is started.
+
+- write_nsi_file(filepath: str, casename: str, varlist=None, witlist=None) -> None
+    Writes the [casename].nsi.dat file for an ALYA simulation.
+
+Authors
+-------
+- Pol Suarez
+- Arnau Miro
+- Francisco Alcantara
+- Pieter Orlandini
+
+Updated
+-------
+Major update: August 2024
+
+Notes
+-----
+This module is typically imported and used within other scripts and is not
+intended to be executed directly.
+"""
+
 from __future__ import print_function, division
 
 import os
@@ -23,6 +83,8 @@ logger.info("%s.py: Logging level set to %s\n", __name__, logger.level)
 
 def run_mesh(runpath, casename, ndim, ini_vel=None):
     """
+    CURRENTLY UNUSED as of August 7, 2024 - Pieter
+
     Use pyAlya tools to generate the mesh from gmsh
     """
     logger.debug(
@@ -60,7 +122,25 @@ def run_mesh(runpath, casename, ndim, ini_vel=None):
 
 def write_case_file(filepath: str, casename: str, simu_name: str) -> None:
     """
-    Writes the casename.dat file
+    Write the casename.dat file for ALYA.
+
+    This function creates a .dat file containing the necessary configurations
+    for running an ALYA simulation. The file includes information about run
+    data, problem data, and MPI I/O settings. Everything is hardcoded except
+    for the simulation name and case name.
+
+    Parameters
+    ----------
+    filepath : str
+        The directory path where the .dat file will be written.
+    casename : str
+        The name of the case for the simulation.
+    simu_name : str
+        The name of the simulation.
+
+    Returns
+    -------
+    None
     """
     logger.debug(
         "alya.write_case_file: Writing .dat file to %s with casename %s and simu_name %s",
@@ -115,7 +195,24 @@ $-------------------------------------------------------------------"""
 
 def write_run_type(filepath: str, type: str, freq: int = 1) -> None:
     """
-    Writes the run type file that is included in the .dat
+    Write the run type file included in the .dat file for ALYA.
+
+    This function creates a run_type.dat file specifying the run type,
+    preliminary setting, and frequency for the ALYA simulation. The file is
+    referenced by the [casename].dat file.
+
+    Parameters
+    ----------
+    filepath : str
+        The directory path where the run_type.dat file will be written.
+    type : str
+        The type of run to be specified in the file. Used options are "CONTI" and "NONCONTI".
+    freq : int, optional
+        The frequency setting for the run. How many time steps between restart file creation. Default is 1.
+
+    Returns
+    -------
+    None
     """
     logger.debug(
         "alya.write_run_type: Writing run type file to %s with type %s and freq %d",
@@ -137,7 +234,35 @@ def write_run_type(filepath: str, type: str, freq: int = 1) -> None:
 
 def write_time_interval(filepath: str, start_time: float, end_time: float) -> None:
     """
-    Writes the time interval file that is included in the .dat
+    Write the time interval file included in the [casename].dat file for ALYA.
+
+    This function creates a time_interval.dat file specifying the start
+    and end times for the ALYA simulation. Used during training to set a
+    specified time interval in an "action step." The file is updated
+    during DRL training.
+
+    Parameters
+    ----------
+    filepath : str
+        The directory path where the time_interval.dat file will be written.
+    start_time : float
+        The start time for the simulation.
+    end_time : float
+        The end time for the simulation.
+
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    FileNotFoundError
+        If the specified filepath does not exist.
+
+    Examples
+    --------
+    Write a time interval file with start time 0.0 and end time 1.0:
+        >>> write_time_interval('/path/to/dir', 0.0, 1.0)
     """
     logger.debug(
         "alya.write_time_interval: Writing time interval file to %s with interval %f, %f",
@@ -162,6 +287,24 @@ def write_time_interval(filepath: str, start_time: float, end_time: float) -> No
 
 
 def detect_last_timeinterval(filename: str) -> Union[float, None]:
+    """
+    Detect the last time interval value in a file.
+
+    This function reads a file and searches for the 'TIME_INTERVAL:' line.
+    It returns the last value found in the 'TIME_INTERVAL:' entry. The file
+    is typically `time_interval.dat` and is used to make sure the new "action
+    step" continues from the previous time interval.
+
+    Parameters
+    ----------
+    filename : str
+        The path to the file to be read.
+
+    Returns
+    -------
+    Union[float, None]
+        The last time interval value found, or None if no interval is found.
+    """
     logger.debug(
         "alya.detect_last_timeinterval: Detecting last time interval in %s", filename
     )
@@ -200,7 +343,29 @@ def detect_last_timeinterval(filename: str) -> Union[float, None]:
 
 def write_dom_file(filepath: str, casename: str, ncpus: int) -> None:
     """
-    Write the case_name.dom.dat
+    Write the [casename].dom.dat file for an ALYA simulation.
+
+    This function creates a [casename].dom.dat file containing configurations for
+    dimensions, strategy, geometry, sets, boundary conditions, and fields
+    for an ALYA simulation.
+
+    Parameters
+    ----------
+    filepath : str
+        The directory path where the [casename].dom.dat file will be written.
+    casename : str
+        The name of the case for the simulation.
+    ncpus : int
+        The number of CPUs to be specified in the strategy section.
+
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+    Write a .dom.dat file for 'example_case' with 4 CPUs:
+        >>> write_dom_file('/path/to/dir', 'example_case', 4)
     """
     logger.debug("alya.write_dom_file: Writing .dom.dat file to %s", filepath)
     file = open(os.path.join(filepath, "%s.dom.dat" % casename), "w")
@@ -246,11 +411,37 @@ def write_ker_file(
     postprocess: List[str] = [],
 ) -> None:
     """
-    THIS FUNCTION IS CURRENTLY UNUSED as of July 10, 2024
+    Write the [casename].ker.dat file for an ALYA simulation.
 
-    Write the casename.ker.dat
+    This function creates a [casename].ker.dat file containing configurations for
+    physical problems, numerical treatments, and output/post-process
+    settings for an ALYA simulation. Postprocessing frequency and variables override
+    any postprocessing set in the [casename].nsi.dat file.
 
-    postprocess can include CODNO, MASSM, COMMU, EXNOR
+    Parameters
+    ----------
+    filepath : str
+        The directory path where the [casename].ker.dat file will be written.
+    casename : str
+        The name of the case for the simulation.
+    jetlist : List[str]
+        A list of jet files to be included.
+    steps : int
+        The number of steps between ALYA post-processing.
+    postprocess : List[str], optional
+        A list of variables for post-processing. Common variables include
+        "VELOC", "PRESSURE", "AVVEL", "VELOX", "VELOY", and "VELOZ".
+        Defaults to an empty list.
+
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+    Write a .ker.dat file for 'example_case' with 100 steps and CODNO postprocess:
+        >>> write_ker_file('/path/to/dir', 'example_case', ['jet1', 'jet2'], 100,
+                           ['CODNO'])
     """
     logger.debug("alya.write_ker_file: Writing .ker.dat file to %s", filepath)
     # Create jet includes
@@ -305,7 +496,29 @@ $------------------------------------------------------------"""
 
 def write_physical_properties(filepath: str, rho: float, mu: float) -> None:
     """
-    Writes the physical properties file that is included in the .ker.dat
+    Write the physical_properties.dat file for an ALYA simulation.
+
+    This function creates a physical_properties.dat file specifying the
+    material properties, including density and viscosity, for an ALYA
+    simulation. This file is included in the [casename].ker.dat file.
+
+    Parameters
+    ----------
+    filepath : str
+        The directory path where the physical_properties.dat file will be written.
+    rho : float
+        The density value for the material.
+    mu : float
+        The viscosity value for the material.
+
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+    Write a physical properties file with density 1000 and viscosity 0.001:
+        >>> write_physical_properties('/path/to/dir', 1000.0, 0.001)
     """
     logger.debug(
         "alya.write_physical_properties: Writing physical properties file to %s",
@@ -326,7 +539,26 @@ def write_physical_properties(filepath: str, rho: float, mu: float) -> None:
 
 def write_inflow_file(filepath: str, functions: List[str]) -> None:
     """
-    Writes the inflow file that is included in the .ker.dat
+    Write the inflow.dat file for an ALYA simulation.
+
+    This function creates an inflow.dat file specifying the inflow functions
+    to be included in the [casename].ker.dat file for an ALYA simulation.
+
+    Parameters
+    ----------
+    filepath : str
+        The directory path where the inflow.dat file will be written.
+    functions : List[str]
+        A list of inflow functions to be included.
+
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+    Write an inflow file with two functions:
+        >>> write_inflow_file('/path/to/dir', ['function1', 'function2'])
     """
     logger.debug("alya.write_inflow_file: Writing inflow file to %s", filepath)
     file = open(os.path.join(filepath, "inflow.dat"), "w")
@@ -341,7 +573,28 @@ def write_inflow_file(filepath: str, functions: List[str]) -> None:
 
 def write_jet_file(filepath: str, name: str, functions: List[str]) -> None:
     """
-    Writes the inflow file that is included in the .ker.dat
+    Write a jet file for an ALYA simulation.
+
+    This function creates a jet file specifying the jet functions to be
+    included in the .ker.dat file for an ALYA simulation.
+
+    Parameters
+    ----------
+    filepath : str
+        The directory path where the jet file will be written.
+    name : str
+        The name of the jet.
+    functions : List[str]
+        A list of jet functions to be included.
+
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+    Write a jet file named 'jet1' with two functions (2D not 3D):
+        >>> write_jet_file('/path/to/dir', 'jet1', ['function1', 'function2'])
     """
     logger.debug("alya.write_jet_file: Writing jet file %s to %s", name, filepath)
     file = open(os.path.join(filepath, f"{name}.dat"), "w")
@@ -363,9 +616,34 @@ def write_nsi_file(
     witlist=None,
 ) -> None:
     """
-    Write the casename.nsi.dat
+    Write the [casename].nsi.dat file for an ALYA simulation.
 
-    postprocess can include VELOC, PRESS, etc.
+    This function creates a [casename].nsi.dat file containing configurations for
+    physical problems, numerical treatments, and output/post-process settings
+    for an ALYA simulation.
+
+    Parameters
+    ----------
+    filepath : str
+        The directory path where the [casename].nsi.dat file will be written.
+    casename : str
+        The name of the case for the simulation.
+    varlist : list of str, optional
+        A list of variables for post-processing. Common variables include
+        "VELOC", "PRESS", "AVVEL". Defaults to ["VELOC", "PRESS"].
+    witlist : list of str, optional
+        A list of variables for post-processing witness points. Variables are
+        "VELOX", "VELOY", "VELOZ", "PRESS". Defaults to ["VELOX", "VELOY",
+        "VELOZ", "PRESS"].
+
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+    Write a .nsi.dat file for 'example_case':
+        >>> write_nsi_file('/path/to/dir', 'example_case')
     """
     logger.debug(
         "alya.write_nsi_file: Writing .nsi.dat file to %s with casename %s",
