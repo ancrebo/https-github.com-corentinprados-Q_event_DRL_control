@@ -428,7 +428,7 @@ logger.debug("Witness file override: %s", need_witness_file_override)
 
 case_folder = f"alya_files/case_{training_case}"
 witness_file_path = os.path.join(case_folder, f"witnessv{probes_location}.dat")
-witness_version_file_path = os.path.join(case_folder, f"witnessv{probes_location}.txt")
+witness_version_file_path = os.path.join(case_folder, f"witnessv{probes_location}_parameters.txt")
 
 if os.path.exists(witness_file_path):
     if need_witness_file_override:
