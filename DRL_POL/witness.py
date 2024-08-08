@@ -723,6 +723,9 @@ def write_witness_file_and_visualize(
     y_skip_values: int = 1,
     nx_Qs: int = 1,
     nz_Qs: int = 1,
+    Lx: float = 2.67,
+    Ly: float = 2,
+    Lz: float = 0.8,
 ) -> None:
     """
     Create the witness.dat file and visualize the witness points, saving a plot to the case folder.
@@ -755,6 +758,12 @@ def write_witness_file_and_visualize(
         Number of sections in the x direction. Default is 1.
     nz_Qs : int, optional
         Number of sections in the z direction. Default is 1.
+    Lx : float, optional
+        Length in the x direction. Default is 2.67.
+    Ly : float, optional
+        Length in the y direction. Default is 2.
+    Lz : float, optional
+        Length in the z direction. Default is 0.8.
 
     Returns
     -------
@@ -786,6 +795,9 @@ def write_witness_file_and_visualize(
         nz_Qs=nz_Qs,
         y_value_density=y_value_density,
         y_skip_values=y_skip_values,
+        Lx=Lx,
+        Ly=Ly,
+        Lz=Lz,
     )
 
     logger.info(

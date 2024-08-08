@@ -462,6 +462,9 @@ if os.path.exists(witness_file_path):
             y_skip_values=y_skip_values,
             nx_Qs=nx_Qs,
             nz_Qs=nz_Qs,
+            Lx=Lx,
+            Ly=Ly,
+            Lz=Lz,
         )
         need_witness_file_override = False
 
@@ -491,6 +494,9 @@ else:
         y_skip_values=y_skip_values,
         nx_Qs=nx_Qs,
         nz_Qs=nz_Qs,
+        Lx=Lx,
+        Ly=Ly,
+        Lz=Lz,
     )
     logger.info(
         f"New witnessv{probes_location}.dat has been created in %s !!!\n", case_folder
