@@ -86,7 +86,7 @@ quick_episode_length: int = 3
 
 # Whether to override the witness file if it already exists
 probes_location: int = 5  # 5, 6, 7, 8 (see witness section)
-need_witness_file_override: bool = False
+need_witness_file_override: bool = True
 
 # THESE VALUES ARE CALCULATED FROM `coco_small_load_post_processing.py` and are specific to THIS BASELINE! - Pieter
 # Check `calculated_values.csv` in baseline folder for these values
