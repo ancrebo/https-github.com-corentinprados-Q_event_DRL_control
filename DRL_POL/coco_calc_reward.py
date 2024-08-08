@@ -1,3 +1,78 @@
+"""
+coco_calc_reward.py
+====================
+DEEP REINFORCEMENT LEARNING WITH ALYA
+-------------------------------------
+
+This script calculates rewards from CFD data based on Q events for ALYA simulations.
+
+
+This script processes CFD simulation data to calculate rewards based on Q events
+for deep reinforcement learning applications with ALYA. It reads, normalizes,
+and analyzes velocity data to detect Q events and compute local Q event volume
+ratios and rewards.
+
+The script performs the following steps:
+1. Loads CFD simulation data from PVD and PVTU files.
+2. Normalizes the velocity components and spatial coordinates.
+3. Processes the velocity data to compute fluctuating components.
+4. Detects Q events based on specified conditions.
+5. Calculates local Q event volume ratios.
+6. Computes rewards based on the local Q event volume ratios.
+7. Saves the results to CSV files.
+
+The script is intended to be called via a shell script, with parameters specified
+through command-line arguments.
+
+Functions
+---------
+- load_data_and_convert_to_dataframe_single(directory: str, file_name: str)
+  -> Tuple[float, pd.DataFrame]:
+    Loads CFD simulation data from a single PVTU file and converts it into a
+    Pandas DataFrame.
+
+- normalize_all_single(timestep_df: Tuple[float, pd.DataFrame], u_tau: float,
+  delta_tau: float) -> Tuple[float, pd.DataFrame]:
+    Normalizes the velocity components and spatial coordinates in the DataFrame.
+
+- process_velocity_data_single(timestep_df: Tuple[float, pd.DataFrame],
+  averaged_data: pd.DataFrame, tolerance: float = 1e-4) -> Tuple[float, pd.DataFrame]:
+    Calculates fluctuating components of velocity fields.
+
+- detect_Q_events_single(timestep_df: Tuple[float, pd.DataFrame], averaged_data:
+  pd.DataFrame, H: float) -> Tuple[float, pd.DataFrame]:
+    Detects Q events in the fluid dynamics data.
+
+- calculate_local_Q_ratios(df: pd.DataFrame, nx: int, nz: int, Lx_norm: float,
+  Lz_norm: float) -> pd.DataFrame:
+    Calculates the ratio of Q-events in local volumes for a single timestep.
+
+- calculate_reward(df: pd.DataFrame, avg_qratio: float, nx: int, nz: int) -> float:
+    Calculates the reward based on the Q ratio in the local volume.
+
+- calculate_reward_full(directory: str, Lx: float, Lz: float, H: float, nx: int,
+  nz: int, averaged_data_path: str, output_qratio_file: str, output_reward_file: str)
+  -> None:
+    Calculates the rewards based on Q events for a single timestep, saving results
+    to CSV files.
+
+Examples
+--------
+Example usage:
+python calc_reward.py --directory path/to/data --Lx 1.0 --Lz 1.0 --H 3.0 --nx 4
+--nz 3 --averaged_data_path path/to/averaged_data --output_qratio_file qratios.csv
+--output_reward_file rewards.csv
+
+Version History
+---------------
+- Major update in August 2024.
+
+Authors
+-------
+- Pieter Orlandini
+- adapted from Corentin Prados' code
+"""
+
 import os
 import shutil
 import argparse
@@ -7,7 +82,6 @@ import xml.etree.ElementTree as ET  # For XML parsing
 import pyvista as pv  # For reading and processing mesh data
 import pandas as pd  # For data manipulation and DataFrame creation
 from typing import Tuple, List
-from pathlib import Path
 import gc
 from env_utils import agent_index_2d_to_1d
 
@@ -23,16 +97,22 @@ def load_data_and_convert_to_dataframe_single(
     directory: str, file_name: str
 ) -> Tuple[float, pd.DataFrame]:
     """
-    This function loads CFD simulation data from a single PVTU file and converts it into a Pandas DataFrame.
+    Load CFD simulation data from a single PVTU file and convert it into a Pandas DataFrame.
     The DataFrame is stored along with its respective timestep.
 
-    Parameters:
-    - directory (str): The path to the directory containing the PVD and PVTU files.
+    Parameters
+    ----------
+    directory : str
+        The path to the directory containing the PVD and PVTU files.
+    file_name : str
+        The name of the PVD file.
 
-    Returns:
-    - data_frame (tuple): A tuple containing:
-      * A timestep (float)
-      * A DataFrame with columns for spatial coordinates (x, y, z) and velocity components (u, v, w)
+    Returns
+    -------
+    Tuple[float, pd.DataFrame]
+        A tuple containing:
+        - A timestep (float)
+        - A DataFrame with columns for spatial coordinates (x, y, z) and velocity components (u, v, w)
     """
     logger.debug("load_data_and_convert_to_dataframe: Loading data from PVTU files...")
     # Parse the PVD file to extract mappings of timesteps to their corresponding PVTU files
@@ -79,17 +159,21 @@ def normalize_all_single(
     timestep_df: Tuple[float, pd.DataFrame], u_tau: float, delta_tau: float
 ) -> Tuple[float, pd.DataFrame]:
     """
-    Processes a tuple containing a timestep and a DataFrame, normalizes the velocity components
-    and spatial coordinates in the DataFrame using the provided friction velocity and characteristic length scale,
-    and returns a tuple with the updated DataFrame.
+    Normalize the velocity components and spatial coordinates in the DataFrame.
 
-    Parameters:
-    - timestep_df (tuple): A tuple containing a timestep (float) and a DataFrame with the original velocity components and spatial coordinates.
-    - u_tau (float): The friction velocity used for normalizing the velocity components.
-    - delta_tau (float): The characteristic length scale used for normalizing the spatial coordinates.
+    Parameters
+    ----------
+    timestep_df : tuple
+        A tuple containing a timestep (float) and a DataFrame with the original velocity components and spatial coordinates.
+    u_tau : float
+        The friction velocity used for normalizing the velocity components.
+    delta_tau : float
+        The characteristic length scale used for normalizing the spatial coordinates.
 
-    Returns:
-    - normalized_data (tuple): A tuple containing the timestep and the updated DataFrame with normalized velocities and spatial coordinates.
+    Returns
+    -------
+    Tuple[float, pd.DataFrame]
+        A tuple containing the timestep and the updated DataFrame with normalized velocities and spatial coordinates.
     """
     timestep, df = timestep_df
     logger.debug("normalize_all_single: Normalizing data...")
@@ -131,19 +215,21 @@ def process_velocity_data_single(
     tolerance: float = 1e-4,
 ) -> Tuple[float, pd.DataFrame]:
     """
-    Processes a tuple containing CFD simulation data to calculate fluctuating components of velocity fields.
-    It computes these metrics for the horizontal (u), vertical (v), and lateral (w) velocity components.
+    Calculate fluctuating components of velocity fields.
 
-    Parameters:
-    - timestep_df (tuple): A tuple containing a timestep and a DataFrame with spatial coordinates (x, y, z)
-      and velocity components (u, v, w). (NORMALIZED!)
-    - averaged_data (DataFrame): Contains averaged velocities ($\overline{U}(y)$, $\overline{V}(y)$, $\overline{W}(y)$)
-      and rms of velocity fluctuations ($u'(y)$, $v'(y)$, $w'(y)$) as columns, indexed by the y-coordinate. (NORMALIZED!)
-    - tolerance (float): The tolerance for matching 'y' values between the main and averaged data. ENSURES THEY ARE THE SAME!
+    Parameters
+    ----------
+    timestep_df : tuple
+        A tuple containing a timestep and a DataFrame with spatial coordinates (x, y, z) and velocity components (u, v, w).
+    averaged_data : DataFrame
+        Contains averaged velocities and rms of velocity fluctuations as columns, indexed by the y-coordinate.
+    tolerance : float, optional
+        The tolerance for matching 'y' values between the main and averaged data.
 
-    Returns:
-    - processed_data (tuple): A tuple containing a timestep and a DataFrame with original and fluctuating
-      velocity components (U, V, W, u, v, w).
+    Returns
+    -------
+    Tuple[float, pd.DataFrame]
+        A tuple containing a timestep and a DataFrame with original and fluctuating velocity components (U, V, W, u, v, w).
     """
     timestep, df = timestep_df
     logger.debug(
@@ -221,19 +307,25 @@ def detect_Q_events_single(
     timestep_df: Tuple[float, pd.DataFrame], averaged_data: pd.DataFrame, H: float
 ) -> Tuple[float, pd.DataFrame]:
     """
-    Detects Q events in the fluid dynamics data based on the specified condition.
+    Detect Q events in the fluid dynamics data based on the specified condition.
 
-    Parameters:
-    - timestep_df (tuple): Data processed by `process_velocity_data_single`, containing:
-      * A timestep (float)
-      * A DataFrame with spatial coordinates (x, y, z) and velocity components u, v, w, U, V, W (NORMALIZED!)
-    - averaged_data (DataFrame): Data containing the rms values for velocity components u and v for each y coordinate. ** u' and v' **
-    - H (float): The sensitivity threshold for identifying Q events.
+    Parameters
+    ----------
+    timestep_df : tuple
+        Data processed by `process_velocity_data_single`, containing:
+        - A timestep (float)
+        - A DataFrame with spatial coordinates (x, y, z) and velocity components u, v, w, U, V, W.
+    averaged_data : DataFrame
+        Data containing the rms values for velocity components u and v for each y coordinate.
+    H : float
+        The sensitivity threshold for identifying Q events.
 
-    Returns:
-    - q_event_data (tuple): A tuple containing:
-      * A timestep (float)
-      * A DataFrame with columns ['x', 'y', 'z', 'Q'], where 'Q' is a boolean indicating whether a Q event is detected.
+    Returns
+    -------
+    Tuple[float, pd.DataFrame]
+        A tuple containing:
+        - A timestep (float)
+        - A DataFrame with columns ['x', 'y', 'z', 'Q'], where 'Q' is a boolean indicating whether a Q event is detected.
     """
     logger.debug("detect_Q_events_single: Detecting Q events...")
     timestep, df = timestep_df
@@ -271,15 +363,23 @@ def calculate_local_Q_ratios(
     """
     Calculate the ratio of Q-events in local volumes for a single timestep.
 
-    Parameters:
-    - df (pd.DataFrame): Input DataFrame with columns ['x', 'y', 'z', 'Q'].
-    - nx (int): Number of sections in the x direction.
-    - nz (int): Number of sections in the z direction.
-    - Lx_norm (float): Length in the x direction. - NORMALIZED BY DIVIDING BY DELTA_TAU
-    - Lz_norm (float): Length in the z direction. - NORMALIZED BY DIVIDING BY DELTA_TAU
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input DataFrame with columns ['x', 'y', 'z', 'Q'].
+    nx : int
+        Number of sections in the x direction.
+    nz : int
+        Number of sections in the z direction.
+    Lx_norm : float
+        Length in the x direction.
+    Lz_norm : float
+        Length in the z direction.
 
-    Returns:
-    - pd.DataFrame: DataFrame with columns ['x_index', 'z_index', 'Q_event_count', 'total_points', 'Q_ratio'].
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with columns ['x_index', 'z_index', 'Q_event_count', 'total_points', 'Q_ratio'].
     """
     logger.debug("calculate_local_Q_ratios: Calculating local Q ratios...")
     step_x = Lx_norm / nx
@@ -328,7 +428,7 @@ def calculate_reward(df: pd.DataFrame, avg_qratio: float, nx: int, nz: int) -> f
     to the global average results in a positive reward and a higher local Q ratio
     results in a negative reward. The goal is to minimize the Q ratio.
 
-    Parameters:
+    Parameters
     ----------
     df : pd.DataFrame
         DataFrame containing the columns ['x_index', 'z_index', 'Q_ratio'] which
@@ -340,7 +440,7 @@ def calculate_reward(df: pd.DataFrame, avg_qratio: float, nx: int, nz: int) -> f
     nz : int
         The z-index of the local volume.
 
-    Returns:
+    Returns
     -------
     float
         The calculated reward value. A value of 1 indicates no Q events in the
@@ -376,7 +476,7 @@ def calculate_reward_full(
     """
     Calculate the rewards based on Q events for a single timestep, saving results to a CSV file.
 
-    Parameters:
+    Parameters
     ----------
     directory : str
         Directory containing the PVD and PVTU files.
@@ -501,19 +601,16 @@ def calculate_reward_full(
         logger.debug("calculate_reward_full: %s does not exist", final_post_folder)
 
 
-"""
-Example usage:
-python calc_reward.py --directory path/to/data --Lx 1.0 --Lz 1.0 --H 3.0 --nx 4 --nz 3 --averaged_data_path path/to/averaged_data --output_file rewards.csv
-"""
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Calculate rewards based on Q events.")
     parser.add_argument(
         "--directory",
         type=str,
         required=True,
-        help="Directory containing the PVD and PVTU files. MUST INCLUDE channel.pvd!!!",
+        help=(
+            "Directory containing the PVD and PVTU files. "
+            "MUST INCLUDE channel.pvd!!!"
+        ),
     )
     parser.add_argument(
         "--Lx",
@@ -543,13 +640,19 @@ if __name__ == "__main__":
         "--averaged_data_path",
         type=str,
         required=True,
-        help="Path to DIRECTORY containing csv file with averaged data AND csv file with pre-calculated values for u_tau and delta_tau.",
+        help=(
+            "Path to DIRECTORY containing csv file with averaged data AND "
+            "csv file with pre-calculated values for u_tau and delta_tau."
+        ),
     )
     parser.add_argument(
         "--output_qratio_file",
         type=str,
         required=True,
-        help="Path to the output CSV file for saving calculated local Q event volume ratio.",
+        help=(
+            "Path to the output CSV file for saving calculated local Q event "
+            "volume ratio."
+        ),
     )
     parser.add_argument(
         "--output_reward_file",
