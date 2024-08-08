@@ -97,24 +97,8 @@ parser.add_argument(
     "before starting the training."
     "see `logging_config.py` for details.",
 )
-parser.add_argument(
-    "--logdir",
-    type=str,
-    required=False,
-    default=None,
-    help="Specify the directory for the log files."
-    "see `logging_config.py` for details.",
-)
 
 args = parser.parse_args()
-
-# Custom log directory to be used in `logging_config.py` (and so in every module)
-CUSTOM_LOG_DIR: str = args.logdir
-
-if CUSTOM_LOG_DIR is not None:
-    LOG_DIR = CUSTOM_LOG_DIR
-else:
-    from logging_config import DEFAULT_LOG_DIR as LOG_DIR
 
 # Set up logger
 logger = configure_logger(

@@ -66,11 +66,6 @@ Version History
 import os
 from typing import Dict, Any
 import logging
-from PARALLEL_TRAINING_3D_CHANNEL_MARL import CUSTOM_LOG_DIR
-
-## This file sets the logging levels for the project
-# IN GENERAL: logging messages should use %s formatting, not f-strings
-# IN GENERAL: "DEBUG" and "INFO" are the most commonly used logging levels in the project
 
 # Possible logging levels (for reference).
 possible_logging_levels = {
@@ -87,13 +82,10 @@ DEFAULT_LOGGING_LEVEL: str = "INFO"
 # Set the DEFAULT log directory for each module
 DEFAULT_LOG_DIR: str = "logsPYTHON"
 
-# Set the CUSTOM log directory if specified in `PARALLEL_TRAINING_3D_CHANNEL_MARL.py`
-# check if CUSTOM_LOG_DIR is NOT None
-if CUSTOM_LOG_DIR is not None:
-    LOG_DIR: str = CUSTOM_LOG_DIR
-else:
-    LOG_DIR: str = DEFAULT_LOG_DIR
+CUSTOM_LOG_DIR: str = None  # Set this to override the default log directory
 
+# Set the CUSTOM log directory if specified
+LOG_DIR: str = CUSTOM_LOG_DIR if CUSTOM_LOG_DIR is not None else DEFAULT_LOG_DIR
 
 # Default Config for a Module
 DEFAULT_CONFIG: Dict[str, Any] = {
