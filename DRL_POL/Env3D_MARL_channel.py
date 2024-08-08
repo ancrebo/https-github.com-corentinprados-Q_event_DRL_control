@@ -458,7 +458,7 @@ class Environment(Environment):
     # -----------------------------------------------------------------------------------------------------
     # -----------------------------------------------------------------------------------------------------
 
-    def log(self, level, message, *args, **kwargs):
+    def log(self, level, message, *args):
         """
         Log messages with specified logging level.
 
@@ -505,7 +505,7 @@ class Environment(Environment):
             "ENV_ID %s: Env3D.log: Args passed to log method: %s", self.ENV_ID, args
         )
         primary_logger.debug(
-            "ENV_ID %s: Env3D.log: Kwargs passed to log method: %s", self.ENV_ID, kwargs
+            "ENV_ID %s: Env3D.log: Kwargs passed to log method: %s", self.ENV_ID
         )
         primary_logger.debug(
             "ENV_ID %s: Env3D.log: *args type: %s", self.ENV_ID, type(args)
@@ -514,11 +514,11 @@ class Environment(Environment):
         if self.ENV_ID[1] == 1:
             # Use primary logger to log to both console and file
             if primary_logger.isEnabledFor(level):
-                primary_logger.log(level, message, *args, **kwargs)
+                primary_logger.log(level, message, *args)
         else:
             # Use file-only logger to log only to file
             if file_only_logger.isEnabledFor(level):
-                file_only_logger.log(level, message, *args, **kwargs)
+                file_only_logger.log(level, message, *args)
 
     def start(self) -> None:
         """
