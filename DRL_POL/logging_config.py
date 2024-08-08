@@ -1,24 +1,77 @@
+"""
+logging_config.py
+=================
+
+DEEP REINFORCEMENT LEARNING WITH ALYA
+-------------------------------------
+
+This module sets up the default logging configuration for the entire project.
+It allows for overriding logging levels for individual modules and provides
+functions to configure loggers with specified settings.
+
+The script includes:
+1. Default logging configuration.
+2. Dictionary to set logging levels for each module if default values are to be overridden.
+3. Function to clear old log files in the specified directory.
+4. Functions to configure loggers for general use and specific module cases.
+
+Usage
+-----
+To set up logging in a new module, add the following lines:
+
+from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
+
+# Set up logger
+logger = configure_logger(__name__, default_level=DEFAULT_LOGGING_LEVEL)
+
+logger.info("%s.py: Logging level set to %s", __name__, logger.level)
+
+You must add the new module's name to logging_config_dict in logging_config.py to
+be able to specify custom logging levels if needed.
+
+Functions
+---------
+configure_logger(module_name: str, default_level: str = "INFO", log_dir: str = DEFAULT_LOG_DIR) -> logging.Logger
+    Configure a logger with specified settings or defaults.
+
+configure_env_logger(log_dir: str = DEFAULT_LOG_DIR) -> Tuple[logging.Logger, logging.Logger]
+    Configure loggers specifically for the Environment class.
+
+clear_old_logs(log_dir: str) -> None
+    Clear old log files in the specified directory.
+
+Authors
+-------
+- Pieter Orlandini
+
+Version History
+---------------
+- Initial implementation in August 2024.
+"""
+
 import os
 from typing import Dict, Any
 import logging
 
 ## This file sets the logging levels for the project
 # IN GENERAL: logging messages should use %s formatting, not f-strings
+# IN GENERAL: "DEBUG" and "INFO" are the most commonly used logging levels in the project
 
-# Possible logging levels (for reference)
+# Possible logging levels (for reference).
 possible_logging_levels = {
-    "DEBUG": 10,
-    "INFO": 20,
-    "WARNING": 30,
-    "ERROR": 40,
-    "CRITICAL": 50,
+    "DEBUG": 10,  # Detailed information, typically of interest only when diagnosing problems.
+    "INFO": 20,  # Confirmation that things are working as expected.
+    "WARNING": 30,  # An indication that something unexpected happened, or indicative of some problem in the near future.
+    "ERROR": 40,  # Due to a more serious problem, the software has not been able to perform some function.
+    "CRITICAL": 50,  # A very serious error, indicating that the program itself may be unable to continue running.
 }
 
-# Set the DEFAULT logging level, passed to individual modules
-DEFAULT_LOGGING_LEVEL = "INFO"
+# Set the DEFAULT logging level and log directory
+DEFAULT_LOGGING_LEVEL: str = "INFO"
+DEFAULT_LOG_DIR: str = "logsPYTHON"
 
-# Default Config
-DEFAULT_CONFIG = {
+# Default Config for a Module
+DEFAULT_CONFIG: Dict[str, Any] = {
     "console_level": DEFAULT_LOGGING_LEVEL,
     "file_level": DEFAULT_LOGGING_LEVEL,
     "override": False,
@@ -94,17 +147,64 @@ logging_config_dict: Dict[str, Dict[str, Any]] = {
 }
 
 
+def clear_old_logs(log_dir: str) -> None:
+    """
+    Clear old log files in the specified directory.
+
+    Parameters
+    ----------
+    log_dir : str
+        The directory where log files are stored.
+    """
+    if os.path.exists(log_dir):
+        for file in os.listdir(log_dir):
+            file_path = os.path.join(log_dir, file)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+
+
 # TODO: @pietero use `funcName` to automatically add the function name to the log - Pieter
-def configure_logger(module_name: str, default_level: str = "INFO") -> logging.Logger:
+def configure_logger(
+    module_name: str,
+    default_level: str = "INFO",
+    log_dir: str = DEFAULT_LOG_DIR,
+) -> logging.Logger:
     """
     Configure a logger with specified settings or defaults.
 
-    Args:
-        module_name (str): The name of the module for the logger.
-        default_level (str): The default logging level (default is "INFO").
+    Parameters
+    ----------
+    module_name : str
+        The name of the module for the logger.
+    default_level : str, optional
+        The default logging level (default is "INFO").
+    log_dir : str, optional
+        The directory where log files are stored (default is "logsPYTHON").
 
-    Returns:
-        logging.Logger: Configured logger.
+    Returns
+    -------
+    logging.Logger
+        Configured logger.
+
+    Examples
+    --------
+    Setting up logging for a new module:
+
+    >>> from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
+    >>> logger = configure_logger(__name__, default_level=DEFAULT_LOGGING_LEVEL)
+    >>> logger.info("%s.py: Logging level set to %s", __name__, logger.level)
+
+    Console log format:
+    module_name - LEVEL - message
+
+    Example:
+    Env3D_MARL_channel - INFO - Environment initialized
+
+    File log format:
+    YYYY-MM-DD HH:MM:SS,mmm - module_name - LEVEL - message
+
+    Example:
+    2024-08-07 10:00:00,123 - Env3D_MARL_channel - INFO - Environment initialized
     """
     logger = logging.getLogger(module_name)
 
@@ -150,9 +250,10 @@ def configure_logger(module_name: str, default_level: str = "INFO") -> logging.L
         logger.addHandler(ch)
 
         # File handler
-        if not os.path.exists("logsPYTHON"):
-            os.makedirs("logsPYTHON")
-        fh = logging.FileHandler(f"logsPYTHON/{module_name}.log")
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+        module_log_path = os.path.join(log_dir, f"{module_name}.log")
+        fh = logging.FileHandler(module_log_path)
         fh.setLevel(file_level)
         formatter_fh = logging.Formatter(
             "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -161,7 +262,7 @@ def configure_logger(module_name: str, default_level: str = "INFO") -> logging.L
         logger.addHandler(fh)
 
         # Global file handler for all logs
-        global_log_path = "logsPYTHON/all.log"
+        global_log_path = os.path.join(log_dir, "all.log")
         fh_all = logging.FileHandler(global_log_path)
         fh_all.setLevel(file_level)
         fh_all.setFormatter(formatter_fh)
@@ -173,16 +274,52 @@ def configure_logger(module_name: str, default_level: str = "INFO") -> logging.L
     return logger
 
 
-def configure_env_logger() -> (logging.Logger, logging.Logger):
+# Function to configure loggers specifically for the Environment class
+def configure_env_logger(
+    log_dir: str = DEFAULT_LOG_DIR,
+) -> (logging.Logger, logging.Logger):
     """
     Configure loggers specifically for the Environment class.
 
-    One logger (primary_logger) logs to both console and file, while the other (file_only_logger) logs to file only.
-    This is to separate the console output for multiple instances of the Environment class, only logging to the console
+    One logger (primary_logger) logs to both console and file, while the other
+    (file_only_logger) logs to file only. This is to separate the console output
+    for multiple instances of the Environment class, only logging to the console
     instances with ENV_ID [*, 1] and logging to file for all instances.
 
-    Returns:
-        tuple: A tuple containing the primary logger and file-only logger.
+    Parameters
+    ----------
+    log_dir : str, optional
+        The directory where log files are stored (default is "logsPYTHON").
+
+    Returns
+    -------
+    tuple
+        A tuple containing the primary logger and file-only logger.
+
+    Examples
+    --------
+    Setting up logging for the Environment class:
+
+    >>> primary_logger, file_only_logger = configure_env_logger()
+    >>> primary_logger.info("Primary logger set up for Env3D_MARL_channel")
+    >>> file_only_logger.info("File-only logger set up for Env3D_MARL_channel")
+
+    Console log format (primary_logger):
+    Env3D_MARL_channel - LEVEL - message
+
+    Example:
+    Env3D_MARL_channel - INFO - Environment initialized
+
+    File log format (primary_logger and file_only_logger):
+    YYYY-MM-DD HH:MM:SS,mmm - Env3D_MARL_channel - LEVEL - message
+
+    Example:
+    2024-08-07 10:00:00,123 - Env3D_MARL_channel - INFO - Environment initialized
+
+    See Also
+    --------
+    `Environment.log`: Method to log messages in the Environment class.
+    (`DRL_POL/Env3D_MARL_channel.py`)
     """
     # Define the logging levels for the Environment class
     if logging_config_dict["Env3D_MARL_channel"]["override"]:
@@ -199,9 +336,10 @@ def configure_env_logger() -> (logging.Logger, logging.Logger):
     primary_logger.setLevel(console_level)
 
     # Create file handler
-    if not os.path.exists("logsPYTHON"):
-        os.makedirs("logsPYTHON")
-    primary_fh = logging.FileHandler("logsPYTHON/Env3D_MARL_channel.log")
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+    env_log_path = os.path.join(log_dir, "Env3D_MARL_channel.log")
+    primary_fh = logging.FileHandler(env_log_path)
     primary_fh.setLevel(file_level)
     primary_formatter_fh = logging.Formatter(
         "%(asctime)s - Env3D_MARL_channel - %(levelname)s - %(message)s"
@@ -219,7 +357,8 @@ def configure_env_logger() -> (logging.Logger, logging.Logger):
     primary_logger.addHandler(primary_ch)
 
     # Create global file handler
-    global_fh = logging.FileHandler("logsPYTHON/all.log")
+    global_env_log_path = os.path.join(log_dir, "all.log")
+    global_fh = logging.FileHandler(global_env_log_path)
     global_fh.setLevel(file_level)  # Set to the lowest level to capture all messages
     global_fh.setFormatter(primary_formatter_fh)
     primary_logger.addHandler(global_fh)
