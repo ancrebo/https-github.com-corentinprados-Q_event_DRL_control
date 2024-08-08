@@ -239,15 +239,15 @@ class Environment(Environment):
     # -----------------------------------------------------------------------------------------------------
     # -----------------------------------------------------------------------------------------------------
 
-    def log(self, level, message, *args, **kwargs):
+    def log(self, level, message, *args):
         if self.ENV_ID[1] == 1:
             # Use primary logger to log to both console and file
             if primary_logger.isEnabledFor(level):
-                primary_logger.log(level, message, *args, **kwargs)
+                primary_logger.log(level, message, *args)
         else:
             # Use file-only logger to log only to file
             if file_only_logger.isEnabledFor(level):
-                file_only_logger.log(level, message, *args, **kwargs)
+                file_only_logger.log(level, message, *args)
 
     def start(self) -> None:
         cr_start("ENV.start", 0)
