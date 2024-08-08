@@ -1,0 +1,73 @@
+#
+# This script plots convergence
+#
+echo "Press Ctrl-C to quit"
+echo "reset"                             >  ./gnuplot.tmp
+
+echo "set multiplot "                    >> ./gnuplot.tmp
+echo "set size noratio 1.0,2.0 "         >> ./gnuplot.tmp
+#----------------------------------------------------------------
+# Top-Left
+#----------------------------------------------------------------
+
+echo 'set format y "10^{%2T}"'           >> ./gnuplot.tmp
+echo "set size   0.5,0.5 "               >> ./gnuplot.tmp
+echo "set origin 0.0,0.5 "               >> ./gnuplot.tmp   
+echo "set xlabel 'Iteration'"            >> ./gnuplot.tmp
+echo "set ylabel 'Residual'"             >> ./gnuplot.tmp
+echo "set log y"                         >> ./gnuplot.tmp
+echo "plot '$1.nsi.cvg' u 16 t 'MOMENTUM' w l, '$1.nsi.cvg' u 17 t 'CONTINUITY' w l" >> ./gnuplot.tmp
+
+#----------------------------------------------------------------
+# Top-Right
+#----------------------------------------------------------------
+
+echo "set size   0.5,0.5 "                 >> ./gnuplot.tmp
+echo "set origin 0.5,0.5"                  >> ./gnuplot.tmp    
+echo "set xlabel 'Iteration'"              >> ./gnuplot.tmp
+echo "set ylabel 'Linf'"                   >> ./gnuplot.tmp
+echo "set log y "                          >> ./gnuplot.tmp   
+echo "plot '$1.nsi.cvg' u 5 t 'Velocity' w l, '$1.nsi.cvg' u 6 t 'Pressure' w l "   >> ./gnuplot.tmp
+
+#----------------------------------------------------------------
+# Bot-Left
+#----------------------------------------------------------------
+
+echo "unset format"                      >> ./gnuplot.tmp
+echo "set size   0.5,0.5 "               >> ./gnuplot.tmp
+echo "set origin 0.0,0.0"                >> ./gnuplot.tmp
+echo "set xlabel 'Iteration'"            >> ./gnuplot.tmp
+echo "set ylabel 'Velocity'"             >> ./gnuplot.tmp
+echo "set y2label 'Pressure'"            >> ./gnuplot.tmp
+echo "set y2tics  "                      >> ./gnuplot.tmp
+echo "set ytics nomirror"                >> ./gnuplot.tmp
+echo "unset log y "                      >> ./gnuplot.tmp   
+#echo "set y2range [0:5]"                 >> ./gnuplot.tmp
+echo "plot '$1.nsi.cvg' u 10 t 'max vel' w l axes x1y1, '$1.nsi.cvg' u 0:(abs(column(26))) t 'abs(min) pres' w l axes x1y2, '$1.nsi.cvg' u 0:(abs(column(27))) t 'abs(max) pres' w l axes x1y2 "   >> ./gnuplot.tmp
+echo "unset log y "                      >> ./gnuplot.tmp   
+
+
+echo "unset y2label "                    >> ./gnuplot.tmp
+#  echo "unset y2tics  "                 >> ./gnuplot.tmp   
+
+#----------------------------------------------------------------
+# Bot-Right
+#----------------------------------------------------------------
+
+echo "set size   0.5,0.5 "               >> ./gnuplot.tmp
+echo "set origin 0.5,0.0"                >> ./gnuplot.tmp    
+echo "set xlabel 'Iteration'"            >> ./gnuplot.tmp
+echo "set ylabel 'Solver iterations'"    >> ./gnuplot.tmp
+echo "set y2tics  "                      >> ./gnuplot.tmp
+echo "unset log y"                       >> ./gnuplot.tmp   
+echo "plot '$1-MOMENTUM.nsi.sol' u 1 t 'MOMENTUM' w l, '$1-CONTINUITY.nsi.sol' u 1 t 'CONTINUITY' w l" >> ./gnuplot.tmp
+
+#----------------------------------------------------------------
+# Replot
+#----------------------------------------------------------------
+
+echo "unset multiplot "                  >> ./gnuplot.tmp
+echo "load './gnuplot.tmp'"              >  ./gnuplot2.tmp
+echo "pause 2"                           >> ./gnuplot2.tmp
+echo "load './gnuplot2.tmp'"             >> ./gnuplot2.tmp
+gnuplot ./gnuplot2.tmp 

@@ -1,0 +1,17 @@
+CODES, NODES
+	1	11	1.0, 1.0, SPACE_TIME_FUNCTION = INFLOW $ inlet
+	2	00	0.0, 0.0                               $ outlet
+	3	00	0.0, 0.0                               $ top		
+	4	00	0.0, 0.0                               $ bottom
+	5	11	0.0, 0.0                               $ airfoil
+	6	11	1.0, 1.0, SPACE_TIME_FUNCTION = jet_1  $ jet_1
+	7	11	1.0, 1.0, SPACE_TIME_FUNCTION = jet_2  $ jet_2
+	8	11	1.0, 1.0, SPACE_TIME_FUNCTION = jet_3  $ jet_3
+	1 & 3	11	1.0, 1.0, SPACE_TIME_FUNCTION = INFLOW $ left top corner
+	2 & 3	00	0.0, 0.0                               $ right top corner
+	2 & 4	00	0.0, 0.0                               $ right bot corner
+	4 & 1	11	1.0, 1.0, SPACE_TIME_FUNCTION = INFLOW $ left bot corner
+	5 & 6	11	1.0, 1.0, SPACE_TIME_FUNCTION = jet_1  $ airfoil&jet_1
+	5 & 7	11	1.0, 1.0, SPACE_TIME_FUNCTION = jet_2  $ airfoil&jet_2
+	5 & 8	11	1.0, 1.0, SPACE_TIME_FUNCTION = jet_3  $ airfoil&jet_3
+END_CODES

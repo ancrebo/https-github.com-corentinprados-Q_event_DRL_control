@@ -1,0 +1,71 @@
+CODES, NODES
+		$1	         000  0.0,	0.0,  0.0	 $ FRONT
+		6	         111  1.0,	1.0,  1.0,	 SPACE_TIME_FUNCTION = INFLOW $ INLET
+		3	         000  0.0,	0.0,  0.0	 $ TOP
+		4            000  0.0,  0.0,  0.0       $ out
+		$2           000  0.0,  0.0,  0.0       $ back
+		5            000  0.0,  0.0,  0.0       $ BOT
+		7            111  0.0,  0.0,  0.0       $ INV1_CYLINDER
+		8            111  0.0,  0.0,  0.0       $ INV2_CYLINDER
+		9            111  0.0,  0.0,  0.0       $ INV3_CYLINDER
+		10           111  0.0,  0.0,  0.0       $ INV4_CYLINDER
+		11	         111  0.0,  0.0,  0.0       $ INV5_CYLINDER
+		12	         111  0.0,  0.0,  0.0       $ INV6_CYLINDER
+		13	         111  0.0,  0.0,  0.0       $ INV7_CYLINDER
+		14	         111  0.0,  0.0,  0.0       $ INV8_CYLINDER
+		15	         111  0.0,  0.0,  0.0       $ INV9_CYLINDER
+		16			 111  0.0,  0.0,  0.0       $ INV10_CYLINDER
+        17	         111  1.0,	1.0,  1.0,	    SPACE_TIME_FUNCTION = JET_TOP $ INLET
+	    18	         111  1.0,	1.0,  1.0,	    SPACE_TIME_FUNCTION = JET_BOT $ INLET
+		6 & 3        111  1.0,  1.0,  1.0,      SPACE_TIME_FUNCTION = INFLOW  $ in + top
+		6 & 5        111  1.0,  1.0,  1.0,      SPACE_TIME_FUNCTION = INFLOW  $ in + bot
+        7 & 17       111  0.0,  0.0,  0.0       $ jet_top + inv1
+		8 & 17       111  0.0,  0.0,  0.0       $ jet_top + inv2
+		9 & 17       111  0.0,  0.0,  0.0       $ jet_top + inv3
+		10 & 17      111  0.0,  0.0,  0.0       $ jet_top + inv4
+	    11 & 17      111  0.0,  0.0,  0.0       $ jet_top + inv5
+		12 & 17      111  0.0,  0.0,  0.0       $ jet_top + inv6
+		13 & 17      111  0.0,  0.0,  0.0       $ jet_top + inv7
+		14 & 17      111  0.0,  0.0,  0.0       $ jet_top + inv8
+		15 & 17      111  0.0,  0.0,  0.0       $ jet_top + inv9
+		16 & 17      111  0.0,  0.0,  0.0       $ jet_top + inv10
+		7 & 18       111  0.0,  0.0,  0.0       $ jet_bot + inv1
+		8 & 18       111  0.0,  0.0,  0.0       $ jet_bot + inv2
+		9 & 18       111  0.0,  0.0,  0.0       $ jet_bot + inv3
+		10 & 18      111  0.0,  0.0,  0.0       $ jet_bot + inv4
+	    11 & 18      111  0.0,  0.0,  0.0       $ jet_bot + inv5
+		12 & 18      111  0.0,  0.0,  0.0       $ jet_bot + inv6
+		13 & 18      111  0.0,  0.0,  0.0       $ jet_bot + inv7
+		14 & 18      111  0.0,  0.0,  0.0       $ jet_bot + inv8
+		15 & 18      111  0.0,  0.0,  0.0       $ jet_bot + inv9
+		16 & 18      111  0.0,  0.0,  0.0       $ jet_bot + inv10
+		7 & 8        111  0.0,  0.0,  0.0       $ inv1 + inv2
+		8 & 9        111  0.0,  0.0,  0.0       $ inv2 + inv3
+		9 & 10       111  0.0,  0.0,  0.0       $ inv3 + inv4
+		10 & 11      111  0.0,  0.0,  0.0       $ inv4 + inv5
+	    11 & 12      111  0.0,  0.0,  0.0       $ inv5 + inv6
+		12 & 13      111  0.0,  0.0,  0.0       $ inv6 + inv7
+		13 & 14      111  0.0,  0.0,  0.0       $ inv7 + inv8
+		14 & 15      111  0.0,  0.0,  0.0       $ inv8 + inv9
+		15 & 16      111  0.0,  0.0,  0.0       $ inv9 + inv10
+		7 & 8 & 17   111  0.0,  0.0,  0.0       $ inv1 + inv2 + jet_top
+		8 & 9 & 17   111  0.0,  0.0,  0.0       $ inv2 + inv3 + jet_top
+		9 & 10 & 17  111  0.0,  0.0,  0.0       $ inv3 + inv4 + jet_top
+		10 & 11 & 17 111  0.0,  0.0,  0.0       $ inv4 + inv5 + jet_top
+	    11 & 12 & 17 111  0.0,  0.0,  0.0       $ inv5 + inv6 + jet_top
+		12 & 13 & 17 111  0.0,  0.0,  0.0       $ inv6 + inv7 + jet_top
+		13 & 14 & 17 111  0.0,  0.0,  0.0       $ inv7 + inv8 + jet_top
+		14 & 15 & 17 111  0.0,  0.0,  0.0       $ inv8 + inv9 + jet_top
+		15 & 16 & 17 111  0.0,  0.0,  0.0       $ inv9 + inv10 + jet_top
+		7 & 8 & 18   111  0.0,  0.0,  0.0       $ inv1 + inv2 + jet_bot
+		8 & 9 & 18   111  0.0,  0.0,  0.0       $ inv2 + inv3 + jet_bot
+		9 & 10 & 18  111  0.0,  0.0,  0.0       $ inv3 + inv4 + jet_bot
+		10 & 11 & 18 111  0.0,  0.0,  0.0       $ inv4 + inv5 + jet_bot
+	    11 & 12 & 18 111  0.0,  0.0,  0.0       $ inv5 + inv6 + jet_bot
+		12 & 13 & 18 111  0.0,  0.0,  0.0       $ inv6 + inv7 + jet_bot
+		13 & 14 & 18 111  0.0,  0.0,  0.0       $ inv7 + inv8 + jet_bot
+		14 & 15 & 18 111  0.0,  0.0,  0.0       $ inv8 + inv9 + jet_bot
+		15 & 16 & 18 111  0.0,  0.0,  0.0       $ inv9 + inv10 + jet_bot
+		4 & 3        000  0.0,  0.0,  0.0       $ out + top
+		4 & 5        000  0.0,  0.0,  0.0       $ out + bot
+END_CODES
