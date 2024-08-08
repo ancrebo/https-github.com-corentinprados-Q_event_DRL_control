@@ -590,7 +590,6 @@ def calculate_channel_witness_coordinates(params: Dict[str, Any]) -> Dict[str, A
 def write_witness_file(
     filepath: str,
     probes_positions: List[Tuple[float, float, float]],
-    witness_version: int,
 ) -> None:
     """
     Writes the witness file that needs to be included in the .ker.dat file.
@@ -766,7 +765,6 @@ def write_witness_file_and_visualize(
     write_witness_file(
         witness_filepath,
         output_params["locations"],
-        probes_location,
     )
 
     write_witness_parameters_file(
