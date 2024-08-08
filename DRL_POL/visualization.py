@@ -126,9 +126,12 @@ def plot_witness_points(
     nz_Qs: int,
     y_value_density: int,
     y_skip_values: int,
+    Lx: float,
+    Ly: float,
+    Lz: float,
 ) -> None:
     """
-    Plot the witness points in the first local volume (0, 0) in 3D and save the plot as an image file.
+    Plot the witness points in the local volume (0, 0) in 3D and save the plot as an image file.
 
     Parameters:
         coordinates (List[Tuple[float, float, float]]): List of witness point coordinates.
@@ -137,6 +140,9 @@ def plot_witness_points(
         nz_Qs (int): Number of agents in the z direction.
         y_value_density (int): Number of y layers in witness points.
         y_skip_values (int): Number of layers to skip for displaying ticks on the y-axis.
+        Lx (float): Length of the environment in the x direction.
+        Ly (float): Length of the environment in the y direction.
+        Lz (float): Length of the environment in the z direction.
     """
     logger.debug("Plotting witness points of local volume (0, 0) in 3D and saving...")
 
@@ -147,8 +153,9 @@ def plot_witness_points(
     y_vals = np.array([coord[1] for coord in coordinates])
     z_vals = np.array([coord[2] for coord in coordinates])
 
-    # Filter points within the first local volume (0, 0)
-    volume_filter = (x_vals < 1 / nx_Qs) & (z_vals < 1 / nz_Qs)
+    # # Filter points within the first local volume (0, 0)
+    volume_filter = (x_vals < Lx / nx_Qs) & (z_vals < Lz / nz_Qs)
+    # volume_filter = (x_vals < 1 / nx_Qs) & (z_vals < 1 / nz_Qs)
     x_vals = x_vals[volume_filter] * nx_Qs
     y_vals = y_vals[volume_filter] * y_value_density
     z_vals = z_vals[volume_filter] * nz_Qs
