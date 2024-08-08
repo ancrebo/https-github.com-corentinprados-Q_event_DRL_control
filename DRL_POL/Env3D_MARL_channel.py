@@ -514,27 +514,11 @@ class Environment(Environment):
         if self.ENV_ID[1] == 1:
             # Use primary logger to log to both console and file
             if primary_logger.isEnabledFor(level):
-                # Flatten args if necessary
-                flat_args = []
-                for arg in args:
-                    if isinstance(arg, tuple):
-                        flat_args.extend(arg)
-                    else:
-                        flat_args.append(arg)
-
-                primary_logger.log(level, message, *flat_args)
+                primary_logger.log(level, message, *args)
         else:
             # Use file-only logger to log only to file
             if file_only_logger.isEnabledFor(level):
-                # Flatten args if necessary
-                flat_args = []
-                for arg in args:
-                    if isinstance(arg, tuple):
-                        flat_args.extend(arg)
-                    else:
-                        flat_args.append(arg)
-
-                file_only_logger.log(level, message, *flat_args)
+                file_only_logger.log(level, message, *args)
 
     def start(self) -> None:
         """
