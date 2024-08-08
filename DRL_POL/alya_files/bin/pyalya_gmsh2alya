@@ -1,7 +1,0 @@
-#!/usr/bin/python3
-# EASY-INSTALL-DEV-SCRIPT: 'pyAlya==2.0','pyalya_gmsh2alya'
-__requires__ = 'pyAlya==2.0'
-__import__('pkg_resources').require('pyAlya==2.0')
-__file__ = '/scratch/polsm/pyalya/bin/pyalya_gmsh2alya'
-with open(__file__) as f:
-    exec(compile(f.read(), __file__, 'exec'))
