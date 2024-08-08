@@ -11,7 +11,8 @@ functions to configure loggers with specified settings.
 
 The script includes:
 1. Default logging configuration.
-2. Dictionary to set logging levels for each module if default values are to be overridden.
+2. Dictionary to set logging levels for each module if default values are to
+   be overridden.
 3. Function to clear old log files in the specified directory.
 4. Functions to configure loggers for general use and specific module cases.
 
@@ -19,26 +20,39 @@ Usage
 -----
 To set up logging in a new module, add the following lines:
 
+```python
 from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
 
 # Set up logger
 logger = configure_logger(__name__, default_level=DEFAULT_LOGGING_LEVEL)
 
 logger.info("%s.py: Logging level set to %s", __name__, logger.level)
+```
 
-You must add the new module's name to logging_config_dict in logging_config.py to
-be able to specify custom logging levels if needed.
+You MUST add the new module's name to logging_config_dict in `logging_config.py`
+to be able to specify custom logging levels if needed.
+
+The log directory can be set as an argument when running
+`PARALLEL_TRAINING_3D_CHANNEL_MARL.py` and imported here to override the
+default log directory.
 
 Functions
 ---------
-configure_logger(module_name: str, default_level: str = "INFO", log_dir: str = DEFAULT_LOG_DIR) -> logging.Logger
+configure_logger(module_name: str, default_level: str = "INFO",
+                 log_dir: str = LOG_DIR) -> logging.Logger
     Configure a logger with specified settings or defaults.
 
-configure_env_logger(log_dir: str = DEFAULT_LOG_DIR) -> Tuple[logging.Logger, logging.Logger]
+configure_env_logger(log_dir: str = LOG_DIR) ->
+Tuple[logging.Logger, logging.Logger]
     Configure loggers specifically for the Environment class.
 
 clear_old_logs(log_dir: str) -> None
     Clear old log files in the specified directory.
+
+See Also
+--------
+PARALLEL_TRAINING_3D_CHANNEL_MARL.py : Sets the custom log directory which can
+be used to override the default log directory via an argument.
 
 Authors
 -------
@@ -52,6 +66,7 @@ Version History
 import os
 from typing import Dict, Any
 import logging
+from PARALLEL_TRAINING_3D_CHANNEL_MARL import CUSTOM_LOG_DIR
 
 ## This file sets the logging levels for the project
 # IN GENERAL: logging messages should use %s formatting, not f-strings
@@ -66,9 +81,19 @@ possible_logging_levels = {
     "CRITICAL": 50,  # A very serious error, indicating that the program itself may be unable to continue running.
 }
 
-# Set the DEFAULT logging level and log directory
+# Set the DEFAULT logging level for each module
 DEFAULT_LOGGING_LEVEL: str = "INFO"
+
+# Set the DEFAULT log directory for each module
 DEFAULT_LOG_DIR: str = "logsPYTHON"
+
+# Set the CUSTOM log directory if specified in `PARALLEL_TRAINING_3D_CHANNEL_MARL.py`
+# check if CUSTOM_LOG_DIR is NOT None
+if CUSTOM_LOG_DIR is not None:
+    LOG_DIR: str = CUSTOM_LOG_DIR
+else:
+    LOG_DIR: str = DEFAULT_LOG_DIR
+
 
 # Default Config for a Module
 DEFAULT_CONFIG: Dict[str, Any] = {
@@ -167,7 +192,7 @@ def clear_old_logs(log_dir: str) -> None:
 def configure_logger(
     module_name: str,
     default_level: str = "INFO",
-    log_dir: str = DEFAULT_LOG_DIR,
+    log_dir: str = LOG_DIR,
 ) -> logging.Logger:
     """
     Configure a logger with specified settings or defaults.
@@ -185,6 +210,12 @@ def configure_logger(
     -------
     logging.Logger
         Configured logger.
+
+    Raises
+    ------
+    ValueError
+        If the module_name is not found in logging_config_dict.
+        If the 'override' key is missing in the configuration.
 
     Examples
     --------
@@ -252,7 +283,7 @@ def configure_logger(
         # File handler
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
-        module_log_path = os.path.join(log_dir, f"{module_name}.log")
+        module_log_path = f"{log_dir}/{module_name}.log"
         fh = logging.FileHandler(module_log_path)
         fh.setLevel(file_level)
         formatter_fh = logging.Formatter(
@@ -262,7 +293,7 @@ def configure_logger(
         logger.addHandler(fh)
 
         # Global file handler for all logs
-        global_log_path = os.path.join(log_dir, "all.log")
+        global_log_path = f"{log_dir}/all.log"
         fh_all = logging.FileHandler(global_log_path)
         fh_all.setLevel(file_level)
         fh_all.setFormatter(formatter_fh)
@@ -276,7 +307,7 @@ def configure_logger(
 
 # Function to configure loggers specifically for the Environment class
 def configure_env_logger(
-    log_dir: str = DEFAULT_LOG_DIR,
+    log_dir: str = LOG_DIR,
 ) -> (logging.Logger, logging.Logger):
     """
     Configure loggers specifically for the Environment class.
@@ -318,8 +349,8 @@ def configure_env_logger(
 
     See Also
     --------
-    `Environment.log`: Method to log messages in the Environment class.
-    (`DRL_POL/Env3D_MARL_channel.py`)
+    Environment.log : Method to log messages in the Environment class.
+    (DRL_POL/Env3D_MARL_channel.py)
     """
     # Define the logging levels for the Environment class
     if logging_config_dict["Env3D_MARL_channel"]["override"]:
@@ -338,7 +369,7 @@ def configure_env_logger(
     # Create file handler
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
-    env_log_path = os.path.join(log_dir, "Env3D_MARL_channel.log")
+    env_log_path = f"{log_dir}/Env3D_MARL_channel.log"
     primary_fh = logging.FileHandler(env_log_path)
     primary_fh.setLevel(file_level)
     primary_formatter_fh = logging.Formatter(
@@ -357,7 +388,7 @@ def configure_env_logger(
     primary_logger.addHandler(primary_ch)
 
     # Create global file handler
-    global_env_log_path = os.path.join(log_dir, "all.log")
+    global_env_log_path = f"{log_dir}/all.log"
     global_fh = logging.FileHandler(global_env_log_path)
     global_fh.setLevel(file_level)  # Set to the lowest level to capture all messages
     global_fh.setFormatter(primary_formatter_fh)

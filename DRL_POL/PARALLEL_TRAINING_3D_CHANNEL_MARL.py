@@ -63,15 +63,11 @@ from env_utils import (
 )
 from configuration import ALYA_ULTCL
 
-from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
-
-# Set up logger
-logger = configure_logger(
-    "PARALLEL_TRAINING_3D_CHANNEL_MARL", default_level=DEFAULT_LOGGING_LEVEL
-)
-
-logger.info(
-    "PARALLEL_TRAINING_3D_CHANNEL_MARL.py: Logging level set to %s\n", logger.level
+from logging_config import (
+    configure_logger,
+    DEFAULT_LOGGING_LEVEL,
+    clear_old_logs,
+    DEFAULT_LOG_DIR,
 )
 
 # Parser for command line arguments
@@ -93,10 +89,44 @@ parser.add_argument(
         "  - channel_3D_MARL"
     ),
 )
+parser.add_argument(
+    "--clearlogs",
+    type=bool,
+    required=False,
+    default=False,
+    help="Clear the logs in the default folder"
+    "before starting the training."
+    "see `logging_config.py` for details.",
+)
+parser.add_argument(
+    "--logdir",
+    type=str,
+    required=False,
+    default=None,
+    help="Specify the directory for the log files."
+    "see `logging_config.py` for details.",
+)
+
 args = parser.parse_args()
+
+# Custom log directory to be used in `logging_config.py` (and so in every module)
+CUSTOM_LOG_DIR: str = args.logdir
+
+# Set up logger
+logger = configure_logger(
+    "PARALLEL_TRAINING_3D_CHANNEL_MARL", default_level=DEFAULT_LOGGING_LEVEL
+)
+
+logger.info(
+    "PARALLEL_TRAINING_3D_CHANNEL_MARL.py: Logging level set to %s\n", logger.level
+)
 
 # Run the cleaner
 run_subprocess("./", ALYA_ULTCL, "", preprocess=True)
+
+# Clean old logs if specified
+if args.clearlogs:
+    clear_old_logs(DEFAULT_LOG_DIR)
 
 # Set up which case to run
 training_case = args.case
@@ -114,7 +144,6 @@ run_subprocess(
 )
 logger.debug("Copying case files for %s ...\n", training_case)
 run_subprocess("alya_files", "cp -r", f"case_{training_case} case", preprocess=True)
-
 
 from Env3D_MARL_channel import Environment
 
