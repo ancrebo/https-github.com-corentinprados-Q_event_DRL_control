@@ -172,15 +172,15 @@ def plot_witness_points(
     # Plot filtered points with color-coded layers
     scatter = ax.scatter(x_vals, z_vals, y_vals, c=colors, marker="o")
 
-    ax.set_xlabel("Normalized X")
-    ax.set_ylabel("Normalized Z")
+    ax.set_xlabel("X")
+    ax.set_ylabel("Z")
     ax.set_zlabel("Y Layer Index")
     ax.set_title("3D Plot of Witness Points in Local Volume (0, 0)")
 
     # Set tick values
-    ax.set_xticks(np.linspace(0, 1, nx_Qs + 1))
+    ax.set_xticks(np.linspace(0, Lx / nx_Qs, nx_Qs + 1))
     ax.set_xticklabels([f"{i / nx_Qs:.2f}" for i in range(nx_Qs + 1)])
-    ax.set_yticks(np.linspace(0, 1, nz_Qs + 1))
+    ax.set_yticks(np.linspace(0, Lz / nz_Qs, nz_Qs + 1))
     ax.set_yticklabels([f"{i / nz_Qs:.2f}" for i in range(nz_Qs + 1)])
 
     # Show "z" ticks based on y_value_density, but only show every y_skip_values
@@ -189,8 +189,8 @@ def plot_witness_points(
     ax.set_zticklabels([str(i) for i in z_tick_indices])
 
     # Set limits to ensure the ticks are correctly displayed
-    ax.set_xlim(0, 1)
-    ax.set_ylim(0, 1)
+    ax.set_xlim(0, Lx / nx_Qs)
+    ax.set_ylim(0, Lz / nz_Qs)
     ax.set_zlim(0, y_value_density)
 
     ax.grid(True)
