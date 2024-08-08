@@ -112,9 +112,9 @@ args = parser.parse_args()
 CUSTOM_LOG_DIR: str = args.logdir
 
 if CUSTOM_LOG_DIR is not None:
-    DEFAULT_LOG_DIR = CUSTOM_LOG_DIR
+    LOG_DIR = CUSTOM_LOG_DIR
 else:
-    from logging_config import DEFAULT_LOG_DIR
+    from logging_config import DEFAULT_LOG_DIR as LOG_DIR
 
 # Set up logger
 logger = configure_logger(
@@ -130,7 +130,7 @@ run_subprocess("./", ALYA_ULTCL, "", preprocess=True)
 
 # Clean old logs if specified
 if args.clearlogs:
-    clear_old_logs(DEFAULT_LOG_DIR)
+    clear_old_logs(LOG_DIR)
 
 # Set up which case to run
 training_case = args.case
