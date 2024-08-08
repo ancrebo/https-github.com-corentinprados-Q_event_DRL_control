@@ -588,7 +588,9 @@ def calculate_channel_witness_coordinates(params: Dict[str, Any]) -> Dict[str, A
 
 
 def write_witness_file(
-    filepath: str, probes_positions: List[Tuple[float, float, float]]
+    filepath: str,
+    probes_positions: List[Tuple[float, float, float]],
+    witness_version: int,
 ) -> None:
     """
     Writes the witness file that needs to be included in the .ker.dat file.
@@ -603,6 +605,8 @@ def write_witness_file(
         The path where the witness.dat file will be written.
     probes_positions : List[Tuple[float, float, float]]
         A list of probe positions.
+    witness_version : int
+        Version of the witness file, based on `probe_location` selected in `parameters.py`
 
     Raises
     ------
@@ -621,7 +625,7 @@ def write_witness_file(
     ndim = len(probes_positions[0]) if probes_positions else 0
 
     # Open file for writing
-    with open(os.path.join(filepath, "witness.dat"), "w") as file:
+    with open(filepath, "w") as file:
         # Write header
         file.write(f"WITNESS_POINTS, NUMBER={nprobes}\n")
 
@@ -647,7 +651,7 @@ def write_witness_file(
     )
 
 
-def write_witness_version_file(
+def write_witness_parameters_file(
     filepath: str,
     probes_location: int,
     probe_type: str,
@@ -691,10 +695,10 @@ def write_witness_version_file(
     None
     """
     logger.debug(
-        "write_witness_version_file: Writing witness version file to %s", filepath
+        "write_witness_parameters_file: Writing witness parameters file to %s", filepath
     )
 
-    with open(os.path.join(filepath, "witness_version.txt"), "w") as file:
+    with open(filepath, "w") as file:
         file.write(f"Witness Probes Location Version: v{probes_location}\n")
         file.write(f"Probe Type: {probe_type}\n")
         file.write(f"Pattern: {pattern}\n")
@@ -705,13 +709,15 @@ def write_witness_version_file(
         file.write(f"nz_Qs: {nz_Qs}\n")
 
     logger.debug(
-        "write_witness_version_file: Witness version file has been written to %s",
+        "write_witness_version_file: Witness parameters file has been written to %s",
         filepath,
     )
 
 
 def write_witness_file_and_visualize(
     case_folder: str,
+    witness_filepath: str,
+    witness_version_filepath: str,
     output_params: Dict[str, Any],
     probes_location: int = 5,
     pattern: str = "X",
@@ -732,6 +738,10 @@ def write_witness_file_and_visualize(
     ----------
     case_folder : str
         The case folder path.
+    witness_filepath : str
+        The path where the witness.dat file will be written.
+    witness_version_filepath : str
+        The path where the witness version file will be written.
     output_params : Dict[str, Any]
         The output parameters containing witness point locations.
     probes_location : int, optional
@@ -754,12 +764,13 @@ def write_witness_file_and_visualize(
     None
     """
     write_witness_file(
-        case_folder,
+        witness_filepath,
         output_params["locations"],
+        probes_location,
     )
 
-    write_witness_version_file(
-        case_folder,
+    write_witness_parameters_file(
+        witness_version_filepath,
         probes_location,
         output_params["probe_type"],
         pattern,

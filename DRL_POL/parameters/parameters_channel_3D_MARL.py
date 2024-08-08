@@ -427,8 +427,8 @@ output_params: Dict[str, Any] = calculate_channel_witness_coordinates(
 logger.debug("Witness file override: %s", need_witness_file_override)
 
 case_folder = f"alya_files/case_{training_case}"
-witness_file_path = os.path.join(case_folder, "witness.dat")
-witness_version_file_path = os.path.join(case_folder, "witness_version.txt")
+witness_file_path = os.path.join(case_folder, f"witnessv{probes_location}.dat")
+witness_version_file_path = os.path.join(case_folder, f"witnessv{probes_location}.txt")
 
 if os.path.exists(witness_file_path):
     if need_witness_file_override:
@@ -442,7 +442,7 @@ if os.path.exists(witness_file_path):
             shutil.copyfile(witness_version_file_path, backup_version_file_path)
             os.remove(witness_version_file_path)
             logger.info(
-                "Existing witness.dat and witness_version.txt files backed up in %s\n",
+                "Existing witness.dat and witness_parameters.txt files backed up in %s\n",
                 case_folder,
             )
 
@@ -452,6 +452,8 @@ if os.path.exists(witness_file_path):
         # Write the new witness.dat file and visualize
         write_witness_file_and_visualize(
             case_folder,
+            witness_file_path,
+            witness_version_file_path,
             output_params,
             probes_location=probes_location,
             pattern=pattern,
@@ -488,7 +490,9 @@ else:
         nx_Qs=nx_Qs,
         nz_Qs=nz_Qs,
     )
-    logger.info("New witness.dat has been created in %s\n", case_folder)
+    logger.info(
+        f"New witnessv{probes_location}.dat has been created in %s !!!\n", case_folder
+    )
 
 ############################################################################################
 ####    These are the probe positions for S85   ####
