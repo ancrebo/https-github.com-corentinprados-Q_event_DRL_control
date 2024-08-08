@@ -473,7 +473,7 @@ class Environment(Environment):
             The logging level (e.g., logging.DEBUG, logging.INFO).
         message : str
             The message to be logged.
-        *args : tuple
+        *args : any
             Additional positional arguments for the logging message.
         **kwargs : dict
             Additional keyword arguments for the logging message.
