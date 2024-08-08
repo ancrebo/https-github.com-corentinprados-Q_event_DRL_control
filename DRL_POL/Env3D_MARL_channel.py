@@ -1526,7 +1526,8 @@ class Environment(Environment):
         self.log(
             logging.INFO,
             "ENV_ID %s: Env3D.save_this_action: Saving action N° %d ...",
-            (self.ENV_ID, self.action_count),
+            self.ENV_ID,
+            self.action_count,
         )
         # print("Saving a new action : N°", self.action_count)
 
