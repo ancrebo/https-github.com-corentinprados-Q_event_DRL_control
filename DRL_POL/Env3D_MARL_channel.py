@@ -1,9 +1,53 @@
-# -*- coding: utf-8 -*-
 """
-multi- agent VERSION 18/04/2024 
+multi_agent_environment.py
+==========================
 
-AUTHORS ->  POL
+DEEP REINFORCEMENT LEARNING WITH ALYA
+-------------------------------------
 
+This module defines the 3D Multi-Agent Reinforcement Learning (MARL) environment
+for simulating fluid dynamics using the ALYA CFD solver. It supports multi-agent
+reinforcement learning for controlling fluid dynamics in various cases such as
+cylinders and channels.
+
+The script includes:
+1. Definition of the MARL environment class.
+2. Methods for initializing, running, and resetting the environment.
+3. Methods for saving actions, rewards, and history parameters.
+4. Methods for computing rewards based on different criteria.
+5. Utilities for interacting with ALYA, including creating meshes and running
+   simulations.
+
+Usage
+-----
+This module is used to create and manage the environment in which the
+reinforcement learning agents operate. It interacts with the ALYA CFD solver to
+simulate fluid dynamics and compute rewards based on the agents' actions.
+
+Classes
+-------
+Environment(Environment)
+    Defines the local environment for each individual agent, managing state,
+    actions, and interactions with the ALYA CFD solver.
+
+Functions
+---------
+The module does not define standalone functions. All functionality is encapsulated
+within the Environment class.
+
+See Also
+--------
+tensorforce.environments.Environment : Parent class from Tensorforce library.
+
+Authors
+-------
+- Pol Suarez
+- Pieter Orlandini
+
+Version History
+---------------
+- Initial implementation in April 2024.
+- Major update and improvements in August 2024.
 """
 
 ###-----------------------------------------------------------------------------
@@ -106,12 +150,139 @@ file_only_logger.info(
 
 ### Environment definition - this is the LOCAL ENVIRONMENT of each individual agent
 class Environment(Environment):
+    """
+    3D Multi-Agent Reinforcement Learning (MARL) Environment.
 
-    ###---------------------------------------------------------------------###
-    ###---------------------------------------------------------------------###
+    This class defines the local environment for each individual agent in the
+    simulation. It manages the state, actions, and interactions of agents with the
+    environment, using the ALYA CFD solver for simulation.
+
+    Parameters
+    ----------
+    simu_name : str
+        The name of the simulation.
+    number_steps_execution : int, optional
+        The number of steps to execute (default is 1).
+    continue_training : bool, optional
+        Whether to continue training from a previous state (default is False).
+    deterministic : bool, optional
+        Whether to use deterministic behavior (default is False).
+    ENV_ID : list of int, optional
+        The ID of the environment (default is [-1, -1]).
+    host : str, optional
+        The host name (default is an empty string).
+    node : str or None, optional
+        The node information (default is None).
+    check_id : bool, optional
+        Whether to check the ID (default is False).
+
+    Attributes
+    ----------
+    simu_name : str
+        The name of the simulation. For example "chan180". Used by ALYA.
+    case : str
+        The name of the case. For example "cylinder" or "channel". Used by ALYA.
+    ENV_ID : tuple of int
+        The ID of the environment. The first element is the global environment
+        number, and the second element is the invariant number.
+    host : str
+        The host name.
+    nodelist : str or None
+        The node information.
+    do_baseline : bool
+        Flag indicating whether to perform baseline simulation.
+    action_count : int
+        The count of actions taken.
+    check_id : bool
+        Flag indicating whether to check the ID.
+    dimension : int
+        The number of dimensions in the environment.
+    number_steps_execution : int
+        The number of steps to execute.
+    reward_function : str
+        The specific reward function to be used.
+    reward_params : dict of str
+        The parameters for the reward function from `parameters.py`.
+    output_params : dict of any
+        The parameters for the output from `parameters.py`.
+    norm_factors : dict of float
+        Normalization factors for various components from `parameters.py`.
+    optimization_params : dict of int or float
+        Optimization parameters from `parameters.py`.
+    Jets : dict of any
+        Jet configurations from `parameters.py`.
+    n_jets : int
+        The number of jets in the global environment.
+    nz_Qs : int
+        The number of agents/invariants in the z direction.
+    Qs_position_z : list of float
+        Positions of Qs in the z direction.
+    delta_Q_z : float
+        Delta value for Qs in the z direction.
+    nx_Qs : int
+        The number of agents/invariants in the x direction (if case is "channel").
+    Qs_position_x : list of float
+        Positions of Qs in the x direction (if case is "channel").
+    delta_Q_x : float
+        Delta value for Qs in the x direction (if case is "channel").
+    actions_per_inv : int
+        The number of actions per invariant. How many separate jets are controlled.
+    nb_inv_per_CFD : int
+        The number of invariants per CFD.
+    bound_inv : int
+        The boundary invariant.
+    neighbor_state : bool
+        Whether to include neighboring invariant state information in an agent's
+        state.
+    probes_values_global : np.ndarray
+        Global probe (witness point) values.
+    probes_values_global_dict : dict of np.ndarray
+        Dictionary of global probe (witness point) values from last time step.
+    simulation_timeframe : list of float
+        Timeframe of the simulation.
+    last_time : float
+        The last time step. This is used to load the most recent probe (witness
+        point) data.
+    delta_t_smooth : float
+        Smooth delta time. This is used in the `jet.update` function.
+    smooth_func : str
+        Smooth function for action implementation in `jet.update`.
+    previous_action_global : np.ndarray
+        Previous global actions.
+    action_global : np.ndarray
+        Current global actions.
+    action : np.ndarray
+        Current actions.
+    history_parameters : dict of any
+        Parameters defining what values to save.
+    episode_number : int
+        Current episode number.
+    last_episode_number : int
+        Previous episode number.
+    episode_drags : np.ndarray
+        Calculated episode drag values (if case is "cylinder").
+    episode_lifts : np.ndarray
+        Calculated episode lift values (if case is "cylinder").
+    episode_drags_GLOBAL : np.ndarray
+        Calculated global episode drag values (if case is "cylinder").
+    episode_lifts_GLOBAL : np.ndarray
+        Calculated global episode lift values (if case is "cylinder").
+    continue_training : bool
+        Whether to continue simulation from where a previous episode ended.
+    deterministic : bool
+        Whether to use deterministic behavior/evaluate the model.
+
+    Raises
+    ------
+    ValueError
+        If the 'ENV_ID' attribute is missing.
+
+    See Also
+    --------
+    tensorforce.environments.Environment : Parent class from Tensorforce library.
+    """
 
     ## Initialization of the environment
-    ## only one time in multienvironment # TODO: @pietero check if this is correct - Pieter
     def __init__(
         self,
         simu_name: str,
@@ -123,9 +294,57 @@ class Environment(Environment):
         node: Union[str, None] = None,
         check_id: bool = False,
     ):
+        """
+        Initialize the 3D Multi-Agent Reinforcement Learning (MARL) environment.
 
+        Parameters
+        ----------
+        simu_name : str
+            The name of the simulation.
+        number_steps_execution : int, optional
+            The number of steps to execute (default is 1).
+        continue_training : bool, optional
+            Whether to continue training from a previous state (default is False).
+        deterministic : bool, optional
+            Whether to use deterministic behavior (default is False).
+        ENV_ID : list of int, optional
+            The ID of the environment (default is [-1, -1]).
+        host : str, optional
+            The host name (default is an empty string).
+        node : str or None, optional
+            The node information (default is None).
+        check_id : bool, optional
+            Whether to check the ID (default is False).
+
+        Raises
+        ------
+        ValueError
+            If the 'ENV_ID' attribute is missing.
+
+        Notes
+        -----
+        This happens for every parallel environment that is created. The environment
+        is initialized in `PARALLEL_TRAINING_3D_CHANNEL_MARL.py` at approximately line 300.
+
+        ```python
+        parallel_environments = [
+            Environment(
+                simu_name=simu_name,
+                ENV_ID=(i, 0),
+                host=f"environment{i + 1}",
+                node=nodelist[i + 1],
+            )
+            for i in range(num_servers)
+        ]
+        ```
+
+        See Also
+        --------
+        PARALLEL_TRAINING_3D_CHANNEL_MARL.py : Script that creates parallel environments, and
+            then creates (shallow) copies of the specific parallel environment for each agent.
+        """
         if ENV_ID is None:
-            ENV_ID = [-1, -1]
+            ENV_ID: List[int] = [-1, -1]
         primary_logger.debug("ENV_ID %s: Env3D.init: Initialization", ENV_ID)
 
         cr_start("ENV.init", 0)
@@ -239,17 +458,99 @@ class Environment(Environment):
     # -----------------------------------------------------------------------------------------------------
     # -----------------------------------------------------------------------------------------------------
 
-    def log(self, level, message, *args):
+    def log(self, level, message, *args, **kwargs):
+        """
+        Log messages with specified logging level.
+
+        This method logs messages to both console and file for the primary
+        instance (where `self.ENV_ID[1] == 1`). For other instances, it logs
+        messages only to the file. It utilizes the custom logger setup from
+        `logging_config.py` for differentiated logging.
+
+        Parameters
+        ----------
+        level : int
+            The logging level (e.g., logging.DEBUG, logging.INFO).
+        message : str
+            The message to be logged.
+        *args : tuple
+            Additional positional arguments for the logging message.
+        **kwargs : dict
+            Additional keyword arguments for the logging message.
+
+        See Also
+        --------
+        logging_config.configure_env_logger : Configures the primary and file-only loggers.
+
+        Examples
+        --------
+        Log an info-level message:
+        >>> self.log(logging.INFO, "This is an info message: %s", self.ENV_ID)
+
+        Log a debug-level message with additional arguments:
+        >>> self.log(logging.DEBUG, "Debugging value: %d, %s", 42, "additional info")
+
+        Notes
+        -----
+        The log format for console logging (primary_logger) is:
+
+        Env3D_MARL_channel - LEVEL - message
+
+        The log format for file logging (primary_logger and file_only_logger) is:
+
+        YYYY-MM-DD HH:MM:SS,mmm - Env3D_MARL_channel - LEVEL - message
+        """
+        # Debug to see what args are passed
+        primary_logger.debug(
+            "ENV_ID %s: Env3D.log: Args passed to log method: %s", self.ENV_ID, args
+        )
+        primary_logger.debug(
+            "ENV_ID %s: Env3D.log: Kwargs passed to log method: %s", self.ENV_ID, kwargs
+        )
+        primary_logger.debug(
+            "ENV_ID %s: Env3D.log: *args type: %s", self.ENV_ID, type(args)
+        )
+
         if self.ENV_ID[1] == 1:
             # Use primary logger to log to both console and file
             if primary_logger.isEnabledFor(level):
-                primary_logger.log(level, message, *args)
+                primary_logger.log(level, message, *args, **kwargs)
         else:
             # Use file-only logger to log only to file
             if file_only_logger.isEnabledFor(level):
-                file_only_logger.log(level, message, *args)
+                file_only_logger.log(level, message, *args, **kwargs)
 
     def start(self) -> None:
+        """
+        Initialize and start the environment.
+
+        This method performs several initialization tasks, computes averages,
+        updates history parameters, and prepares the environment for execution.
+        It handles different cases (`cylinder` and `channel`) and takes care of
+        setting up the environment based on the episode number and other parameters.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        None
+
+        Notes
+        -----
+        The `start` method performs the following steps:
+        1. Computes average drag and lift values for the `cylinder` case.
+        2. Updates history parameters dynamically based on computed averages.
+        3. Saves history parameters.
+        4. Prints results dynamically.
+        5. Initializes actions based on the specified case.
+        6. Sets the `check_id` flag to True for folder creation checks.
+        """
         cr_start("ENV.start", 0)
         self.log(
             logging.DEBUG,
@@ -336,6 +637,31 @@ class Environment(Environment):
     # -----------------------------------------------------------------------------------------------------
 
     def clean(self, full: bool = False) -> None:
+        """
+        Clean the environment by removing specific directories and resetting action count.
+
+        Parameters
+        ----------
+        full : bool, optional
+            If True, removes the 'saved_models' and 'best_model' directories. Default is False.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        None
+
+        Notes
+        -----
+        The `clean` method performs the following steps:
+        1. If `full` is True, removes the 'saved_models' directory containing .csv files
+           of all cd and cl at the end of each episode.
+        2. If `full` is True, removes the 'best_model' directory containing the best model
+           at the end of each episode.
+        3. Resets the action count to 1.
+        """
         cr_start("ENV.clean", 0)
         self.log(
             logging.DEBUG, "ENV_ID %s: Env3D.clean: Beginning `clean`...", self.ENV_ID
@@ -362,6 +688,32 @@ class Environment(Environment):
     def create_mesh(
         self,
     ) -> None:  # TODO: Flag para que no tenga que volver a hacer la malla
+        """
+        Create the computational mesh for the environment.
+
+        This method is currently unused as of August 2024.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        None
+
+        Notes
+        -----
+        The `create_mesh` method performs the following steps:
+        1. If `do_baseline` is True and the dimension is 2, it runs the `geo_file_maker.py`
+           script using Gmsh to create the mesh.
+        2. Updates the jet files with the appropriate path.
+        3. Writes the witness file with the specified output locations.
+        4. Runs the cleanup process for the Alya files.
+        """
         cr_start("ENV.mesh", 0)
         self.log(
             logging.DEBUG,
@@ -389,6 +741,32 @@ class Environment(Environment):
     # -------------------------------------------------------------------------------------------------------
 
     def run_baseline(self, clean: bool = True) -> None:
+        """
+        Run the baseline simulation for the environment.
+
+        Parameters
+        ----------
+        clean : bool, optional
+            Whether to perform a full clean before running the baseline (default is True).
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        None
+
+        Notes
+        -----
+        The `run_baseline` method performs the following steps:
+        1. If `clean` is True, it performs a full clean by calling the `clean` method.
+        2. Creates the mesh by calling the `create_mesh` method.
+        3. Sets up Alya files by copying the case directory to the baseline directory.
+        4. If the dimension is 2, runs the `initialCondition.py` script to set the initial condition.
+        5. Logs the start of the Alya baseline run.
+        6. Runs the Alya simulation in reset mode by calling the `run` method with the `which` parameter set to "reset".
+        """
         cr_start("ENV.run_baseline", 0)
         self.log(
             logging.DEBUG,
@@ -431,6 +809,53 @@ class Environment(Environment):
     # -------------------------------------------------------------------------------------------------------
 
     def run(self, which: str) -> None:
+        """
+        Execute a simulation run for the environment.
+
+        Parameters
+        ----------
+        which : str
+            Specifies the type of run to execute. Options are "reset" for a baseline
+            run and "execute" for an action run.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        None
+
+        Notes
+        -----
+        The `run` method performs the following steps:
+
+        For "reset":
+        1. Logs the start of the reset process.
+        2. If `self.do_baseline` is True, prepares the baseline run by writing necessary
+           files (case file, run type, time interval, physical properties).
+        3. Calls `run_subprocess` to start the Alya baseline simulation.
+        4. Logs the completion of the baseline run and updates `self.do_baseline` so
+           the baseline isn't run again.
+
+        For "execute":
+        1. Logs the start of the action execution process.
+        2. Sets up the file paths for the simulation run.
+        3. If `self.ENV_ID[1] == 1` (main environment), writes necessary files (run type,
+           time interval) and calls `run_subprocess` to start the Alya simulation with
+           updated actions.
+        4. Creates a directory as a sync flag for other environments.
+        5. If not the main environment, waits for the main environment to finish tasks,
+           ensuring actions are synchronized across environments.
+        6. Logs the completion of the action run.
+
+        The `run` method is crucial as it calls the function that starts the Alya
+        simulation via `run_subprocess`.
+
+        See Also
+        --------
+        run_subprocess : Function to execute a subprocess command. `env_utils.py`
+        """
         self.log(
             logging.DEBUG,
             "ENV_ID %s: Env3D.run: Beginning `run` method...",
@@ -791,7 +1216,42 @@ class Environment(Environment):
     def save_history_parameters_all(
         self, nb_actuations: int, name: str = "output.csv"
     ) -> None:
+        """
+        Save historical parameters for the current episode.
 
+        This method is used to save all historical parameters at the end of each
+        episode, except for `time` and `episode_number`. It updates episode-specific
+        parameters and writes them to a CSV file.
+
+        Parameters
+        ----------
+        nb_actuations : int
+            The number of actions per episode.
+        name : str, optional
+            The name of the output CSV file (default is "output.csv").
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        None
+
+        Notes
+        -----
+        This method performs the following steps:
+        1. Appends the current episode's parameters to their respective arrays.
+        2. Checks if the end of the episode has been reached.
+        3. If it is the end of the episode, calculates the average of each parameter
+           and saves them to a CSV file.
+        4. Updates the best model if the current episode's results are better.
+        5. Resets episode-specific parameters for the next episode.
+
+        See Also
+        --------
+        save_history_parameters : Deprecated method for saving specific parameters.
+        """
         cr_start("ENV.save_history_parameters", 0)
         self.log(
             logging.DEBUG,
@@ -883,16 +1343,13 @@ class Environment(Environment):
                             run_subprocess("./", "rm -rf", "best_model")
                             run_subprocess("./", "cp -r", "saved_models best_model")
 
-            # TODO: update what channel parameters are being saved? - Pieter @pietero
+            # TODO: @pietero @canordq @pol update what channel parameters are being saved? - Pieter
             self.log(
                 logging.DEBUG,
                 "ENV_ID %s: Env3D.save_history_parameters_all: Saving parameters...",
                 self.ENV_ID,
             )
-            # printDebug(
-            #     f"\n \n Saving parameters, [INSERT CHANNEL PARAMETERS HERE], which are the input of the neural network! (Env3D_MARL_channel-->execute-->save_history_parameters_all)\n \n"
-            # )
-            # print("Done.")
+
             self.log(
                 logging.DEBUG,
                 "ENV_ID %s: Env3D.save_history_parameters_all: Done!\n",
@@ -903,6 +1360,43 @@ class Environment(Environment):
     def save_history_parameters(
         self, nb_actuations: int, name: str = "output.csv"
     ) -> None:
+        """
+        Save historical parameters for the current episode (Deprecated).
+
+        This method is retained for backwards compatibility but is superseded by
+        `save_history_parameters_all`. It saves specific parameters like drag and
+        lift at the end of each episode.
+
+        Parameters
+        ----------
+        nb_actuations : int
+            The number of actions per episode.
+        name : str, optional
+            The name of the output CSV file (default is "output.csv").
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        None
+
+        Notes
+        -----
+        This method performs the following steps:
+        1. Appends the current episode's drag and lift parameters to their respective
+           arrays.
+        2. Checks if the end of the episode has been reached.
+        3. If it is the end of the episode, calculates the average drag and lift
+           and saves them to a CSV file.
+        4. Updates the best model if the current episode's results are better.
+        5. Resets episode-specific parameters for the next episode.
+
+        See Also
+        --------
+        save_history_parameters_all : Method for saving all historical parameters.
+        """
         # TODO: @pietero delete this!!! - Pieter
 
         cr_start("ENV.save_cd_cl", 0)
@@ -1015,13 +1509,24 @@ class Environment(Environment):
     # -----------------------------------------------------------------------------------------------------
 
     def save_this_action(self) -> None:
+        """
+        Save the current action to a CSV file.
 
+        This method saves the details of the current action to a CSV file. The
+        actions are saved in a structured directory based on the environment ID
+        and episode number.
+
+        Notes
+        -----
+        Steps performed:
+        1. Create necessary directories if they don't exist.
+        2. Append the current action to `output_actions.csv` file.
+        """
         cr_start("ENV.save_action", 0)
         self.log(
             logging.INFO,
             "ENV_ID %s: Env3D.save_this_action: Saving action N° %d ...",
-            self.ENV_ID,
-            self.action_count,
+            (self.ENV_ID, self.action_count),
         )
         # print("Saving a new action : N°", self.action_count)
 
@@ -1073,8 +1578,24 @@ class Environment(Environment):
     # -----------------------------------------------------------------------------------------------------
 
     def save_reward(self, reward: float) -> None:
-        # TODO: @pietero is the reward always input as a float? - Pieter
+        """
+        Save the current reward to a CSV file.
 
+        This method saves the details of the current reward to a CSV file. The
+        rewards are saved in a structured directory based on the environment ID
+        and episode number.
+
+        Parameters
+        ----------
+        reward : float
+            The reward value to be saved.
+
+        Notes
+        -----
+        Steps performed:
+        1. Create necessary directories if they don't exist.
+        2. Append the current reward to `output_rewards.csv` file.
+        """
         cr_start("ENV.save_reward", 0)
         primary_logger.info(
             "ENV_ID %s: Env3D.save_reward: ENV_ID %s Saving reward N° %d: %f ...",
@@ -1128,7 +1649,23 @@ class Environment(Environment):
     # -----------------------------------------------------------------------------------------------------
 
     def save_final_reward(self, reward: float) -> None:
+        """
+        Save the final reward of the episode to a CSV file.
 
+        This method saves the final reward of the episode to a CSV file. The
+        rewards are saved in a structured directory based on the environment ID.
+
+        Parameters
+        ----------
+        reward : float
+            The final reward value to be saved.
+
+        Notes
+        -----
+        Steps performed:
+        1. Create necessary directories if they don't exist.
+        2. Append the final reward to `output_final_rewards.csv` file.
+        """
         primary_logger.info(
             "ENV_ID %s: Env3D.save_final_reward: Saving the last reward from episode %d: %f ...",
             self.ENV_ID,
@@ -1170,8 +1707,21 @@ class Environment(Environment):
 
     def save_comms_probes(
         self,
-    ) -> None:  # TODO: This function is not used. May be eliminated
+    ) -> None:  # TODO: This function is not used. May be eliminated - Pol
+        """
+        Save the communication probe data to a CSV file.
 
+        This method saves the communication probe data to a CSV file. The probe
+        data are saved in a structured directory based on the episode number.
+
+        Notes
+        -----
+        This function is currently not used and may be eliminated in the future.
+
+        Steps performed:
+        1. Create necessary directories if they don't exist.
+        2. Append the probe data to `output_probes_comms.csv` file.
+        """
         primary_logger.info(
             "ENV_ID %s: Env3D.save_comms_probes: Saving probes inputs...", self.ENV_ID
         )
@@ -1208,7 +1758,20 @@ class Environment(Environment):
 
     ### AQUI DEBEMOS ANULAR EL RECUPERAR EL BASELINE SI YA EXISTE EL QUE TOCA
     def recover_start(self) -> None:
+        """
+        Recover the starting state of the environment.
 
+        This method prepares the environment for the start of a new episode by
+        either copying the baseline state or moving the previous episode's state
+        to the current episode folder.
+
+        Notes
+        -----
+        Steps performed:
+        1. Remove older files if not restarting from the last episode.
+        2. Move or copy the baseline state to the current episode folder.
+        3. Create synchronization flags for the environment.
+        """
         cr_start("ENV.recover_start", 0)
         self.log(
             logging.DEBUG,
@@ -1277,6 +1840,19 @@ class Environment(Environment):
 
     # create folder for each cpu id in parallel and folder per invariants inside
     def create_cpuID(self) -> None:
+        """
+        Create directories for each CPU ID and save node information.
+
+        This method creates necessary directories for each CPU ID involved in the
+        environment and saves the list of nodes running this environment.
+
+        Notes
+        -----
+        Steps performed:
+        1. Create a directory for each CPU ID.
+        2. Create subdirectories for each invariant.
+        3. Write the nodes running this environment to a CSV file.
+        """
         self.log(
             logging.DEBUG,
             "ENV_ID %s: Env3D.create_cpuID: Beginning `create_cpuID` method...",
@@ -1329,6 +1905,17 @@ class Environment(Environment):
 
     # Optional
     def close(self) -> None:
+        """
+        Close the environment and clean up resources.
+
+        This method logs the closure of the environment and calls the parent class's
+        close method to perform any necessary cleanup.
+
+        Notes
+        -----
+        - This method is required for environments in Tensorforce.
+        - It ensures that resources are properly released when the environment is no longer needed.
+        """
         self.log(
             logging.DEBUG, "ENV_ID %s: Env3D.close: Closing environment...", self.ENV_ID
         )
@@ -1345,19 +1932,35 @@ class Environment(Environment):
         """
         Generate a 1D array of probe values for the current environment.
 
-        This method slices the global dictionary of probe values based on the current environment ID.
-        For pressure data, it directly extracts the relevant slice. For velocity data, it concatenates
-        and flattens the slices of VELOX, VELOY, and VELOZ components in column-major order.
+        This method slices the global dictionary of probe values based on the current
+        environment ID. For pressure data, it directly extracts the relevant slice.
+        For velocity data, it concatenates and flattens the slices of VELOX, VELOY,
+        and VELOZ components in column-major order.
 
-        Returns:
-            np.ndarray: A 1D numpy array of probe values for the current (local) environment.
+        Returns
+        -------
+        np.ndarray
+            A 1D numpy array of probe values for the current (local) environment.
 
-        Raises:
-            NotImplementedError: If the probe type is not supported.
-            NotImplementedError: If the neighbor state is True.
+        Raises
+        ------
+        NotImplementedError
+            If the probe type is not supported.
+        NotImplementedError
+            If the neighbor state is True.
+
+        Notes
+        -----
+        Steps performed:
+        1. Determine the probe type from the output parameters.
+        2. Calculate the batch size of probes based on the number of environments.
+        3. Slice the global probe values dictionary to obtain data for the current environment.
+        4. Flatten the velocity data if applicable.
         """
         self.log(
-            logging.DEBUG, "ENV_ID %s: Env3D.list_observation_updated: starting ..."
+            logging.DEBUG,
+            "ENV_ID %s: Env3D.list_observation_updated: starting ...",
+            self.ENV_ID,
         )
         # print(f"Env3D.list_observation_updated: {self.ENV_ID}: starting ...")
 
@@ -1405,10 +2008,33 @@ class Environment(Environment):
         self.log(
             logging.DEBUG,
             "ENV_ID %s: Env3D.list_observation_updated: Probes filtered for this specific environment!\n",
+            self.ENV_ID,
         )
         return probes_values_2
 
     def list_observation(self) -> np.ndarray:
+        """
+        Generate a 1D array of probe values for the current environment.
+
+        This method slices the global probe values based on the current environment ID.
+        If `neighbor_state` is True, it includes values from neighboring environments.
+
+        Notes
+        -----
+        - This method is deprecated and replaced by `list_observation_updated`.
+        - It should be removed in future versions.
+
+        Returns
+        -------
+        np.ndarray
+            A 1D numpy array of probe values for the current (local) environment.
+
+        Raises
+        ------
+        NotImplementedError
+            If the probe type is not supported.
+            If `neighbor_state` is True.
+        """
         # TODO: @pietero delete this!!! - Pieter
 
         if not self.neighbor_state:
@@ -1472,14 +2098,19 @@ class Environment(Environment):
         """
         Define the state space for the TensorForce agent.
 
-        This method calculates the state size based on the probe type and the number of locations in the global environment.
-        It adjusts for the number of agents in the environment and handles different probe types (velocity and pressure).
+        This method calculates the state size based on the probe type and the number
+        of locations in the global environment. It adjusts for the number of agents
+        in the environment and handles different probe types (velocity and pressure).
 
-        Returns:
-            dict: A dictionary defining the state type and shape for the TensorForce agent.
+        Returns
+        -------
+        dict
+            A dictionary defining the state type and shape for the TensorForce agent.
 
-        Raises:
-            NotImplementedError: If the probe type is not supported.
+        Raises
+        ------
+        NotImplementedError
+            If the probe type is not supported.
         """
         self.log(
             logging.DEBUG,
@@ -1519,10 +2150,30 @@ class Environment(Environment):
     # -----------------------------------------------------------------------------------------------------
 
     def actions(self) -> Dict[str, Any]:
-        """Action is a list of n_jets-1 capped values of Q"""
-        """UPDATE --> now with multiple Q per jet slot --> use nz_Qs"""
-        """UPDATE 2 --> NOW WITH MARL --> ACTIONS_PER_INV = 1"""
+        """
+        Define the action space for the TensorForce agent.
 
+        This method sets the action space as a list of capped values for the jets.
+        The action space has been updated to accommodate multiple Q values per jet
+        slot and is now designed for multi-agent reinforcement learning (MARL).
+
+        Returns
+        -------
+        dict
+            A dictionary defining the action type, shape, minimum, and maximum values.
+
+        Notes
+        -----
+        - Initially, the action was a list of n_jets - 1 capped values of Q.
+        - Updated to support multiple Q values per jet slot using nz_Qs.
+        - Further updated for MARL, with actions_per_inv set to 1.
+
+        Examples
+        --------
+        Define the action space:
+        >>> env.actions()
+        {'type': 'float', 'shape': (self.actions_per_inv), 'min_value': min_value, 'max_value': max_value}
+        """
         self.log(
             logging.DEBUG,
             "ENV_ID %s: Env3D.actions: Defining action space...",
@@ -1550,7 +2201,27 @@ class Environment(Environment):
         This method is used ONLY at the beginning of each episode,
         and is followed by the TensorForce agent calling the `execute` method.
 
-        Returns: the initial actions based on the baseline (or previous episode if `. TODO: @pietero finish documentation - Pieter
+        Returns
+        -------
+        np.ndarray
+            The initial actions based on the baseline or previous episode.
+
+        Notes
+        -----
+        Steps performed:
+        1. Logs the beginning of the `reset` method.
+        2. Creates a folder for each environment if `check_id` is True.
+        3. Cleans the environment using the `self.clean` method.
+        4. Advances the episode number and sets `bool_restart_prevEP`.
+        5. Detects and sets the new simulation timeframe.
+        6. Copies the baseline in the environment directory if `action_count` is 1.
+        7. Updates the `time_interval.dat` file if `ENV_ID[1]` is 1.
+        8. Extracts and filters probe data.
+
+        Raises
+        ------
+        NotImplementedError
+            If neighbor state is True or if the probe type is not supported.
         """
         self.log(
             logging.INFO,
@@ -1561,12 +2232,7 @@ class Environment(Environment):
             time.sleep(4)
 
         """Reset state"""
-        # print(
-        #     "\n \n Reset to initalize each episode (copy baseline, clean action count...)! (Env3D_MARL_channel-->reset)\n \n"
-        # )
         # Create a folder for each environment
-        # print("POOOOL --> CHECK_ID = ", self.check_id)
-        # print("POOOOL --> ENV_ID   = ", self.ENV_ID[1])
         if self.check_id == True and self.ENV_ID[1] == 1:
             self.create_cpuID()
             self.check_id = False
@@ -1577,10 +2243,6 @@ class Environment(Environment):
             "ENV_ID %s: Env3D.reset: Cleaning the environment using `self.clean`...",
             self.ENV_ID,
         )
-        # print("\n\nLocation: Reset")
-        # print(
-        #     "Action: start to set up the case, set the initial conditions and clean the action counter\n"
-        # )
         self.clean(False)
 
         # Advance in episode
@@ -1589,8 +2251,8 @@ class Environment(Environment):
         self.bool_restart_prevEP = bool_restart
 
         # Apply new time frame
-        # TODO --> fix time interval detected in the time_interval.dat file
-        #     it has to read and detect self.simulation_timeframe[1] auto
+        # TODO --> fix time interval detected in the time_interval.dat file - Pol
+        #     it has to read and detect self.simulation_timeframe[1] auto - Pol
         self.simulation_timeframe: List[float] = simulation_params[
             "simulation_timeframe"
         ]
@@ -1624,16 +2286,6 @@ class Environment(Environment):
                     "time_interval.dat",
                 ),
             )
-            # print(
-            #     "POOOOOOOL PATH:",
-            #     os.path.join(
-            #         "alya_files",
-            #         f"{self.host}",
-            #         "1",
-            #         f"EP_{self.episode_number}",
-            #         "time_interval.dat",
-            #     ),
-            # )
         else:
             t2: float = self.simulation_timeframe[1]
         self.simulation_timeframe = [t1, t2]
@@ -1644,13 +2296,12 @@ class Environment(Environment):
             t1,
             t2,
         )
-        # print(f"EnvID: {self.ENV_ID} - The actual timeframe is between {t1} and {t2}: ")
 
         # Copy the baseline in the environment directory
-
         if self.action_count == 1 and self.ENV_ID[1] == 1:
             self.recover_start()
 
+        # Update the time_interval.dat file
         if self.ENV_ID[1] == 1:
             self.log(
                 logging.DEBUG,
@@ -1674,14 +2325,12 @@ class Environment(Environment):
             self.ENV_ID,
             self.episode_number,
         )
-        # print(f"Actual episode: {self.episode_number}")
-        # print("\n\Action: extract the probes")
+
+        # Begin extracting witness point data
         self.log(
             logging.INFO, "ENV_ID %s: Env3D.reset: Extracting probes...", self.ENV_ID
         )
-        NWIT_TO_READ = 1  # Read n timesteps from witness file from behind, last instant
 
-        # TODO: READ THE WITNESS OF EACH PSEUDOENV! - Pol
         # cp witness.dat to avoid IO problems in disk?
         # filename     = os.path.join('alya_files','%s'%self.host,'%s'%self.ENV_ID[1],'EP_%d'%self.episode_number,'%s.nsi.wit'%self.case)
         filename = os.path.join(
@@ -1709,7 +2358,6 @@ class Environment(Environment):
             self.ENV_ID,
             self.deterministic,
         )
-        # print("POOOOOOOL -> self.deterministic = ", self.deterministic)
 
         if not self.deterministic:
             while not os.path.exists(action_end_flag_cp_path):
@@ -1744,9 +2392,7 @@ class Environment(Environment):
             logging.DEBUG, "ENV_ID %s: Env3D.reset: Filtering probes...", self.ENV_ID
         )
         probes_values_2 = self.list_observation_updated()
-        # print(
-        #     "\n\n\nEnv3D_MARL_channel.Env3D.reset: probes_values_2 being returned to Tensorforce!!!\n\n\n"
-        # )
+
         self.log(
             logging.INFO, "ENV_ID %s: Env3D.reset: Probes extracted!\n", self.ENV_ID
         )
@@ -1758,10 +2404,52 @@ class Environment(Environment):
         return probes_values_2
 
     # -----------------------------------------------------------------------------------------------------
-    # TODO: figure our where the actions in `execute` argument are coming from @pietero
-    # TODO: figure out structure/type of actions in `execute` argument @pietero
     def execute(self, actions: np.ndarray) -> Tuple[np.ndarray, bool, float]:
-        # TODO: @pietero FINISH LOGGING IMPLEMENTATION STARTING HERE!!!!!!!!! - Pieter
+        """
+        Execute the given actions in the environment.
+
+        This method performs the given actions, updates the simulation, computes the reward,
+        and determines if the episode has ended. It normalizes and saves the actions, waits
+        for all actions to be ready, updates jet profiles, starts the ALYA simulation, and
+        extracts and filters probe values.
+
+        Parameters
+        ----------
+        actions : np.ndarray
+            Actions to be performed in the environment. Received from Tensorforce agent.
+
+        Returns
+        -------
+        tuple
+            A tuple containing:
+            - np.ndarray: The new observation after executing the action.
+            - bool: Whether the episode has ended (terminal state).
+            - float: The reward obtained from executing the action.
+
+        Raises
+        ------
+        ValueError
+            If a required directory does not exist for action vtk files or pre-calculated data.
+        NotImplementedError
+            If the probe type for reward calculation is not supported.
+
+        Notes
+        -----
+        Steps performed:
+        1. Logs the beginning of the `execute` method.
+        2. Normalizes the actions based on the environment type.
+        3. Saves the current action using `save_this_action`.
+        4. Creates a directory flag to indicate the action is ready.
+        5. Sets the new simulation timeframe.
+        6. Waits for all actions to be ready if `ENV_ID[1]` is 1.
+        7. Merges actions from all environments.
+        8. Updates the jet profiles based on the new actions.
+        9. Starts ALYA run using `run` method.
+        10. Computes and saves the reward.
+        11. Advances the action count and determines if the episode is terminal.
+        12. Extracts and filters the probe values.
+        13. Logs the completion of the `execute` method.
+        """
         self.log(
             logging.DEBUG,
             "ENV_ID %s: Env3D.execute: Starting `execute` method...",
@@ -2223,6 +2911,45 @@ class Environment(Environment):
     # -----------------------------------------------------------------------------------------------------
 
     def compute_reward(self) -> float:
+        """
+        Compute the reward based on the specified reward function.
+
+        This method calculates the reward using different reward functions specified by
+        `self.reward_function`. The reward functions can be based on drag, lift, or a
+        combination of various factors. The method logs the beginning and end of the
+        reward computation and handles multiple reward function options, each with its
+        own logic for calculating the reward.
+
+        Returns
+        -------
+        float
+            The computed reward value.
+
+        Raises
+        ------
+        ValueError
+            If the reward file for `q_event_volume` is not found or contains no matching rows.
+        NotImplementedError
+            If the specified reward function is not implemented.
+
+        Notes
+        -----
+        Steps performed:
+        1. Logs the beginning of the `compute_reward` method.
+        2. Checks the specified reward function.
+        3. Calculates the reward based on the selected function:
+           - For `plain_drag`, computes reward based on mean drag values.
+           - For `drag_plain_lift_2`, combines drag and lift values.
+           - For `drag`, computes reward based on the latest drag value.
+           - For `drag_plain_lift`, combines local and global drag and lift values.
+           - For `max_plain_drag`, computes reward using the negative mean drag value.
+           - For `drag_avg_abs_lift`, uses absolute lift and drag values.
+           - For `lift_vs_drag`, computes reward as a ratio of lift to drag.
+           - For `q_event_volume`, reads reward from a file based on Q event volume.
+        4. Logs the computed reward.
+        5. Returns the computed reward value.
+        """
+
         self.log(
             logging.DEBUG,
             "ENV_ID %s: Env3D.compute_reward: Starting `reward` method...",
@@ -2241,7 +2968,7 @@ class Environment(Environment):
                 "ENV_ID %s: Env3D.compute_reward: Reward computed!",
                 self.ENV_ID,
             )
-            return (
+            reward_value = (
                 np.mean(values_drag_in_last_execute) + 0.159
             )  # the 0.159 value is a proxy value corresponding to the mean drag when no control; may depend on the geometry
 
@@ -2259,7 +2986,7 @@ class Environment(Environment):
                 "ENV_ID %s: Env3D.compute_reward: Reward computed!",
                 self.ENV_ID,
             )
-            return -avg_drag - 0.2 * abs(avg_lift)
+            reward_value = -avg_drag - 0.2 * abs(avg_lift)
 
         elif (
             self.reward_function == "drag"
@@ -2273,7 +3000,7 @@ class Environment(Environment):
                 "ENV_ID %s: Env3D.compute_reward: Reward computed!",
                 self.ENV_ID,
             )
-            return self.history_parameters["drag"][-1] + 0.159
+            reward_value = self.history_parameters["drag"][-1] + 0.159
 
         elif (
             self.reward_function == "drag_plain_lift"
@@ -2350,7 +3077,7 @@ class Environment(Environment):
                 self.ENV_ID,
             )
             ## le añadimos el offset de 3.21 para partir de reward nula y que solo vaya a (+)
-            return reward_total
+            reward_value = reward_total
 
         elif (
             self.reward_function == "max_plain_drag"
@@ -2365,7 +3092,7 @@ class Environment(Environment):
                 "ENV_ID %s: Env3D.compute_reward: Reward computed!",
                 self.ENV_ID,
             )
-            return -(np.mean(values_drag_in_last_execute) + 0.159)
+            reward_value = -(np.mean(values_drag_in_last_execute) + 0.159)
 
         elif (
             self.reward_function == "drag_avg_abs_lift"
@@ -2381,7 +3108,7 @@ class Environment(Environment):
                 "ENV_ID %s: Env3D.compute_reward: Reward computed!",
                 self.ENV_ID,
             )
-            return avg_drag + 0.159 - 0.2 * avg_abs_lift
+            reward_value = avg_drag + 0.159 - 0.2 * avg_abs_lift
 
         elif (
             self.reward_function == "lift_vs_drag"
@@ -2399,7 +3126,7 @@ class Environment(Environment):
                 "ENV_ID %s: Env3D.compute_reward: Reward computed!",
                 self.ENV_ID,
             )
-            return self.optimization_params["norm_reward"] * (
+            reward_value = self.optimization_params["norm_reward"] * (
                 avg_lift / avg_drag + self.optimization_params["offset_reward"]
             )
 
@@ -2441,8 +3168,12 @@ class Environment(Environment):
             reward_value: float = float(matching_row["reward"][0])
             self.log(
                 logging.INFO,
-                "ENV_ID %s: Env3D.compute_reward: Rewards loaded! \n%s\n",
+                "ENV_ID %s: Env3D.compute_reward: Reward loaded! \n%s\n",
                 self.ENV_ID,
                 data,
             )
-            return reward_value
+        else:
+            raise NotImplementedError(
+                f"Env3D.computer_reward: Reward function {self.reward_function} not implemented yet"
+            )
+        return reward_value

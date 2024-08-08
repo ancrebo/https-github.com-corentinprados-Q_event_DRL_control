@@ -1,16 +1,43 @@
-#!/bin/env python
-#
-# DEEP REINFORCEMENT LEARNING WITH ALYA
-#
-# CHANNEL 3D parameters
-#
-# Just copy this code to the main folder and rename it
-# to parameters.py to use it
-#
-# Pol Suarez, Fran Alcantara, Arnau Miro
+"""
+parameters_channel_3D_MARL.py
+=============================
 
-# TODO: IN GENERAL - @pietero, @canordq Update for channel parameters!! - Pieter
-# TODO: @pietero clean up commented cylinder code - Pieter
+DEEP REINFORCEMENT LEARNING WITH ALYA
+-------------------------------------
+
+This module sets up the parameters for the "channel_3D_MARL" case in ALYA. It
+defines simulation settings, fluid properties, jet configurations, witness
+coordinates, and environment setups specific to the 3D channel multi-agent
+reinforcement learning (MARL) case.
+
+The script includes parameters for:
+1. Simulation and domain box dimensions.
+2. Reynolds number cases.
+3. Baseline and environment setup.
+4. Fluid properties.
+5. Jet setup and geometry parameters.
+6. State observation and witness map configurations.
+7. Post-processing options.
+8. Optimization parameters.
+
+Examples
+--------
+Example usage:
+# When the case in `PARALLEL_TRAINING` is `channel_3D_MARL`, this module is
+# copied to the root folder as `parameters.py` and then imported and used in
+# the main training script to set up the "channel_3D_MARL" case.
+
+Authors
+-------
+- Pol Suarez
+- Francisco Alcantara
+- Arnau Miro
+- Pieter Orlandini
+
+Version History
+---------------
+- Major update in August 2024.
+"""
 
 from __future__ import print_function, division
 from typing import List, Tuple, Dict, Any, Union
@@ -98,7 +125,6 @@ bool_restart: bool = False
 
 ### **********************************************************
 ### DOMAIN BOX ***********************************************
-# TODO: @canordq Update for channel parameters!! - Pieter
 # These parameters need to match the specific case mesh
 
 # The parameters below are based on the `minimal channel - Jimenez` paper
@@ -149,7 +175,7 @@ else:
 
 ### **********************************************************
 ### WORKSTATION SPECIFIC SETUP *******************************
-
+# MUST MATCH BASELINE PARAMETERS!!! - Pieter
 # Number of calculation processors (for local, number of threads on workstation)
 nb_proc_ws = 18
 
@@ -176,7 +202,7 @@ else:
 
 ### *****************************************************
 ### TIMESCALES ******************************************
-
+# MUST MATCH BASELINE RESTART FILES!!! - Pieter
 baseline_duration = 1228.6  # to converge with velocity max = 1
 baseline_time_start = 0.0
 
@@ -189,6 +215,7 @@ short_spacetime_func = False  # override smooth func --> TODO: need to fix strin
 ### FLUID PROPERTIES ************************************
 
 # TODO: @pietero @canordq Update mu value for channel case! Placeholder now - Pieter
+# TODO: @pietero @ canordq @pol THIS IS NU NOT MU!!! - Pieter
 mu_list = [10e-3, 50e-4, 33e-4, 25e-4, 10e-4, 0.00025641025, 10e-4]
 mu = mu_list[Re_case]
 rho = 1.0
@@ -199,7 +226,7 @@ rho = 1.0
 # TODO: @pietero Update ALL?? for channel parameters!! - Pieter
 
 ## Not needed for channel currently! - Pieter
-norm_reward = 5  # like PRESS, try to be between -1,1
+norm_reward = 1  # like PRESS, try to be between -1,1
 penal_cl = 0.6  # avoid asymmetrical strategies
 alpha_rew = 0.80  # balance between global and local reward
 norm_press = 2.0
@@ -278,25 +305,9 @@ for i in range(nx_Qs):
 # TODO: @canordq Update for channel parameters!! - Pieter
 # Commented out all content. Can add inputs as needed later. Combined the two into one JET_TOP_BOTTOM -Chriss
 
+# EMPTY DICTIONARY FOR CHANNEL (for now) - Chriss
 jets_definition = {
-    "JET_TOP_BOTTOM": {
-        #        "width": 10,
-        #        "radius": radius,
-        #        "angle": jet_angle,
-        #        "positions_angle": 90
-        #        + jet_angle,  # make sure the width doesn't not coincide with 0,90,180 or 270
-        #        "positions": [cylinder_coordinates[0], cylinder_coordinates[1] + radius],
-        #        "remesh": False,
-    },
-    #    "JET_BOTTOM": {
-    #        "width": 10,
-    #        "radius": radius,
-    #        "angle": jet_angle,
-    #        "positions_angle": 270
-    #        - jet_angle,  # make sure the width doesn't not coincide with 0,90,180 or 270
-    #        "positions": [cylinder_coordinates[0], cylinder_coordinates[1] - radius],
-    #        "remesh": False,
-    #    },
+    "JET_TOP_BOTTOM": {},
 }
 
 # Build the jets
@@ -789,9 +800,9 @@ variational_input: Dict[str, Any] = {
 # TODO: @pietero @canordq Get actual values for these!!! - Pieter
 norm_factors: Dict[str, float] = {
     "PRESS": norm_press,  # original norm_press value for backwards compatibility
-    "VELOX": 10.0,  # example value, replace with actual value
-    "VELOY": 10.0,  # example value, replace with actual value
-    "VELOZ": 10.0,  # example value, replace with actual value
+    "VELOX": 1.0,  # example value, replace with actual value
+    "VELOY": 1.0,  # example value, replace with actual value
+    "VELOZ": 1.0,  # example value, replace with actual value
 }
 
 # Optimization

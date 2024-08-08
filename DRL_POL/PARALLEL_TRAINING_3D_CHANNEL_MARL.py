@@ -1,13 +1,45 @@
-#!/bin/env python
-#
-# DEEP REINFORCEMENT LEARNING WITH ALYA
-#
-# Parallel training launcher
-#
-# Pol Suarez, Francisco Alcantara
-# 21/02/2022
+"""
+PARALLEL_TRAINING_3D_CHANNEL_MARL.py
+====================================
 
-# TODO: ANY CHANNEL-SPECIFIC EDITS
+DEEP REINFORCEMENT LEARNING WITH ALYA
+-------------------------------------
+
+PARALLEL TRAINING LAUNCHER
+--------------------------
+This script launches the parallel training for 3D channel Multi-Agent
+Reinforcement Learning (MARL) with ALYA. It initializes the necessary
+environments, agents, and training configurations and starts the training
+process.
+
+The script performs the following steps:
+1. Cleans up old files and sets up the specified training case.
+2. Detects the system configuration (local or SLURM).
+3. Creates a base environment for baseline calculations and parallel
+   environments for each agent.
+4. Initializes the TensorForce agent with specified network configurations.
+5. Splits the global environments into local environments for each agent.
+6. Starts all environments and runs the training for the specified number of
+   episodes.
+7. Saves the model data in model-numpy format and generates a CR report.
+
+Examples
+--------
+Example usage:
+python PARALLEL_TRAINING_3D_CHANNEL_MARL.py --case channel_3D_MARL
+python PARALLEL_TRAINING_3D_CHANNEL_MARL.py --case cylinder_WS_test
+
+Authors
+-------
+- Pol Suarez
+- Francisco Alcantara
+- Pieter Orlandini
+
+Version History
+---------------
+- Major update in February 2022.
+- Major update for channel features in August 2024.
+"""
 
 from __future__ import print_function, division
 
@@ -31,15 +63,10 @@ from env_utils import (
 )
 from configuration import ALYA_ULTCL
 
-from logging_config import configure_logger, DEFAULT_LOGGING_LEVEL
-
-# Set up logger
-logger = configure_logger(
-    "PARALLEL_TRAINING_3D_CHANNEL_MARL", default_level=DEFAULT_LOGGING_LEVEL
-)
-
-logger.info(
-    "PARALLEL_TRAINING_3D_CHANNEL_MARL.py: Logging level set to %s\n", logger.level
+from logging_config import (
+    configure_logger,
+    DEFAULT_LOGGING_LEVEL,
+    clear_old_logs,
 )
 
 # Parser for command line arguments
@@ -61,10 +88,33 @@ parser.add_argument(
         "  - channel_3D_MARL"
     ),
 )
+parser.add_argument(
+    "--clearlogs",
+    type=bool,
+    required=False,
+    default=False,
+    help="Clear the logs in the default folder"
+    "before starting the training."
+    "see `logging_config.py` for details.",
+)
+
 args = parser.parse_args()
+
+# Set up logger
+logger = configure_logger(
+    "PARALLEL_TRAINING_3D_CHANNEL_MARL", default_level=DEFAULT_LOGGING_LEVEL
+)
+
+logger.info(
+    "PARALLEL_TRAINING_3D_CHANNEL_MARL.py: Logging level set to %s\n", logger.level
+)
 
 # Run the cleaner
 run_subprocess("./", ALYA_ULTCL, "", preprocess=True)
+
+# Clean old logs if specified
+if args.clearlogs:
+    clear_old_logs(LOG_DIR)
 
 # Set up which case to run
 training_case = args.case
@@ -119,7 +169,7 @@ elif training_case == "channel_3D_MARL":
     from parameters import (
         nz_Qs,
         nx_Qs,
-        nTotal_Qs,  # TODO: necessary or just nb_inv_per_CFD?
+        nTotal_Qs,  # TODO: necessary or just nb_inv_per_CFD? - Pieter
     )
 
 from cr import cr_reset, cr_info, cr_report
@@ -132,14 +182,15 @@ cr_reset()
 initial_time = time.time()
 
 # Generate the list of nodes
-# TODO --- ADD NUM_CFD (MARL)
+# TODO --- ADD NUM_CFD (MARL) - Pol (RESOLVED??)
 logger.debug("Generating node list...\n")
 generate_node_list(num_servers=num_servers, num_cores_server=nb_proc)
-# TODO: check if this works in MN!
-# TODO: Update to local nodelists with num_servers
+# TODO: check if this works in MN! - Pol (RESOLVED??)
+# TODO: Update to local nodelists with num_servers - Pol (RESOLVED??)
 
 # Read the list of nodes
 nodelist = read_node_list()
+logger.info("nodelist: %s\n", nodelist)
 
 # IMPORTANT: this environment base is needed to do the baseline, the main one
 logger.debug("Creating base environment...\n")
@@ -148,7 +199,6 @@ logger.debug(
     "Created base environment with ENV_ID %s\n",
     environment_base.ENV_ID,
 )
-# print(f"\nDEBUG: Environment Base ENV_ID: {environment_base.ENV_ID}\n")
 
 if run_baseline:
     logger.info("`run_baseline` is TRUE, running baseline...\n")
@@ -201,20 +251,27 @@ agent = Agent.create(
 logger.debug("Created agent.\n")
 
 
-def split(
+def split_CFD_environment_to_invariant_environments(
     environment: Environment, np: int, nz_Qs: int, nx_Qs: int = 1
 ) -> List[Environment]:
     """
     Creates individual (local) agent environments for parallel training, per node.
 
-    Parameters:
-        environment (Environment): The base environment to be copied. From `Env3D_MARL_channel.py`.
-        np (int): The number of the parallel environment (node).
-        nz_Qs (int): The number of sections in the z direction.
-        nx_Qs (int, optional): The number of sections in the x direction. Defaults to 1.
+    Parameters
+    ----------
+    environment : Environment
+        The base environment to be copied. From `Env3D_MARL_channel.py`.
+    np : int
+        The number of the parallel environment (node).
+    nz_Qs : int
+        The number of sections in the z direction.
+    nx_Qs : int, optional
+        The number of sections in the x direction. Defaults to 1.
 
-    Returns:
-        List[Environment]: A list of local environments in a single node with updated ENV_IDs for parallel training.
+    Returns
+    -------
+    List[Environment]
+        A list of local environments in a single node with updated ENV_IDs for parallel training.
     """
     list_inv_envs = []
     for i in range(nx_Qs):
@@ -229,24 +286,7 @@ def split(
     return list_inv_envs
 
 
-# def split_old(environment, np):  # called 1 time in PARALLEL_TRAINING.py
-#     # np:= number of the parallel environment. e.g. between [1,4] for 4 parallel CFDenvironments
-#     # (ni, nj):= env_ID[1]:= 'position'/'ID-card' of the 'pseudo-parallel' invariant environment (a tuple in 3d, in which we have a grid of actuators. A scalar in 2D, in which we have a line of actuators)
-#     # nb_inv_envs:= total number of 'pseudo-parallel' invariant environments. e.g. 10
-#     """input: one of the parallel environments (np); output: a list of nb_inv_envs invariant environments identical to np. Their ID card: (np, ni)"""
-#     list_inv_envs = []
-#     for j in range(nz_Qs):
-#         env = cp.copy(environment)
-#         env.ENV_ID = [
-#             np,
-#             (j + 1),
-#         ]  # Adjust for two dimensions? or translate two to one dimension (n, m) -> (j)
-#         env.host = f"environment{np}"
-#         list_inv_envs.append(env)
-#     return list_inv_envs
-
 logger.info("nodelist: %s\n", nodelist)
-# print("Here is the nodelist: ", nodelist)
 
 # here the array of environments is defined, will be n-1 host (the 1st one is MASTER) #TODO: assign more nodes to an environment
 logger.info(
@@ -271,7 +311,9 @@ logger.info(
     nx_Qs * nz_Qs,
 )
 environments = [
-    split(parallel_environments[i], i + 1, nx_Qs, nz_Qs)[j]
+    split_CFD_environment_to_invariant_environments(
+        parallel_environments[i], i + 1, nx_Qs, nz_Qs
+    )[j]
     for i in range(num_servers)
     for j in range(nx_Qs * nz_Qs)  # Adjusted for 2D grid
 ]
@@ -285,9 +327,6 @@ for env in environments:
         env.ENV_ID[1],
         env_id_2d,
     )
-    # print(
-    #     f"Verif : Host: {env.host:<20} ID: {str(env.ENV_ID):<10} Agent 1D Index: {env.ENV_ID[1]:<5} 2D Index: {str(env_id_2d):<10}"
-    # )
 
 time.sleep(1.0)
 
