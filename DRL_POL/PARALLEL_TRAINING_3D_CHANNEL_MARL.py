@@ -289,10 +289,10 @@ def split_CFD_environment_to_invariant_environments(
     for i in range(nx_Qs):
         for j in range(nz_Qs):
             env = cp.copy(environment)
-            env.ENV_ID = [
+            env.ENV_ID = (
                 np,
                 agent_index_2d_to_1d(i, j, nz_Qs),  # Convert 2D agent index to 1D
-            ]
+            )
             env.host = f"environment{np}"
             list_inv_envs.append(env)
     return list_inv_envs
@@ -308,7 +308,7 @@ logger.info(
 parallel_environments = [
     Environment(
         simu_name=simu_name,
-        ENV_ID=[i, 0],
+        ENV_ID=(i, 0),
         host=f"environment{i + 1}",
         node=nodelist[i + 1],
     )
