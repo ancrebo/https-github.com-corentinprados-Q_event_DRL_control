@@ -120,15 +120,15 @@ def plot_witness_points_broken(
 
 
 def plot_witness_points(
-        coordinates: List[Tuple[float, float, float]],
-        filename: str,
-        nx_Qs: int,
-        nz_Qs: int,
-        y_value_density: int,
-        y_skip_values: int,
-        Lx: float,
-        Ly: float,
-        Lz: float,
+    coordinates: List[Tuple[float, float, float]],
+    filename: str,
+    nx_Qs: int,
+    nz_Qs: int,
+    y_value_density: int,
+    y_skip_values: int,
+    Lx: float,
+    Ly: float,
+    Lz: float,
 ) -> None:
     """
     Plot the witness points in the local volume (0, 0) in 3D and save the plot as an image file.
@@ -161,7 +161,9 @@ def plot_witness_points(
 
     # Scaling values to match the visualization requirements
     x_vals_scaled = x_vals * nx_Qs / Lx
-    y_vals_scaled = y_vals
+    y_vals_scaled = (
+        y_vals * y_value_density / Ly
+    )  # Scale y values to the range [0, y_value_density]
     z_vals_scaled = z_vals * nz_Qs / Lz
 
     # Pick a color map for the layers
@@ -170,11 +172,13 @@ def plot_witness_points(
     # Assign colors based on the layer index
     num_layers = y_value_density // y_skip_values + 1
     color_map = plt.cm.get_cmap(color_map_name)
-    layer_indices = (y_vals // y_skip_values).astype(int)
+    layer_indices = (y_vals_scaled // y_skip_values).astype(int)
     colors = color_map(layer_indices / (num_layers - 1))
 
     # Plot filtered points with color-coded layers
-    scatter = ax.scatter(x_vals_scaled, z_vals_scaled, y_vals_scaled, c=colors, marker="o")
+    scatter = ax.scatter(
+        x_vals_scaled, z_vals_scaled, y_vals_scaled, c=colors, marker="o"
+    )
 
     ax.set_xlabel("X")
     ax.set_ylabel("Z")
@@ -183,9 +187,9 @@ def plot_witness_points(
 
     # Set tick values
     ax.set_xticks(np.linspace(0, 1, nx_Qs + 1))
-    ax.set_xticklabels([f"{i * Lx / nx_Qs:.2f}" for i in range(nx_Qs + 1)])
+    ax.set_xticklabels([f"{i * (Lx / nx_Qs):.2f}" for i in range(nx_Qs + 1)])
     ax.set_yticks(np.linspace(0, 1, nz_Qs + 1))
-    ax.set_yticklabels([f"{i * Lz / nz_Qs:.2f}" for i in range(nz_Qs + 1)])
+    ax.set_yticklabels([f"{i * (Lz / nz_Qs):.2f}" for i in range(nz_Qs + 1)])
 
     # Show "z" ticks based on y_value_density, but only show every y_skip_values
     z_tick_indices = [i for i in range(1, y_value_density + 1, y_skip_values)]
@@ -212,5 +216,3 @@ def plot_witness_points(
     plt.savefig(filename)
     plt.close(fig)
     logger.info("3D plot of witness probes saved as %s !!!\n", filename)
-
-
