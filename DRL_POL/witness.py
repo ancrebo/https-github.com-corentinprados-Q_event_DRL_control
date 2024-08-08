@@ -617,8 +617,6 @@ def write_witness_file(
         filepath,
         len(probes_positions),
     )
-    # Ensure the directory exists
-    os.makedirs(filepath, exist_ok=True)
 
     nprobes = len(probes_positions)
     ndim = len(probes_positions[0]) if probes_positions else 0
