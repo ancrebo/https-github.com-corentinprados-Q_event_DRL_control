@@ -1,8 +1,8 @@
 """
 jets.py
-
+=======
 DEEP REINFORCEMENT LEARNING WITH ALYA
-
+-------------------------------------
 This module provides classes and functions to manage jet implementations in ALYA
 simulations. It includes the `Jet` base class and specialized classes such as
 `JetCylinder` and `JetChannel`.
