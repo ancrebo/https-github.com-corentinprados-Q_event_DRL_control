@@ -480,8 +480,10 @@ else:
     from witness import write_witness_file_and_visualize
 
     write_witness_file_and_visualize(
-        case_folder,
-        output_params,
+        case_folder=case_folder,
+        witness_file_path=witness_file_path,
+        witness_version_file_path=witness_version_file_path,
+        output_params=output_params,
         probes_location=probes_location,
         pattern=pattern,
         y_value_density=y_value_density,
