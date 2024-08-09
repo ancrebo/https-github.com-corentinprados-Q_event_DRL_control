@@ -1762,6 +1762,20 @@ class Environment(Environment):
     # TODO: figure out structure/type of actions in `execute` argument @pietero
     def execute(self, actions: np.ndarray) -> Tuple[np.ndarray, bool, float]:
         # TODO: @pietero FINISH LOGGING IMPLEMENTATION STARTING HERE!!!!!!!!! - Pieter
+
+        # Will be implemented later to change Tensorforce "actions" values to my own for intensity threshold testing
+        use_tensorforce_values: bool = True
+
+        # if use_tensorforce_values == True:
+        #     actions: np.ndarray = actions: np.ndarray
+        # else:
+        #     random_array = np.random.uniform(0, 10, size=(3,4))
+        #     Q_array = np.round(random_array, decimals=2)
+        #     actions = Q_array
+        #
+        # # Print the array
+        # print(Q_array)
+
         self.log(
             logging.DEBUG,
             "ENV_ID %s: Env3D.execute: Starting `execute` method...",
@@ -1786,6 +1800,10 @@ class Environment(Environment):
 
         # Write the action
         self.save_this_action()
+
+        # Testing to see actions from Tensorforce -Chriss
+        print("Här kommer actions:----------------------------------------\n")
+        print(actions)
 
         if case == "cylinder":
             self.log(
@@ -1857,6 +1875,8 @@ class Environment(Environment):
             ## NOW READY TO MERGE ACTIONS:
             # append and reading file
             # open the file for reading
+
+
 
             for i in range(self.nb_inv_per_CFD):
                 path_action_file = f"actions/{self.host}/{self.ENV_ID[0]}_{i+1}/ep_{self.episode_number}/output_actions.csv"
