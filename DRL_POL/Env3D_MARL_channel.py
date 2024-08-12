@@ -1763,24 +1763,26 @@ class Environment(Environment):
     def execute(self, actions: np.ndarray) -> Tuple[np.ndarray, bool, float]:
         # TODO: @pietero FINISH LOGGING IMPLEMENTATION STARTING HERE!!!!!!!!! - Pieter
 
-        # Will be implemented later to change Tensorforce "actions" values to my own for intensity threshold testing
-        use_tensorforce_values: bool = True
-
-        # if use_tensorforce_values == True:
-        #     actions: np.ndarray = actions: np.ndarray
-        # else:
-        #     random_array = np.random.uniform(0, 10, size=(3,4))
-        #     Q_array = np.round(random_array, decimals=2)
-        #     actions = Q_array
-        #
-        # # Print the array
-        # print(Q_array)
-
         self.log(
             logging.DEBUG,
             "ENV_ID %s: Env3D.execute: Starting `execute` method...",
             self.ENV_ID,
         )
+
+        use_tensorforce_values: bool = False  # set to true to use tensorforce values
+
+        if not use_tensorforce_values:
+            # Set a unique random seed based on ENV_ID to ensure different random values across different environments
+            np.random.seed(int.from_bytes(os.urandom(4), byteorder='little'))
+
+            low = -0.1
+            high = 0.1
+            # Generate a unique random action for each environment
+            actions = np.random.uniform(low, high, self.actions_per_inv)
+            print(f"ENV_ID {self.ENV_ID}: actions are:----------------------------------------------------------------")
+            print(actions)
+            print("\n")
+
         action: List[np.ndarray] = []
         # action = []
         if case == "cylinder":
